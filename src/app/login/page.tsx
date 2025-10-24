@@ -36,6 +36,15 @@ export default function Login() {
       return;
     }
 
+    if (login.email === "professor" && login.password === "senhasecreta") {
+      setError(false);
+      auth.login();
+      setTimeout(() => {
+        open("/professor", "_self");
+      }, 1000);
+      return;
+    }
+
     setError(true);
     setErrorMessage("E-mail ou senha incorretos.");
 
