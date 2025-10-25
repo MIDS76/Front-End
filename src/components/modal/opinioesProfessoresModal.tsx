@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { Conselho } from "@/app/conselho/pagina";
 
 export interface Professor {
   id: number;
@@ -59,11 +60,13 @@ const professores: Professor[] = [
 interface FeedbackModalProps {
   isOpen: boolean;
   onClose: () => void;
+  conselho: Conselho;
 }
 
 export default function FeedbackModal({
   isOpen = false,
   onClose,
+  conselho
 }: FeedbackModalProps) {
   return (
     <aside

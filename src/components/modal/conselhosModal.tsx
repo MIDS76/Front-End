@@ -9,18 +9,11 @@ import {
 import SmallModal from "./smallModal";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-
-import { Icon } from "@/components/button/smallButton";
 import { Conselho } from "@/app/conselho/pagina";
-import Link from "next/link";
 import { Usuario } from "../lista";
 import { etapas } from "@/utils/types";
+import { useState } from "react";
+import FeedbackModal from "./opinioesProfessoresModal";
 
 export interface Turma {
   id: number;
@@ -52,14 +45,12 @@ export default function ConselhosModal({
   //   }
   // }, [selectedConselho]);
 
+  const [isDevolutivaModalOpen, setIsDevolutivaModalOpen] = useState(false);
+  const [selectedConselho, setSelectedConselho] = useState<Conselho | null>(null);
+
   const handleClick = (conselho: Conselho) => {
-    const semConselho = turma;
-    semConselho.conselhos = [];
-    conselho.turma = semConselho;
-    localStorage.setItem("conselho", JSON.stringify(conselho));
-    setTimeout(() => {
-      open("/conselho/", "_self");
-    }, 0);
+    setSelectedConselho(conselho);
+    setIsDevolutivaModalOpen(true);
   };
 
   return (
@@ -90,33 +81,6 @@ export default function ConselhosModal({
                 {turma.nomeCurso}
               </CardDescription>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <div>
-                  <ButtonTT
-                    tooltip="Mais"
-                    mode="small"
-                    variant="ghost"
-                    icon="MoreVertical"
-                  />
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="p-2 flex flex-col" align="end">
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() => open("/gerenciamento/turma", "_self")}
-                >
-                  <Icon icon="FaGear" />
-                  Gerenciar turma
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                  <Icon className="scale-125" icon="Plus" />
-                  <Link href={`/criar/conselho?turma=true`}>
-                    Criar conselho
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </CardHeader>
         <CardContent className="flex-1 overflow-hidden">
@@ -129,7 +93,7 @@ export default function ConselhosModal({
             <ScrollArea className="h-full">
               {turma.conselhos?.map((conselho, index) => (
                 <SmallModal
-                  setNotificacoes={() => {}}
+                  setNotificacoes={() => { }}
                   key={index}
                   title={
                     convertDate(new Date(conselho.dataInicio)) +
@@ -151,6 +115,14 @@ export default function ConselhosModal({
           )}
         </CardContent>
       </Card>
+
+      {isDevolutivaModalOpen && selectedConselho && (
+        <FeedbackModal
+          isOpen={isDevolutivaModalOpen}
+          onClose={() => setIsDevolutivaModalOpen(false)}
+          conselho={selectedConselho}
+        />
+      )}
     </aside>
   );
 }

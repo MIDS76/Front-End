@@ -48,8 +48,8 @@ export default function MedModal({
           </h3>
           <p
             className={`text-sm ${loading
-                ? "text-card/70 dark:text-muted"
-                : "text-background dark:text-card-foreground"
+              ? "text-card/70 dark:text-muted"
+              : "text-background dark:text-card-foreground"
               }`}
           >
             {courseName}

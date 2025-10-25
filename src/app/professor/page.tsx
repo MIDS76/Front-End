@@ -8,9 +8,39 @@ import { useState } from "react";
 export default function ProfessorHome() {
 
     const dataAleatoria = "20/03/25"
-
     const turmas: Turma[] = [
-        { id: 1, codigoTurma: "MI 76", nomeCurso: "Desenvolvimento de Sistemas", conselhos: []},
+        {
+            id: 1, codigoTurma: "MI 76", nomeCurso: "Desenvolvimento de Sistemas",
+            conselhos: [{
+                id: 1,
+                dataInicio: new Date("2025-10-20"),
+                dataFim: new Date("2025-10-24"),
+                etapa: 2,
+                turma: { id: 1, codigoTurma: "MI 76", nomeCurso: "Desenvolvimento de Sistemas" }
+            },
+            {
+                id: 1,
+                dataInicio: new Date("2025-10-20"),
+                dataFim: new Date("2025-10-24"),
+                etapa: 3,
+                turma: { id: 1, codigoTurma: "MI 76", nomeCurso: "Desenvolvimento de Sistemas" }
+            },
+            {
+                id: 1,
+                dataInicio: new Date("2025-10-20"),
+                dataFim: new Date("2025-10-24"),
+                etapa: 3,
+                turma: { id: 1, codigoTurma: "MI 76", nomeCurso: "Desenvolvimento de Sistemas" }
+            },
+            {
+                id: 1,
+                dataInicio: new Date("2025-10-20"),
+                dataFim: new Date("2025-10-24"),
+                etapa: 3,
+                turma: { id: 1, codigoTurma: "MI 76", nomeCurso: "Desenvolvimento de Sistemas" }
+            }
+        ]
+        },
         { id: 2, codigoTurma: "MT 75", nomeCurso: "Eletrotécnica" },
         { id: 3, codigoTurma: "WU 77", nomeCurso: "Usinagem" },
         { id: 4, codigoTurma: "MI 77", nomeCurso: "Desenvolvimento de Sistemas" },
@@ -70,7 +100,7 @@ export default function ProfessorHome() {
                     }
                 }}
             >
-                <b>Último conselho:</b> {dataAleatoria} {/* Exibe a data aleatória como "Último conselho". */}
+                <b>Último conselho:</b> {dataAleatoria}
             </MedModal>
         ));
     }
