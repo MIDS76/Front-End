@@ -18,7 +18,7 @@ export default function RootLayout({
   useEffect(() => {}, [pathname]);
 
   useEffect(() => {
-    document.title = "ConselhEXPERT";
+    document.title = "Portal do Conselho";
   }, []);
 
   return (
@@ -28,7 +28,7 @@ export default function RootLayout({
           {" "}
           <AuthProvider>
             <WebSocketProvider>
-              {pathname !== "/login" && <Header />}
+              {pathname !== "/login" && <Header userRole={"admin"} />}
               {children}
               <Toaster richColors />
             </WebSocketProvider>
