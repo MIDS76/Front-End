@@ -36,6 +36,31 @@ export default function Login() {
       return;
     }
 
+    if (!login.email || !login.password){
+      setError(true);
+      setErrorMessage("Preencha todos os campos.");
+      return;
+    }
+
+    const users = [
+
+      {email: "admin", password : "senhasecreta", redirect: "/"},
+      {email: "aluno", password : "senhaaluno", redirect: "/aluno"}
+    ]
+
+    const user = users.find(
+      (user) => user.email === login.email && user.password === login.password
+    );
+
+    if (user) {
+      setError(false);
+      auth.login();
+      setTimeout(() => {
+        open(user.redirect, "_self");
+      }, 1000);
+      return;
+    }
+
     setError(true);
     setErrorMessage("E-mail ou senha incorretos.");
 
