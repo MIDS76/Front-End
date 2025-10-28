@@ -31,7 +31,16 @@ export default function Login() {
       return;
     }
 
-    if (login.email === "admin" && login.password === "senhasecreta") {
+    const users = [
+      { email : "admin", password : "senhasecreta", redirect : "/"},
+      { email : "repre", password: "senharepre", redirect : "/representante"}
+    ]
+
+    const user = users.find(
+      (u) => u.email === login.email && u.password === login.password
+    );
+
+    if (user) {
       setError(false);
       auth.login();
       setTimeout(() => {
@@ -39,6 +48,9 @@ export default function Login() {
       }, 1000);
       return;
     }
+    
+    setError(true);
+    setErrorMessage("E-mail ou senha incorretos.");
 
     setError(true);
     setErrorMessage("Login ou senha incorretos.");
