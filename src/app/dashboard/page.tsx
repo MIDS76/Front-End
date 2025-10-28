@@ -31,6 +31,7 @@ import {
 } from "chart.js";
 
 import "@/app/globals.css";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 ChartJS.register(
   ArcElement,
@@ -536,6 +537,7 @@ export default function DashboardPage() {
   };
 
   return (
+    <ProtectedRoute>
     <main className="h-[calc(100vh-5rem)] flex-col items-center justify-between pt-10 px-4">
       <h1 className="text-4xl font-bold font-title ml-8 self-start">
         Dashboard
@@ -694,5 +696,6 @@ export default function DashboardPage() {
         </div>
       </div>
     </main>
+    </ProtectedRoute>
   );
 }
