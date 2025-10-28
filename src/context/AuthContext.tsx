@@ -17,26 +17,28 @@ interface AuthContextProps {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   hasPermission: (roles: Perfil[]) => boolean;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // Recuperar sessão existente
   useEffect(() => {
-    const stored = localStorage.getItem("user");
-    if (stored) {
-      setUser(JSON.parse(stored));
+    // Recupera sessão existente do localStorage
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
     }
+    setLoading(false);
   }, []);
 
-  // Login simulado (substituir depois pela api)
   const login = async (email: string, password: string) => {
     const fakeUsers = [
-      { email: "aluno@email.com", password: "aluno123", perfil: "aluno" },
+      { email: "aluno@email.com", password: "aluno123", perfil: "Aluno" },
       { email: "pedagogico@email.com", password: "pedagogico123", perfil: "pedagogico" },
       { email: "admin@email.com", password: "admin123", perfil: "admin" },
     ];
@@ -59,21 +61,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return true;
   };
 
-  // Logout
   const logout = () => {
     localStorage.removeItem("user");
     setUser(null);
     router.push("/login");
   };
 
-  // Verifica permissão
   const hasPermission = (roles: Perfil[]) => {
-    if (!user) return false;
-    return roles.includes(user.perfil);
+    return user ? roles.includes(user.perfil) : false;
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, hasPermission }}>
+    <AuthContext.Provider value={{ user, login, logout, hasPermission, loading }}>
       {children}
     </AuthContext.Provider>
   );

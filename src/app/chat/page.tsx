@@ -6,6 +6,7 @@ import { Usuario } from "@/components/lista";
 import { useWindowSize } from "usehooks-ts";
 import { Page } from "@/utils/types";
 import ChatList from "@/components/chat/chatList";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export interface SalaChat {
   id: number;
@@ -99,6 +100,7 @@ export default function Home() {
   );
 
   return (
+    <ProtectedRoute>
     <main className="h-[calc(100vh-5rem)] bg-background flex">
       {windowSize.width <= 768 && isChatOpen ? (
         ""
@@ -131,6 +133,7 @@ export default function Home() {
         </div>
       )}
     </main>
+    </ProtectedRoute>
   );
 }
 
