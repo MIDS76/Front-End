@@ -1,3 +1,32 @@
 {
-     
+    "turma1": {
+        "id": 1,
+        "codigoTurma": "MI76",
+        "nomeCurso": "Desenvolvimento de Sistemas"
+    },
+    "turma2": {
+        "id": 2,
+        "codigoTurma": "MI76",
+        "nomeCurso": "Desenvolvimento de Sistemas"
+    },
+    "turma3": {
+        "id": 3,
+        "codigoTurma": "MI76",
+        "nomeCurso": "Desenvolvimento de Sistemas"
+    },
+    "turma4": {
+        "id": 4,
+        "codigoTurma": "MI76",
+        "nomeCurso": "Desenvolvimento de Sistemas"
+    },
+    "turma5": {
+        "id": 5,
+        "codigoTurma": "MI76",
+        "nomeCurso": "Desenvolvimento de Sistemas"
+    },
+    "turma6": {
+        "id": 6,
+        "codigoTurma": "MI76",
+        "nomeCurso": "Desenvolvimento de Sistemas"
+    }
 }
