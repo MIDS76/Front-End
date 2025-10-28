@@ -25,7 +25,7 @@ export default function ResetPassword() {
     const newPassword = data.get("newPassword") as string;
     const confirmPass = data.get("confirmPassword") as string;
 
-    // Verifica cada requisito separadamente
+   
     const requirements = [
       { regex: /[a-z]/, message: "letra minúscula" },
       { regex: /[A-Z]/, message: "letra maiúscula" },

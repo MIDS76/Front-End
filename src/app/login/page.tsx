@@ -46,11 +46,11 @@ export default function Login() {
 
   return (
     <main className="relative min-h-screen w-full overflow-hidden flex flex-col">
-      {/* Header fixo superior */}
+
       <header className="w-full bg-white border-b border-blue-200 py-4 px-8 flex items-center justify-start">
         <div className="flex items-center gap-3">
           <Image
-            src="/logo.svg" // troque pelo seu logo
+            src="\logo.svg"
             alt="Logo do Conselho"
             width={32}
             height={32}
@@ -61,7 +61,7 @@ export default function Login() {
         </div>
       </header>
 
-      {/* Imagem de fundo */}
+   
       <div className="relative flex-1 flex items-center justify-center">
         <Image
           className="absolute inset-0 w-full h-full object-cover"
@@ -71,48 +71,70 @@ export default function Login() {
           alt="Imagem de fundo de uma sala de reunião"
         />
 
-        {/* Card central */}
-        <div className="relative z-10 bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+     
+      <div className="relative z-10 bg-white p-8 rounded-2xl shadow-xl w-full max-w-md pt" style={{ paddingTop: '3rem', paddingBottom: '3rem' }}>
           <div className="text-left mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Bem-Vindo</h1>
-            <p className="text-xs text-left mb-6" style={{ color: "#626262" }}>
+            <h1 className="text-4xl font-bold text-gray-900 mb-3">
+              Bem-Vindo
+            </h1>
+            <p className="text-sm text-left mb-6 ">
               A sua Plataforma Completa para Atividades Profissionais
             </p>
           </div>
 
-          <Form action={handleLogin} className="flex flex-col gap-4">
-            <TextField
-              name="login"
-              label="Login"
-              placeholder="Insira seu e-mail institucional"
-              type="text"
-              id="login"
-              className={error ? "border-destructive" : ""}
-            />
-            <TextField
-              name="password"
-              label="Senha"
-              placeholder="Insira sua senha"
-              type="password"
-              id="password"
-              className={error ? "border-destructive" : ""}
-            />
+          <Form action={handleLogin} className="flex flex-col gap-3">
+      
+            <div className="flex flex-col gap-1">
+              <label
+                htmlFor="login"
+                className="text-sm font-semibold text-gray-800"
+              >
+                Login
+              </label>
+              <input
+                name="login"
+                id="login"
+                type="text"
+                placeholder="Insira seu e-mail institucional"
+                className={`w-full rounded-md px-3 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary ${
+                  error ? "border-destructive" : ""
+                } bg-gray-100`}
+              />
+            </div>
+
+   
+            <div className="flex flex-col gap-1">
+              <label
+                htmlFor="password"
+                className="text-sm font-semibold text-gray-800"
+              >
+                Senha
+              </label>
+              <input
+                name="password"
+                id="password"
+                type="password"
+                placeholder="Insira sua senha"
+                className={`w-full rounded-md px-3 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary ${
+                  error ? "border-destructive" : ""
+                } bg-gray-100`}
+              />
+
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="text-xs text-primary hover:underline text-left mt-1 mb-6"
+              >
+                Esqueceu sua senha?
+              </button>
+            </div>
+
 
             {error && (
               <p className="text-destructive text-sm text-center">
                 {errorMessage}
               </p>
             )}
-
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(true)}
-                className="text-xs text-primary hover:underline"
-              >
-                Esqueceu sua senha?
-              </button>
-            </div>
 
             <ButtonTT mode="default" tooltip="Fazer login" type="submit">
               Login
