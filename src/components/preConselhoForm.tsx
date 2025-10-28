@@ -97,29 +97,30 @@ export default function PreConselhoFormulario() {
               </p>
             </div>
             <div className="pl-2 pr-4">
-              {Array.from({ length: 3 }, (_, i) => (
-                <div key={i}>
+              {["positivos", "melhoria", "sugestoes"].map((campo, i) => (
+                <div key={campo}>
                   <Label
-                    htmlFor={`positivos-${index}`}
+                    htmlFor={`${campo}-${index}`}
                     className="text-[14px] leading-[20px] font-semibold text-foreground"
                   >
-                    {i === 0
+                    {campo === "positivos"
                       ? "Pontos positivos"
-                      : i === 1
-                      ? "Pontos de melhoria"
-                      : "Sugestões"}
+                      : campo === "melhoria"
+                        ? "Pontos de melhoria"
+                        : "Sugestões"}
                   </Label>
                   <Textarea
-                    id={`positivos-${index}`}
+                    id={`${campo}-${index}`}
                     placeholder="Escreva aqui o que for debatido com a turma sobre o tópico."
                     className="mt-2 resize-none bg-card"
-                    value={secao.positivos}
+                    value={secao[campo as keyof CampoFormulario]}
                     onChange={(e) =>
-                      handleChange(index, "positivos", e.target.value)
+                      handleChange(index, campo as keyof CampoFormulario, e.target.value)
                     }
                   />
                 </div>
               ))}
+
             </div>
           </div>
         ))}

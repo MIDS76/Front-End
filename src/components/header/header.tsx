@@ -6,14 +6,17 @@ import Logo from "../../../public/logo";
 import { cn } from "@/lib/utils";
 import ButtonTT from "../button/ButtonTT";
 import HeaderButtons from "./HeaderButtons";
+import { useAuth } from "@/context/AuthContext"; // ✅ usar AuthContext
 
 interface HeaderProps {
-  userRole: "aluno" | "admin" | "pedagogico";
   login?: boolean;
   className?: string;
 }
 
-export default function Header({ userRole, login = false, className }: HeaderProps) {
+export default function Header({ login = false, className }: HeaderProps) {
+  const { user } = useAuth(); // pega o usuário logado
+  const userRole = (user?.perfil as "aluno" | "admin" | "pedagogico") || "aluno"; // default para aluno
+
   const header = !login ? "border-b bg-card" : "";
 
   return (

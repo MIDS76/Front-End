@@ -28,7 +28,7 @@ export default function RootLayout({
           {" "}
           <AuthProvider>
             <WebSocketProvider>
-              {pathname !== "/login" && <Header userRole={"admin"} />}
+              {pathname !== "/login" && <Header />}
               {children}
               <Toaster richColors />
             </WebSocketProvider>
