@@ -34,9 +34,7 @@ export default function Login() {
     if (login.email === "admin" && login.password === "senhasecreta") {
       setError(false);
       auth.login();
-      setTimeout(() => {
-        router.push("/");
-      }, 1000);
+      setTimeout(() => router.push("/"), 1000);
       return;
     }
 
@@ -46,22 +44,15 @@ export default function Login() {
 
   return (
     <main className="relative min-h-screen w-full overflow-hidden flex flex-col">
-
       <header className="w-full bg-white border-b border-blue-200 py-4 px-8 flex items-center justify-start">
         <div className="flex items-center gap-3">
-          <Image
-            src="\logo.svg"
-            alt="Logo do Conselho"
-            width={32}
-            height={32}
-          />
+          <Image src="\logo.svg" alt="Logo do Conselho" width={32} height={32} />
           <h1 className="text-lg font-semibold text-gray-800">
             Portal do Conselho
           </h1>
         </div>
       </header>
 
-   
       <div className="relative flex-1 flex items-center justify-center">
         <Image
           className="absolute inset-0 w-full h-full object-cover"
@@ -71,64 +62,43 @@ export default function Login() {
           alt="Imagem de fundo de uma sala de reunião"
         />
 
-     
-      <div className="relative z-10 bg-white p-8 rounded-2xl shadow-xl w-full max-w-md pt" style={{ paddingTop: '3rem', paddingBottom: '3rem' }}>
+        <div className="relative z-10 bg-white p-8 rounded-2xl shadow-xl w-full max-w-md" style={{ paddingTop: "3rem", paddingBottom: "3rem" }}>
           <div className="text-left mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-3">
-              Bem-Vindo
-            </h1>
-            <p className="text-sm text-left mb-6 ">
+            <h1 className="text-4xl font-bold text-gray-900 mb-3">Bem-Vindo</h1>
+            <p className="text-sm text-left mb-6">
               A sua Plataforma Completa para Atividades Profissionais
             </p>
           </div>
 
-          <Form action={handleLogin} className="flex flex-col gap-3">
-      
-            <div className="flex flex-col gap-1">
-              <label
-                htmlFor="login"
-                className="text-sm font-semibold text-gray-800"
-              >
-                Login
-              </label>
-              <input
-                name="login"
-                id="login"
-                type="text"
-                placeholder="Insira seu e-mail institucional"
-                className={`w-full rounded-md px-3 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary ${
-                  error ? "border-destructive" : ""
-                } bg-gray-100`}
-              />
-            </div>
+          <Form action={handleLogin} className="flex flex-col gap-4">
+            
+            <TextField
+              id="login"
+              name="login"
+              label="Login"
+              placeholder="Insira seu e-mail institucional"
+              type="text"
+              required
+              className={error ? "border-destructive" : ""}
+            />
 
-   
-            <div className="flex flex-col gap-1">
-              <label
-                htmlFor="password"
-                className="text-sm font-semibold text-gray-800"
-              >
-                Senha
-              </label>
-              <input
-                name="password"
-                id="password"
-                type="password"
-                placeholder="Insira sua senha"
-                className={`w-full rounded-md px-3 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary ${
-                  error ? "border-destructive" : ""
-                } bg-gray-100`}
-              />
+            <TextField
+              id="password"
+              name="password"
+              label="Senha"
+              placeholder="Insira sua senha"
+              type="password"
+              required
+              className={error ? "border-destructive" : ""}
+            />
 
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(true)}
-                className="text-xs text-primary hover:underline text-left mt-1 mb-6"
-              >
-                Esqueceu sua senha?
-              </button>
-            </div>
-
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              className="text-xs text-primary hover:underline text-left -mt-2 mb-4"
+            >
+              Esqueceu sua senha?
+            </button>
 
             {error && (
               <p className="text-destructive text-sm text-center">
@@ -143,9 +113,7 @@ export default function Login() {
         </div>
       </div>
 
-      {isModalOpen && (
-        <PasswordResetModal onClose={() => setIsModalOpen(false)} />
-      )}
+      {isModalOpen && <PasswordResetModal onClose={() => setIsModalOpen(false)} />}
     </main>
   );
 }

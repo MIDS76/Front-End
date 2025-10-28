@@ -35,7 +35,7 @@ export default function TextField({
   return (
     <div className="flex flex-col gap-2 ">
       <Label
-        className={className + " whitespace-nowrap flex items-center"}
+        className={className + " whitespace-nowrap flex items-center font-semibold"}
         htmlFor={id}
       >
         {label}
