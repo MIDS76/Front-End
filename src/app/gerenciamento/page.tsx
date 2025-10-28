@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import { useEffect } from "react";
-import Lista, { Usuario } from "@/components/lista";
+import { Usuario, Turma } from "@/utils/types";
 import MedModal from "@/components/modal/medModal";
 import TurmaFilter from "@/components/input/turmasFilter";
-import { Turma } from "@/components/modal/conselhosModal";
+import Lista from "@/components/lista";
 import useSWR from "swr";
 import { Page } from "@/utils/types";
 
