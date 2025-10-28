@@ -7,14 +7,17 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 interface CampoTextoProps {
+
   name?: string;
   label: string;
   placeholder: string;
   type: string;
-  id: string;
+  id?: string;
   className?: string;
   value?: string;
   editavel?: boolean;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void; // new add
+  required?: boolean;// new add
 }
 
 export default function TextField({
