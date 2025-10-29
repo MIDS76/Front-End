@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import Lista, { Usuario } from "@/components/lista";
+import { Usuario } from "@/utils/types";
+import Lista from "@/components/lista";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import TextField from "@/components/input/textField";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function GereciarTurma() {
   const allUsers: Usuario[] = Array.from({ length: 12 }, (_, index) => ({
@@ -36,6 +38,7 @@ export default function GereciarTurma() {
   }, []);
 
   return (
+    <ProtectedRoute>
     <div className="p-6">
       <div className="flex flex-col md:flex-row gap-4">
         <div className="w-full md:w-1/2 flex flex-col items-start">
@@ -134,5 +137,6 @@ export default function GereciarTurma() {
         </div>
       </div>
     </div>
+    </ProtectedRoute>
   );
 }

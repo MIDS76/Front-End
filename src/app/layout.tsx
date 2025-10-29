@@ -18,7 +18,7 @@ export default function RootLayout({
   useEffect(() => {}, [pathname]);
 
   useEffect(() => {
-    document.title = "ConselhEXPERT";
+    document.title = "Portal do Conselho";
   }, []);
 
   return (

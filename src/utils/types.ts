@@ -6,6 +6,29 @@ export interface Page<T> {
   number: number;
 }
 
+export interface Turma {
+  id: number;
+  codigoTurma: string;
+  nomeCurso: string;
+  conselhos?: Conselho[];
+  usuarios?: Usuario[];
+}
+
+export interface Conselho {
+  id: number;
+  dataInicio: Date;
+  dataFim: Date;
+  etapa: number;
+  turma: Turma;
+}
+
+export interface Usuario {
+  id: number;
+  nome: string;
+  email: string;
+  role: string;
+}
+
 export const USER_ROLES = [
   { value: "TECNICO_PEDAGOGICO", label: "Técnico Pedagógico" },
   { value: "SUPERVISOR", label: "Supervisor" },

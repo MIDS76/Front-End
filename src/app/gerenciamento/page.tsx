@@ -2,26 +2,19 @@
 
 import React, { useState } from "react";
 import { useEffect } from "react";
-import Lista, { Usuario } from "@/components/lista";
+import { Usuario, Turma } from "@/utils/types";
 import MedModal from "@/components/modal/medModal";
 import TurmaFilter from "@/components/input/turmasFilter";
-import { Turma } from "@/components/modal/conselhosModal";
-import useSWR from "swr";
-import { Page } from "@/utils/types";
-
-import Paginacao from "@/components/paginacao";
+import Lista from "@/components/lista";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import turmas from "@/data/turma.json";
+import usuarios from "@/data/usuarios.json";
 
 export default function GerenciamentoUsersTurmas() {
-  const [paginaAtualTurmas, setPaginaAtualTurmas] = useState(0);
-  const [paginaAtualUsuarios, setPaginaAtualUsuarios] = useState(0);
-  const [totalPagesTurmas, setTotalPagesTurmas] = useState(0);
-  const [totalPagesUsuarios, setTotalPagesUsuarios] = useState(0);
-
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchQueryUsuarios, setSearchQueryUsuarios] = useState("");
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQueryUsuarios, setSearchQueryUsuarios] = useState("");
 
   const [turmasFiltradas, setTurmasFiltradas] = React.useState<Turma[]>(
     Array.from({ length: 10 }, (_, index) => ({
@@ -34,43 +27,12 @@ export default function GerenciamentoUsersTurmas() {
     }))
   );
 
-  const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-  const {
-    data: turmas,
-    isLoading,
-    error,
-  } = useSWR<Page<Turma>>(
-    `http://localhost:8099/api/turmas/listar?page=${paginaAtualTurmas}&size=12&nomeCurso=${searchQuery}&codigoTurma=${searchQuery}`,
-    fetcher
-  );
-
-  const {
-    data: usuarios,
-    isLoading: isLoadingUsuarios,
-    error: errorUsuarios,
-  } = useSWR<Page<Usuario>>(
-    `http://localhost:8099/api/usuarios/listar?page=${paginaAtualUsuarios}&nome=${searchQueryUsuarios}&email=${searchQueryUsuarios}`,
-    fetcher
-  );
-  useEffect(() => {
-    setPaginaAtualTurmas(0);
-  }, [searchQuery]);
-
-  useEffect(() => {
-    setPaginaAtualUsuarios(0);
-  }, [searchQueryUsuarios]);
-
-  useEffect(() => {
-    if (usuarios) {
-      setTotalPagesUsuarios(usuarios.totalPages);
-    }
-  }, [usuarios]);
+  const turmasArray = Object.values(turmas);
+  const usuariosArray = Object.values(usuarios);
 
   useEffect(() => {
     if (turmas) {
-      setTurmasFiltradas(turmas.content);
-      setTotalPagesTurmas(turmas.totalPages);
+      setTurmasFiltradas(turmasArray);
     }
 
   }, [turmas]);
@@ -82,6 +44,7 @@ export default function GerenciamentoUsersTurmas() {
   }, []);
 
   return (
+    <ProtectedRoute>
     <>
       <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-5rem)]">
         <section className="flex flex-col h-full gap-4 w-full py-8 px-4 lg:w-1/2">
@@ -92,21 +55,19 @@ export default function GerenciamentoUsersTurmas() {
 
             <TurmaFilter
               className="px-4"
-              loading={isLoading || error}
-              turmas={
-                isLoading || error ? turmasFiltradas : turmas?.content ?? []
-              }
+              loading= {true}
+              turmas={turmasArray}
               setFiltered={setTurmasFiltradas}
               setSearchQuery={setSearchQuery}
               searchQuery={searchQuery}
             />
-          </div>
+            </div>
 
           <ScrollArea className="w-full h-[600px]">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 gap-4 px-4">
               {turmasFiltradas?.map((classItem, index) => (
                 <MedModal
-                  loading={isLoading || error}
+                  loading={true}
                   key={index}
                   courseCode={classItem.codigoTurma}
                   courseName={classItem.nomeCurso}
@@ -116,13 +77,6 @@ export default function GerenciamentoUsersTurmas() {
               ))}
             </div>
           </ScrollArea>
-          <div className="mt-auto">
-            <Paginacao
-              paginaAtual={paginaAtualTurmas}
-              setPaginaAtual={setPaginaAtualTurmas}
-              totalPages={totalPagesTurmas}
-            />
-          </div>
         </section>
 
         <section className="flex flex-col justify-between gap-4 w-full py-2 lg:py-8 px-4 lg:w-1/2 h-full">
@@ -134,20 +88,15 @@ export default function GerenciamentoUsersTurmas() {
             setIsDialogOpen={setIsDialogOpen}
             setSearchQuery={setSearchQueryUsuarios}
             searchQuery={searchQueryUsuarios}
-            loading={isLoadingUsuarios || errorUsuarios}
+            loading={true}
             className="h-[600px] "
             tipo="edit"
             setSelectedContact={() => {}}
-            usuarios={usuarios?.content ?? []}
-          />
-
-          <Paginacao
-            paginaAtual={paginaAtualUsuarios}
-            setPaginaAtual={setPaginaAtualUsuarios}
-            totalPages={totalPagesUsuarios}
+            usuarios={usuariosArray ?? []}
           />
         </section>
       </div>
     </>
+    </ProtectedRoute>
   );
 }

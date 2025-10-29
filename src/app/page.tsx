@@ -10,6 +10,7 @@ import { Page } from "@/utils/types";
 
 import Paginacao from "@/components/paginacao";
 import TurmaFilter from "@/components/input/turmasFilter";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function LandingPage() {
   const [dataAleatoria] = useState(() => {
@@ -52,6 +53,7 @@ export default function LandingPage() {
   }, [selectedTurma]);
 
   return (
+    <ProtectedRoute>
     <main className="w-full flex flex-col">
       <div className="flex flex-row flex-auto">
         <section className="w-full max-h-full md:w-3/5 xl:w-3/4 h-full flex flex-col items-start p-4 pt-16 gap-y-4">
@@ -95,6 +97,7 @@ export default function LandingPage() {
         </section>
       </div>
     </main>
+    </ProtectedRoute>
   );
 
   function ListaTurmas() {
