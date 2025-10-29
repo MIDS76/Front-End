@@ -31,6 +31,7 @@ import {
 } from "chart.js";
 
 import "@/app/globals.css";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 ChartJS.register(
   ArcElement,
@@ -45,7 +46,7 @@ ChartJS.register(
 
 interface Alunos {
   nome: string,
-  conselho: string, 
+  conselho: string,
   chamado: boolean,
   visualizou: boolean
 }
@@ -102,7 +103,7 @@ export default function DashboardPage() {
         chamado: rand(7) > 0.4,
         visualizou: rand(11 + i) > 0.5, // <- Agora depende do aluno e da seed do mês/ano
       };
-          
+
     });
   };
 
@@ -147,7 +148,7 @@ export default function DashboardPage() {
       : ["#19323C", "#2B5E64", "#49A5AB"];
   };
 
-  
+
   const doughnutData = {
     labels: ["Pré-conselho", "Conversa", "Concluído"],
     datasets: [
@@ -201,8 +202,8 @@ export default function DashboardPage() {
       },
     ],
   };
-  
-  
+
+
 
   const lineOptions: ChartOptions<'line'> = {
     responsive: true,
@@ -211,7 +212,7 @@ export default function DashboardPage() {
       y: {
         beginAtZero: true,
         ticks: { stepSize: 5, color: "#6B7280", font: { size: 12 } },
-        grid: { color: "rgba(107,114,128,0.2)", borderDash: [4, 4] }  as Partial<GridLineOptions>,
+        grid: { color: "rgba(107,114,128,0.2)", borderDash: [4, 4] } as Partial<GridLineOptions>,
       },
       x: {
         ticks: { display: false },   // 👈 oculta os labels dos dias
@@ -237,7 +238,7 @@ export default function DashboardPage() {
           },
         },
       },
-      
+
       legend: {
         display: true,
         position: "bottom",
@@ -251,10 +252,10 @@ export default function DashboardPage() {
       },
     },
   };
-  
-  
-  
-  
+
+
+
+
 
   const barData = {
     labels: ["01", "02", "03", "04", "05", "06", "07"],
@@ -311,15 +312,14 @@ export default function DashboardPage() {
   };
 
   const gerarRelatorioPDF = () => {
-  const doc = new jsPDF();
+    const doc = new jsPDF();
 
-  doc.setFontSize(16);
-  doc.text("Relatório de Alunos - Visualização", 14, 20);
+    doc.setFontSize(16);
+    doc.text("Relatório de Alunos - Visualização", 14, 20);
 
-  doc.setFontSize(12);
-  doc.text(
-    `Mês: ${
-      [
+    doc.setFontSize(12);
+    doc.text(
+      `Mês: ${[
         "Janeiro",
         "Fevereiro",
         "Março",
@@ -333,44 +333,44 @@ export default function DashboardPage() {
         "Novembro",
         "Dezembro",
       ][+mesSelecionado] || "-"
-    } | Ano: ${anoSelecionado}`,
-    14,
-    28
-  );
+      } | Ano: ${anoSelecionado}`,
+      14,
+      28
+    );
 
-  const alunosOrdenados = [...alunos].sort((a, b) =>
-    a.nome.localeCompare(b.nome, "pt", { sensitivity: "base" })
-  );
+    const alunosOrdenados = [...alunos].sort((a, b) =>
+      a.nome.localeCompare(b.nome, "pt", { sensitivity: "base" })
+    );
 
-  const tableData = alunosOrdenados.map((aluno, index) => [
-    index + 1,
-    aluno.nome,
-    aluno.visualizou ? "Sim" : "Não",
-    aluno.conselho,
-    aluno.chamado ? "Sim" : "Não",
-  ]);
+    const tableData = alunosOrdenados.map((aluno, index) => [
+      index + 1,
+      aluno.nome,
+      aluno.visualizou ? "Sim" : "Não",
+      aluno.conselho,
+      aluno.chamado ? "Sim" : "Não",
+    ]);
 
-  autoTable(doc, {
-    head: [["#", "Nome", "Visualizou", "Conselho", "Chamado"]],
-    body: tableData,
-    startY: 35,
-    headStyles: {
-      fillColor: [58, 109, 112], // <- #3a6d70
-      textColor: 255,
-      fontStyle: "bold",
-    },
-    styles: {
-      fontSize: 10,
-      cellPadding: 4,
-      textColor: [50, 50, 50],
-    },
-    alternateRowStyles: {
-      fillColor: [245, 245, 245],
-    },
-  });
+    autoTable(doc, {
+      head: [["#", "Nome", "Visualizou", "Conselho", "Chamado"]],
+      body: tableData,
+      startY: 35,
+      headStyles: {
+        fillColor: [58, 109, 112], // <- #3a6d70
+        textColor: 255,
+        fontStyle: "bold",
+      },
+      styles: {
+        fontSize: 10,
+        cellPadding: 4,
+        textColor: [50, 50, 50],
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245],
+      },
+    });
 
-  doc.save(`relatorio-alunos-visualizacao-${mesSelecionado}-${anoSelecionado}.pdf`);
-};
+    doc.save(`relatorio-alunos-visualizacao-${mesSelecionado}-${anoSelecionado}.pdf`);
+  };
 
 
   const gerarRelatorioFasesConselho = () => {
@@ -410,13 +410,13 @@ export default function DashboardPage() {
 
   const gerarRelatorioVisualizacaoConselho = () => {
     const doc = new jsPDF();
-  
+
     doc.setFontSize(16);
     doc.text("Relatório - Visualização de Conselhos", 14, 20);
-  
+
     const totalVisualizados = alunos.filter((a) => a.visualizou).length;
     const totalNaoVisualizados = alunos.length - totalVisualizados;
-  
+
     doc.setFontSize(12);
     doc.text(
       `Visualizaram: ${totalVisualizados} alunos (${(
@@ -434,7 +434,7 @@ export default function DashboardPage() {
       14,
       38
     );
-  
+
     const tableData = alunos
       .sort((a, b) => a.nome.localeCompare(b.nome, "pt", { sensitivity: "base" }))
       .map((aluno, i) => [
@@ -442,7 +442,7 @@ export default function DashboardPage() {
         aluno.nome,
         aluno.visualizou ? "Sim" : "Não",
       ]);
-  
+
     autoTable(doc, {
       head: [["#", "Nome", "Visualizou"]],
       body: tableData,
@@ -459,12 +459,12 @@ export default function DashboardPage() {
         fillColor: [245, 245, 245],
       },
     });
-  
+
     doc.save(
       `relatorio-visualizacao-conselho-${mesSelecionado}-${anoSelecionado}.pdf`
     );
   };
-  
+
 
   const gerarRelatorioChamados = () => {
     const doc = new jsPDF();
@@ -536,163 +536,165 @@ export default function DashboardPage() {
   };
 
   return (
-    <main className="h-[calc(100vh-5rem)] flex-col items-center justify-between pt-10 px-4">
-      <h1 className="text-4xl font-bold font-title ml-8 self-start">
-        Dashboard
-      </h1>
+    <ProtectedRoute>
+      <main className="h-[calc(100vh-5rem)] flex-col items-center justify-between pt-10 px-4">
+        <h1 className="text-4xl font-bold font-title ml-8 self-start">
+          Dashboard
+        </h1>
 
-      <div className="ml-8 flex gap-8 m-[2vh]">
-        <Select value={mesSelecionado} onValueChange={setMesSelecionado}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Selecione o mês" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Meses</SelectLabel>
-              {[
-                "Janeiro",
-                "Fevereiro",
-                "Março",
-                "Abril",
-                "Maio",
-                "Junho",
-                "Julho",
-                "Agosto",
-                "Setembro",
-                "Outubro",
-                "Novembro",
-                "Dezembro",
-              ].map((mes, index) => (
-                <SelectItem key={index} value={index.toString()}>
-                  {mes}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+        <div className="ml-8 flex gap-8 m-[2vh]">
+          <Select value={mesSelecionado} onValueChange={setMesSelecionado}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Selecione o mês" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Meses</SelectLabel>
+                {[
+                  "Janeiro",
+                  "Fevereiro",
+                  "Março",
+                  "Abril",
+                  "Maio",
+                  "Junho",
+                  "Julho",
+                  "Agosto",
+                  "Setembro",
+                  "Outubro",
+                  "Novembro",
+                  "Dezembro",
+                ].map((mes, index) => (
+                  <SelectItem key={index} value={index.toString()}>
+                    {mes}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
 
-        <Select value={anoSelecionado} onValueChange={setAnoSelecionado}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Selecione o ano" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Anos</SelectLabel>
-              {[0, 1, 2, 3, 4, 5].map((offset) => (
-                <SelectItem key={offset} value={(anoAtual - offset).toString()}>
-                  {anoAtual - offset}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
+          <Select value={anoSelecionado} onValueChange={setAnoSelecionado}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Selecione o ano" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Anos</SelectLabel>
+                {[0, 1, 2, 3, 4, 5].map((offset) => (
+                  <SelectItem key={offset} value={(anoAtual - offset).toString()}>
+                    {anoAtual - offset}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
 
-      <div className="flex flex-wrap gap-6 xl:justify-between w-full px-8">
-        <Card className="lg:w-[calc((1/3*100%)-1rem)] w-full md:w-[calc(50%-0.75rem)]">
-          <CardHeader className="flex flex-col gap-2 pb-2">
-            <div className="flex justify-between items-center w-full">
-              <CardTitle className="text-base font-medium">
-                Fases dos Conselhos
-              </CardTitle>
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-ring text-white hover:text-popover-foreground"
-                onClick={gerarRelatorioFasesConselho}
-              >
-                Ver Relatório
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="h-[220px] flex flex-col items-center mt-5">
-            <div className="h-[150px] w-[150px]">
-              <Doughnut options={doughnutOptions} data={doughnutData} />
-            </div>
-            <div className="flex justify-around w-full mt-4">
-              {doughnutData.labels.map((label, index) => (
-                <div key={label} className="text-xs flex items-start">
-                  <div
-                    className="w-2.5 h-2.5 rounded-full mt-1 mr-2"
-                    style={{
-                      backgroundColor:
-                        doughnutData.datasets[0].backgroundColor[index],
-                    }}
-                  />
-                  <div className="flex flex-col items-start">
-                    <div className="font-semibold">{label}</div>
-                    <div className="text-gray-500">{percent[index]}%</div>
+        <div className="flex flex-wrap gap-6 xl:justify-between w-full px-8">
+          <Card className="lg:w-[calc((1/3*100%)-1rem)] w-full md:w-[calc(50%-0.75rem)]">
+            <CardHeader className="flex flex-col gap-2 pb-2">
+              <div className="flex justify-between items-center w-full">
+                <CardTitle className="text-base font-medium">
+                  Fases dos Conselhos
+                </CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-ring text-white hover:text-popover-foreground"
+                  onClick={gerarRelatorioFasesConselho}
+                >
+                  Ver Relatório
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="h-[220px] flex flex-col items-center mt-5">
+              <div className="h-[150px] w-[150px]">
+                <Doughnut options={doughnutOptions} data={doughnutData} />
+              </div>
+              <div className="flex justify-around w-full mt-4">
+                {doughnutData.labels.map((label, index) => (
+                  <div key={label} className="text-xs flex items-start">
+                    <div
+                      className="w-2.5 h-2.5 rounded-full mt-1 mr-2"
+                      style={{
+                        backgroundColor:
+                          doughnutData.datasets[0].backgroundColor[index],
+                      }}
+                    />
+                    <div className="flex flex-col items-start">
+                      <div className="font-semibold">{label}</div>
+                      <div className="text-gray-500">{percent[index]}%</div>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card className="lg:w-[calc((1/3*100%)-1rem)] w-full md:w-[calc(50%-0.75rem)]">
-          <CardHeader className="flex flex-col gap-2 pb-2">
-            <div className="flex justify-between items-center w-full">
-              <CardTitle className="text-base font-medium"> 
-                Visualização de Conselhos
-              </CardTitle>
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-ring text-white hover:text-popover-foreground"
-                onClick={gerarRelatorioVisualizacaoConselho}
-              >
-                Ver Relatório
-              </Button>
-            </div>
-            <span className="text-2xl font-semibold">
-              {alunos.length > 0
-                ? `${(
+          <Card className="lg:w-[calc((1/3*100%)-1rem)] w-full md:w-[calc(50%-0.75rem)]">
+            <CardHeader className="flex flex-col gap-2 pb-2">
+              <div className="flex justify-between items-center w-full">
+                <CardTitle className="text-base font-medium">
+                  Visualização de Conselhos
+                </CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-ring text-white hover:text-popover-foreground"
+                  onClick={gerarRelatorioVisualizacaoConselho}
+                >
+                  Ver Relatório
+                </Button>
+              </div>
+              <span className="text-2xl font-semibold">
+                {alunos.length > 0
+                  ? `${(
                     (alunos.filter((a) => a.visualizou).length / alunos.length) *
                     100
                   ).toFixed(1)}%`
-                : "--"}
-            </span>
-          </CardHeader>
-          <CardContent className="h-48  flex justify-center items-center">
-            <div className="h-[160px] w-full max-w-[500px]">
-              <Line data={lineData} options={lineOptions} />
-            </div>
-          </CardContent>
-        </Card>
+                  : "--"}
+              </span>
+            </CardHeader>
+            <CardContent className="h-48  flex justify-center items-center">
+              <div className="h-[160px] w-full max-w-[500px]">
+                <Line data={lineData} options={lineOptions} />
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card className="lg:w-[calc((1/3*100%)-1rem)] w-full md:w-full">
-          <CardHeader className="flex flex-col gap-2 pb-2">
-            <div className="flex justify-between items-center w-full">
-              <CardTitle className="text-base font-medium">
-                Quantidade de alunos chamados
-              </CardTitle>
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-ring text-white hover:text-popover-foreground"
-                onClick={gerarRelatorioChamados}
-              >
-                Ver Relatório
-              </Button>
-            </div>
-          </CardHeader>
+          <Card className="lg:w-[calc((1/3*100%)-1rem)] w-full md:w-full">
+            <CardHeader className="flex flex-col gap-2 pb-2">
+              <div className="flex justify-between items-center w-full">
+                <CardTitle className="text-base font-medium">
+                  Quantidade de alunos chamados
+                </CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-ring text-white hover:text-popover-foreground"
+                  onClick={gerarRelatorioChamados}
+                >
+                  Ver Relatório
+                </Button>
+              </div>
+            </CardHeader>
 
-          <CardContent className="h-[220px] flex justify-center items-center mt-5">
-            <div className="h-full w-full">
-              <Bar data={barData} options={barOptions} />
-            </div>
-          </CardContent>
-        </Card>
-        <div className="flex my-8 lg:my-[4vh] w-full justify-end">
-          <Button
-            variant="outline"
-            className="bg-ring text-white hover:text-popover-foreground"
-            onClick={gerarRelatorioPDF}
-          >
-            Gerar Relatórios
-          </Button>
+            <CardContent className="h-[220px] flex justify-center items-center mt-5">
+              <div className="h-full w-full">
+                <Bar data={barData} options={barOptions} />
+              </div>
+            </CardContent>
+          </Card>
+          <div className="flex my-8 lg:my-[4vh] w-full justify-end">
+            <Button
+              variant="outline"
+              className="bg-ring text-white hover:text-popover-foreground"
+              onClick={gerarRelatorioPDF}
+            >
+              Gerar Relatórios
+            </Button>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </ProtectedRoute>
   );
 }

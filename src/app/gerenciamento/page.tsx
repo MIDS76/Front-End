@@ -44,6 +44,7 @@ export default function GerenciamentoUsersTurmas() {
   }, []);
 
   return (
+    <ProtectedRoute>
     <>
       <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-5rem)]">
         <section className="flex flex-col h-full gap-4 w-full py-8 px-4 lg:w-1/2 ">
@@ -95,5 +96,6 @@ export default function GerenciamentoUsersTurmas() {
         </section>
       </div>
     </>
+    </ProtectedRoute>
   );
 }
