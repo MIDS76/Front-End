@@ -1,4 +1,5 @@
-import ButtonTT from "@/components/button/ButtonTT";
+"use client";
+
 import {
   Dialog,
   DialogClose,
@@ -9,9 +10,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import ButtonTT from "@/components/button/ButtonTT";
 import { cn } from "@/lib/utils";
+import React from "react";
 
-interface ActionModalProps {
+interface ActionModalFormProps {
   children?: React.ReactNode;
   conteudo?: React.ReactNode;
   title: string;
@@ -19,7 +22,7 @@ interface ActionModalProps {
   closeButtonLabel?: string;
   actionButtonLabel?: string;
   destructive?: boolean;
-  onConfirm?: React.MouseEventHandler<HTMLButtonElement>;
+  onSubmit: (formData: FormData) => Promise<void> | void;
   onClose?: () => void;
   isOpen?: boolean;
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
@@ -27,7 +30,7 @@ interface ActionModalProps {
   customPosition?: boolean;
 }
 
-export default function ActionModal({
+export default function ActionModalForm({
   removeBg = false,
   children,
   title,
@@ -35,21 +38,19 @@ export default function ActionModal({
   closeButtonLabel = "Cancelar",
   actionButtonLabel = "Confirmar",
   destructive,
-  onConfirm,
+  onSubmit,
   onClose,
   conteudo,
   isOpen,
   setOpen,
   customPosition,
-}: ActionModalProps) {
+}: ActionModalFormProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent
         withOverlay={!removeBg}
-        onInteractOutside={(e) => {
-          e.preventDefault();
-        }}
+        onInteractOutside={(e) => e.preventDefault()}
         className={cn(
           removeBg && customPosition && "lg:left-1/3 md:left-1/4",
           "rounded-2xl sm:max-w-[425px] [&>button:last-child]:hidden"
@@ -59,29 +60,37 @@ export default function ActionModal({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <section>{conteudo}</section>
-        <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2">
-          <DialogClose asChild>
-            <ButtonTT
-              tooltip="none"
-              mode="default"
-              variant="destructive"
-              onClick={onClose}
-            >
-              {closeButtonLabel}
-            </ButtonTT>
-          </DialogClose>
-          <DialogClose asChild>
+
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            await onSubmit(formData);
+          }}
+        >
+          <section>{conteudo}</section>
+
+          <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2 mt-6">
+            <DialogClose asChild>
+              <ButtonTT
+                tooltip="none"
+                mode="default"
+                variant="outline"
+                onClick={onClose}
+              >
+                {closeButtonLabel}
+              </ButtonTT>
+            </DialogClose>
             <ButtonTT
               tooltip={actionButtonLabel}
               mode="default"
               variant={destructive ? "destructive" : "default"}
-              onClick={onConfirm!}
+              type="submit"
             >
               {actionButtonLabel}
             </ButtonTT>
-          </DialogClose>
-        </DialogFooter>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

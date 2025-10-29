@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Turma } from "../modal/conselhosModal";
+import { Turma } from "../../utils/types";
 import SearchBar from "./searchBar";
 
 interface TurmaFilterProps {
