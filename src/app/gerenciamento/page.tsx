@@ -9,6 +9,8 @@ import Lista from "@/components/lista";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import turmas from "@/data/turma.json";
 import usuarios from "@/data/usuarios.json";
+import ProtectedRoute from "@/components/ProtectedRoute";
+
 
 export default function GerenciamentoUsersTurmas() {
 
@@ -44,8 +46,8 @@ export default function GerenciamentoUsersTurmas() {
   }, []);
 
   return (
-    <ProtectedRoute>
     <>
+    <ProtectedRoute>
       <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-5rem)]">
         <section className="flex flex-col h-full gap-4 w-full py-8 px-4 lg:w-1/2 ">
           <div className="flex flex-col gap-6 md:mt-8 md:w-[450px] md:m-auto">
@@ -95,7 +97,7 @@ export default function GerenciamentoUsersTurmas() {
           />
         </section>
       </div>
+      </ProtectedRoute>
     </>
-    </ProtectedRoute>
   );
 }
