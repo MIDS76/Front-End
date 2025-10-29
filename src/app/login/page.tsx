@@ -108,16 +108,14 @@ export default function Login() {
                 htmlFor="password"
                 className="text-sm font-semibold text-gray-800"
               >
-                Senha
+
               </label>
-              <input
-                name="password"
+              <TextField
                 id="password"
-                type="password"
+                name="password"
+                label="Senha"
                 placeholder="Insira sua senha"
-                className={`w-full rounded-md px-3 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary ${
-                  error ? "border-destructive" : ""
-                } bg-gray-100`}
+                type="password"
               />
 
               <button
