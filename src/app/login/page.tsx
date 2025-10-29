@@ -121,7 +121,7 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setIsModalOpen(true)}
-                className="text-xs text-primary hover:underline text-left mt-1 mb-6"
+                className="text-xs text-primary hover:underline text-left -mt-8 mb-6"
               >
                 Esqueceu sua senha?
               </button>
