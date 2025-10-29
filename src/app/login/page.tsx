@@ -13,35 +13,30 @@ export default function Login() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const auth = useAuth();
+  const { login } = useAuth();
   const router = useRouter();
 
   const handleLogin = async (data: FormData) => {
     setError(false);
     setErrorMessage("");
 
-    const login = {
-      email: data.get("login") as string,
-      password: data.get("password") as string,
-    };
+    const email = data.get("login") as string;
+    const password = data.get("password") as string;
 
-    if (!login.email || !login.password) {
+    if (!email || !password) {
       setError(true);
       setErrorMessage("Preencha todos os campos.");
       return;
     }
 
-    if (login.email === "admin" && login.password === "senhasecreta") {
-      setError(false);
-      auth.login();
-      setTimeout(() => {
-        router.push("/");
-      }, 1000);
-      return;
-    }
+    const success = await login(email, password);
 
-    setError(true);
-    setErrorMessage("Login ou senha incorretos.");
+    if (success) {
+      router.push("/"); 
+    } else {
+      setError(true);
+      setErrorMessage("Login ou senha incorretos.");
+    }
   };
 
   return (
