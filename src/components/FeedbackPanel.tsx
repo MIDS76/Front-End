@@ -1,58 +1,130 @@
 "use client";
+
 import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { User } from "lucide-react";
+import { cn } from "@/lib/utils";
+import ButtonTT from "@/components/button/ButtonTT";
 
 interface Feedback {
   pontosFortes: string;
   oportunidades: string;
   sugestoes: string;
-}
-
-interface FeedbackPanelProps {
-  feedback: Feedback | null;
   periodo?: string;
+  alunoNome?: string;
+  alunoAvatar?: string;
 }
 
-export default function FeedbackPanel({ feedback, periodo }: FeedbackPanelProps) {
+interface DevolutivaAlunoProps {
+  isOpen: boolean;
+  onClose: () => void;
+  feedback: Feedback | null;
+}
+
+export default function DevolutivaAluno({
+  isOpen,
+  onClose,
+  feedback,
+}: DevolutivaAlunoProps) {
   if (!feedback) {
     return (
-      <div className="bg-[#d9e3e6] rounded-lg p-6 w-full h-full flex items-center justify-center text-gray-700">
-        <p>Selecione um conselho disponível para acesso</p>
-      </div>
+      <aside
+        className={cn(
+          "inset-auto right-0 z-10 flex flex-col bg-card w-[480px] h-full",
+          "transform transition-transform duration-300 ease-in-out border-l",
+          isOpen ? "translate-x-0" : "translate-x-full"
+        )}
+      >
+        <Card className="h-full border-t-0 flex items-center justify-center text-muted-foreground">
+          <p>Nenhuma devolutiva disponível no momento.</p>
+        </Card>
+      </aside>
     );
   }
 
   return (
-    <div className="bg-[#d9e3e6] rounded-lg p-6 w-full text-gray-800">
-      <h3 className="text-lg font-semibold mb-2">Conselho Publicado</h3>
-      <p className="text-sm mb-4">{periodo}</p>
+    <aside
+      className={cn(
+        "inset-auto right-0 z-10 flex flex-col bg-card w-[480px] h-full",
+        "transform transition-transform duration-300 ease-in-out border-l",
+        isOpen ? "translate-x-0" : "translate-x-full"
+      )}
+    >
+      <Card className="h-full mb-4 border-t-0">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <ButtonTT
+              variant="ghost"
+              mode="small"
+              onClick={onClose}
+              icon="IoClose"
+              tooltip="none"
+            ></ButtonTT>
 
-      <div className="flex flex-col gap-4">
-        <div>
-          <p className="font-semibold">Pontos Fortes</p>
-          <textarea
-            readOnly
-            className="w-full mt-1 p-2 rounded border bg-white"
-            value={feedback.pontosFortes}
-          />
-        </div>
-        <div>
-          <p className="font-semibold">Oportunidades de Melhoria</p>
-          <textarea
-            readOnly
-            className="w-full mt-1 p-2 rounded border bg-white"
-            value={feedback.oportunidades}
-          />
-        </div>
-        <div>
-          <p className="font-semibold">Sugestões</p>
-          <textarea
-            readOnly
-            className="w-full mt-1 p-2 rounded border bg-white"
-            value={feedback.sugestoes}
-          />
-        </div>
-      </div>
-    </div>
+            <h2 className="font-title text-accent-foreground">
+              Devolutiva do Conselho
+            </h2>
+
+            <span className="text-sm text-muted-foreground">
+              {feedback.periodo || "Período não informado"}
+            </span>
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent>
+          <div className="flex items-center space-x-4 mb-4">
+            <Avatar>
+              {feedback.alunoAvatar ? (
+                <AvatarImage
+                  src={feedback.alunoAvatar}
+                  alt={feedback.alunoNome || "Aluno"}
+                />
+              ) : (
+                <AvatarFallback>
+                  <User />
+                </AvatarFallback>
+              )}
+            </Avatar>
+            <div>
+              <p className="text-sm font-medium">
+                {feedback.alunoNome || "Aluno não identificado"}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4">
+            <div>
+              <Label>Pontos Fortes</Label>
+              <Textarea
+                value={feedback.pontosFortes}
+                readOnly
+                className="resize-none"
+              />
+            </div>
+
+            <div>
+              <Label>Oportunidades de Melhoria</Label>
+              <Textarea
+                value={feedback.oportunidades}
+                readOnly
+                className="resize-none"
+              />
+            </div>
+
+            <div>
+              <Label>Sugestões</Label>
+              <Textarea
+                value={feedback.sugestoes}
+                readOnly
+                className="resize-none"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </aside>
   );
 }
- 

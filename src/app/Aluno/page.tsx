@@ -1,9 +1,20 @@
 "use client";
-
 import React, { useState } from "react";
 import MedModal from "@/components/modal/medModal";
-import FeedbackPanel from "@/components/FeedbackPanel";
-import { Input } from "@/components/ui/input"; // 👈 importa o input estilizado
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import ButtonTT from "@/components/button/ButtonTT";
+import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { SlidersHorizontal } from "lucide-react";
+import FiltrosPesquisa from "@/components/modal/FiltrosPesquisa";
 
 interface Feedback {
   pontosFortes: string;
@@ -62,72 +73,161 @@ const conselhos: Conselho[] = [
   },
 ];
 
+
+interface DevolutivaAlunoProps {
+  isOpen: boolean;
+  onClose: () => void;
+  feedback: Feedback | null;
+  periodo?: string;
+}
+
+function DevolutivaAluno({ isOpen, onClose, feedback, periodo }: DevolutivaAlunoProps) {
+  return (
+    <aside
+  className={cn(
+    "fixed top-0 right-0 z-10 flex flex-col w-full lg:w-[480px] h-full",
+    "transform transition-transform duration-300 ease-in-out border-l shadow-lg bg-card", // bg-card igual ao modal
+    isOpen ? "translate-x-0" : "translate-x-full"
+  )}
+>
+      <Card className="h-full border-t-0">
+        <CardHeader className="flex flex-col items-start justify-between">
+          <CardTitle className="font-title text-accent-foreground text-lg mb-1">
+            Conselho Publicado
+          </CardTitle>
+          <span className="text-sm text-muted-foreground mb-4">
+            {periodo || "Período não informado"}
+          </span>
+          <ButtonTT
+            variant="ghost"
+            mode="small"
+            onClick={onClose}
+            icon="IoClose"
+            tooltip="none"
+          />
+        </CardHeader>
+
+        <CardContent className="overflow-auto">
+          {!feedback ? (
+            <div className="flex items-center justify-center h-full text-muted-foreground text-center">
+              Nenhum conselho selecionado!
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              <div>
+                <Label>Pontos Fortes</Label>
+                <Textarea value={feedback.pontosFortes} readOnly className="resize-none" />
+              </div>
+              <div>
+                <Label>Oportunidades de Melhoria</Label>
+                <Textarea value={feedback.oportunidades} readOnly className="resize-none" />
+              </div>
+              <div>
+                <Label>Sugestões</Label>
+                <Textarea value={feedback.sugestoes} readOnly className="resize-none" />
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </aside>
+  );
+}
+
 export default function AlunoHome() {
   const [selectedConselho, setSelectedConselho] = useState<number | null>(null);
   const [filtro, setFiltro] = useState("");
+  const [ordenacao, setOrdenacao] = useState<"recente" | "antigo">("recente");
+  const [anoFiltro, setAnoFiltro] = useState<string>("");
 
-  const conselhoSelecionado = conselhos.find((c) => c.id === selectedConselho);
-
-  // filtra os conselhos com base no texto digitado
-  const conselhosFiltrados = conselhos.filter((c) =>
+  let conselhosFiltrados = conselhos.filter((c) =>
     c.periodo.toLowerCase().includes(filtro.toLowerCase())
   );
 
-  return (
-    <div className="flex h-screen bg-[#f5f5f5]">
-      {/* Coluna da esquerda */}
-      <div className="flex-1 p-8">
-        <h1 className="text-2xl font-semibold mb-4 text-primary">
-          Meus Conselhos
-        </h1>
+  if (anoFiltro) {
+    conselhosFiltrados = conselhosFiltrados.filter((c) => c.periodo.includes(anoFiltro));
+  }
 
-        {/* Input de pesquisa */}
-        <div className="mb-6">
+  conselhosFiltrados.sort((a, b) => {
+    const anoA = parseInt(a.periodo.split("/")[1]);
+    const anoB = parseInt(b.periodo.split("/")[1]);
+    return ordenacao === "recente" ? anoB - anoA : anoA - anoB;
+  });
+
+  const conselhoSelecionado = conselhos.find((c) => c.id === selectedConselho);
+
+  return (
+    <div className="flex flex-col lg:flex-row h-screen bg-[#f5f5f5]">
+      <div className="flex-1 p-8">
+        <h1 className="text-2xl font-semibold mb-4 text-primary">Meus Conselhos</h1>
+
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-start gap-2">
           <Input
             type="text"
             placeholder="Pesquisar conselho por período..."
             value={filtro}
             onChange={(e) => setFiltro(e.target.value)}
-            className="max-w-sm bg-white shadow-sm"
+            className="sm:max-w-sm bg-white shadow-sm"
           />
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 bg-white shadow-sm hover:bg-gray-50"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                <span>Filtros</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <FiltrosPesquisa
+                onSortChange={(valor) => setOrdenacao(valor)}
+                onYearChange={(ano) => setAnoFiltro(ano)}
+              />
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
-        {/* Grid de conselhos */}
-        <div className="grid grid-cols-3 gap-4">
-          {conselhosFiltrados.map((c) => (
-            <MedModal
-              key={c.id}
-              courseCode={c.periodo}
-              courseName="Conselho" 
-              onClick={() => setSelectedConselho(c.id)}
-              className={`transition-transform hover:scale-[1.02] ${
-                selectedConselho === c.id
-                  ? "ring-2 ring-primary scale-[1.02]"
-                  : ""
-              }`}
-            >
-              <p className="text-muted-foreground text-right">
-                <span className="font-semibold">Status:</span> {c.status}
-              </p>
-            </MedModal>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {conselhosFiltrados.length > 0 ? (
+            conselhosFiltrados.map((c) => (
+              <MedModal
+                key={c.id}
+                courseCode={c.periodo}
+                courseName="Conselho"
+                onClick={() => setSelectedConselho(c.id)}
+                className={`transition-transform hover:scale-[1.02] cursor-pointer ${
+                  selectedConselho === c.id ? "ring-2 ring-primary scale-[1.02]" : ""
+                }`}
+              >
+                <div className="text-muted-foreground text-right">
+                  <span className="font-semibold">Status:</span> {c.status}
+                </div>
+              </MedModal>
+            ))
+          ) : (
+          <div className="display: block; margin-left: auto; margin-right: auto;">
+            Nenhum conselho encontrado!
+          </div>
+        
+       
+        
 
-          {/* Caso não encontre nenhum */}
-          {conselhosFiltrados.length === 0 && (
-            <p className="text-muted-foreground col-span-3 text-center mt-6">
-              Nenhum conselho encontrado!
-            </p>
+
           )}
         </div>
       </div>
 
-      {/* Coluna da direita */}
-      <div className="w-[30%] p-6">
-        <FeedbackPanel
+      <div className="w-full lg:w-[480px] p-6">
+        <DevolutivaAluno
+          isOpen={selectedConselho !== null}
+          onClose={() => setSelectedConselho(null)}
           feedback={conselhoSelecionado?.feedback ?? null}
           periodo={conselhoSelecionado?.periodo}
         />
       </div>
     </div>
   );
-}
+
+          }

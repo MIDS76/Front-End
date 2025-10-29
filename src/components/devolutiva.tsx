@@ -108,7 +108,7 @@ export default function Devolutiva() {
               Alunos
             </TabsTrigger>
             <TabsTrigger
-              value="professores"
+              value="professores" 
               className="font-bold text-popover-foreground"
             >
               Professores
