@@ -7,32 +7,32 @@
     },
     "usuario2": {
         "id": 2,
-        "nome": "Raquel",
-        "email": "raquel@gmail.com",
+        "nome": "Juscelino",
+        "email": "juscelino@gmail.com",
         "role": "Professor"
     },
     "usuario3": {
         "id": 3,
-        "nome": "Raquel",
-        "email": "raquel@gmail.com",
+        "nome": "Isabeli",
+        "email": "isabeli@gmail.com",
         "role": "Aluno"
     },
     "usuario4": {
         "id": 4,
-        "nome": "Raquel",
-        "email": "raquel@gmail.com",
+        "nome": "Julia Macena",
+        "email": "julia_macena@gmail.com",
         "role": "Aluno"
     },
     "usuario5": {
         "id": 5,
-        "nome": "Raquel",
-        "email": "raquel@gmail.com",
+        "nome": "Geovanna",
+        "email": "geovanna@gmail.com",
         "role": "Professor"
     },
     "usuario6": {
         "id": 6,
-        "nome": "Raquel",
-        "email": "raquel@gmail.com",
+        "nome": "Julia Gabrieli",
+        "email": "julia_gabrieli@gmail.com",
         "role": "Aluno"
     }
 }

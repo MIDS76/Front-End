@@ -23,7 +23,6 @@ import { toast } from "sonner";
 import { Conselho } from "@/utils/types";
 import { Usuario } from "@/utils/types";
 import { Label } from "./ui/label";
-import { useLocalStorage } from "usehooks-ts";
 
 interface ListaProps {
   className?: string;
@@ -34,7 +33,6 @@ interface ListaProps {
     | "checkbox"
     | "edit"
     | "add"
-    | "star"
     | "excluir"
     | "conselho"
     | "limpa";
@@ -65,11 +63,6 @@ export default function Lista({
   const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
   const [filteredUsers, setFilteredUsers] = useState<Usuario[]>();
 
-  const [starredUsers, setStarredUsers] = useLocalStorage<number[]>(
-    "starredUsers",
-    []
-  );
-
   const toggleUsuario = (usuario: Usuario) => {
     setSelectedUsuario((prev) => (prev?.id === usuario.id ? null : usuario));
   };
@@ -91,22 +84,6 @@ export default function Lista({
     );
   }, [loading, searchQuery, usuarios]);
 
-  const handleStarClick = (user: Usuario) => {
-    const isAlreadyStarred = starredUsers.includes(user.id);
-
-    if (isAlreadyStarred) {
-      const updated = starredUsers.filter((id) => id !== user.id);
-      setStarredUsers(updated);
-      localStorage.setItem("starredUsers", JSON.stringify(updated));
-    } else {
-      if (starredUsers.length >= 2) {
-        return;
-      }
-      const updated = [...starredUsers, user.id];
-      setStarredUsers(updated);
-      localStorage.setItem("starredUsers", JSON.stringify(updated));
-    }
-  };
   const [editingUser, setEditingUser] = useState<Usuario>({} as Usuario);
 
   return (
@@ -122,7 +99,7 @@ export default function Lista({
           className="flex-1"
         />
 
-        {(tipo === "excluir" || tipo === "star") && (
+        {(tipo === "excluir") && (
           <ButtonTT
             variant="secondary"
             onClick={() => console.log("Clicou em adicionar")}
@@ -152,7 +129,6 @@ export default function Lista({
                 isDialogOpen={isDialogOpen}
                 setIsDialogOpen={setIsDialogOpen}
                 usuarioProfessor={professor}
-                loading={loading}
                 key={index}
                 usuario={usuario}
                 conselho={conselho!}
@@ -164,8 +140,6 @@ export default function Lista({
                   (u) => u.id === usuario.id
                 )}
                 setEditingUser={setEditingUser}
-                isStarred={starredUsers.includes(usuario.id)}
-                onStarClick={() => handleStarClick(usuario)}
                 removeUser={() => {
                   setFilteredUsers(
                     filteredUsers?.filter((user) => user.id !== usuario.id)

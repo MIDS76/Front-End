@@ -125,7 +125,7 @@ export default function GereciarTurma() {
             setIsDialogOpen={setIsDialogOpen}
             usuarios={filteredUsers}
             setSelectedContact={selectUser}
-            tipo={userFilter === "Alunos" ? "star" : "excluir"}
+            tipo={userFilter === "Alunos" ? "edit" : "excluir"}
             selectedUsers={selectedUsers}
           />
           <div

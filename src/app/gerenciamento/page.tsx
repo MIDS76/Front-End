@@ -46,31 +46,31 @@ export default function GerenciamentoUsersTurmas() {
   return (
     <>
       <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-5rem)]">
-        <section className="flex flex-col h-full gap-4 w-full py-8 px-4 lg:w-1/2">
-          <div className="flex flex-col gap-6">
-            <h2 className="px-4 text-2xl font-title font-bold text-accent-foreground">
+        <section className="flex flex-col h-full gap-4 w-full py-8 px-4 lg:w-1/2 ">
+          <div className="flex flex-col gap-6 md:mt-8 md:w-[450px] md:m-auto">
+            <h2 className="px-4 text-3xl font-title font-bold text-accent-foreground">
               Gerenciar uma turma
             </h2>
 
             <TurmaFilter
               className="px-4"
-              loading= {true}
+              loading={true}
               turmas={turmasArray}
               setFiltered={setTurmasFiltradas}
               setSearchQuery={setSearchQuery}
               searchQuery={searchQuery}
             />
-            </div>
+          </div>
 
-          <ScrollArea className="w-full h-[600px]">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 gap-4 px-4">
+          <ScrollArea className="w-full h-[600px] mt-5 md:w-[450px] md:m-auto">
+            <div className="grid grid-cols-1 gap-6 px-4">
               {turmasFiltradas?.map((classItem, index) => (
                 <MedModal
-                  loading={true}
                   key={index}
                   courseCode={classItem.codigoTurma}
                   courseName={classItem.nomeCurso}
                   onClick={() => open("/gerenciamento/turma", "_self")}
+                  className=""
                   simple
                 />
               ))}
@@ -87,11 +87,10 @@ export default function GerenciamentoUsersTurmas() {
             setIsDialogOpen={setIsDialogOpen}
             setSearchQuery={setSearchQueryUsuarios}
             searchQuery={searchQueryUsuarios}
-            loading={true}
             className="h-[600px] "
             tipo="edit"
-            setSelectedContact={() => {}}
-            usuarios={usuariosArray ?? []}
+            setSelectedContact={() => { }}
+            usuarios={usuariosArray}
           />
         </section>
       </div>

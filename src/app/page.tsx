@@ -2,12 +2,11 @@
 
 import MedModal from "@/components/modal/medModal";
 import { useEffect, useState } from "react";
-import ConselhosModal, { Turma } from "@/components/modal/conselhosModal";
+import ConselhosModal from "@/components/modal/conselhosModal";
+import { Turma } from "@/utils/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import useSWR from "swr";
-
 import { Page } from "@/utils/types";
-
 import Paginacao from "@/components/paginacao";
 import TurmaFilter from "@/components/input/turmasFilter";
 
