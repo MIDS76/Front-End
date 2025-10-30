@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Usuario } from "@/utils/types";
-import Lista from "@/components/lista";
+import Lista, { Usuario } from "@/components/lista";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import TextField from "@/components/input/textField";

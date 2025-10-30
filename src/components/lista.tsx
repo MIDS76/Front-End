@@ -20,10 +20,17 @@ import ActionModal from "./modal/actionModal";
 
 import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
-import { Conselho } from "@/utils/types";
-import { Usuario } from "@/utils/types";
+import { Conselho } from "@/app/conselho/pagina";
+
 import { Label } from "./ui/label";
 import { useLocalStorage } from "usehooks-ts";
+
+export interface Usuario {
+  id: number;
+  nome: string;
+  email: string;
+  role: string;
+}
 
 interface ListaProps {
   className?: string;

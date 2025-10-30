@@ -17,9 +17,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Icon } from "@/components/button/smallButton";
+import { Conselho } from "@/app/conselho/pagina";
 import Link from "next/link";
-import { Turma, Conselho } from "@/utils/types";
+import { Usuario } from "../lista";
 import { etapas } from "@/utils/types";
+
+export interface Turma {
+  id: number;
+  codigoTurma: string;
+  nomeCurso: string;
+  conselhos?: Conselho[];
+  usuarios?: Usuario[];
+}
 
 interface ConselhosModalProps {
   isOpen: boolean;

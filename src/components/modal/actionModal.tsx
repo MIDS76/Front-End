@@ -65,7 +65,7 @@ export default function ActionModal({
             <ButtonTT
               tooltip="none"
               mode="default"
-              variant="destructive"
+              variant="outline"
               onClick={onClose}
             >
               {closeButtonLabel}
