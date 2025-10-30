@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import turmas from "@/data/turma.json";
 import usuarios from "@/data/usuarios.json";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import SearchBar from "@/components/input/searchBar";
 
 
 export default function GerenciamentoUsersTurmas() {
@@ -44,59 +45,70 @@ export default function GerenciamentoUsersTurmas() {
       document.title = "Gerenciamento - ConselhEXPERT";
     };
   }, []);
+  
 
   return (
     <>
-    <ProtectedRoute>
-      <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-5rem)]">
-        <section className="flex flex-col h-full gap-4 w-full py-8 px-4 lg:w-1/2 ">
-          <div className="flex flex-col gap-6 md:mt-8 md:w-[450px] md:m-auto">
-            <h2 className="px-4 text-3xl font-title font-bold text-accent-foreground">
-              Gerenciar uma turma
-            </h2>
+      <ProtectedRoute>
+        <div className="flex flex-col lg:flex-row gap-6">
+          <section className="flex flex-col h-full gap-4 w-full py-8 lg:px-0 px-4 lg:w-1/2 ">
+            <div className="flex flex-col gap-6 md:mt-8 md:w-[450px] md:m-auto">
+              <h2 className="px-4 text-3xl font-title font-bold text-accent-foreground">
+                Gerenciar uma turma
+              </h2>
 
-            <TurmaFilter
-              className="px-4"
-              loading={true}
-              turmas={turmasArray}
-              setFiltered={setTurmasFiltradas}
-              setSearchQuery={setSearchQuery}
-              searchQuery={searchQuery}
-            />
-          </div>
-
-          <ScrollArea className="w-full h-[600px] mt-5 md:w-[450px] md:m-auto">
-            <div className="grid grid-cols-1 gap-6 px-4">
-              {turmasFiltradas?.map((classItem, index) => (
-                <MedModal
-                  key={index}
-                  courseCode={classItem.codigoTurma}
-                  courseName={classItem.nomeCurso}
-                  onClick={() => open("/gerenciamento/turma", "_self")}
-                  className=""
-                  simple
-                />
-              ))}
+              <SearchBar
+                className="px-4"
+                placeholder="Buscar uma turma"
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                filter
+              />
             </div>
-          </ScrollArea>
-        </section>
 
-        <section className="flex flex-col justify-between gap-4 w-full py-2 lg:py-8 px-4 lg:w-1/2 h-full">
-          <h2 className="px-4 text-2xl font-title font-bold text-accent-foreground">
-            Gerenciar Usuários
-          </h2>
-          <Lista
-            isDialogOpen={isDialogOpen}
-            setIsDialogOpen={setIsDialogOpen}
-            setSearchQuery={setSearchQueryUsuarios}
-            searchQuery={searchQueryUsuarios}
-            className="h-[600px] "
-            tipo="edit"
-            setSelectedContact={() => { }}
-            usuarios={usuariosArray}
-          />
-        </section>
-      </div>
+            <ScrollArea className="w-full h-[600px] mt-5 md:w-[450px] md:m-auto">
+              <div className="grid grid-cols-1 gap-6 px-4">
+                {turmasFiltradas?.map((classItem, index) => (
+                  <MedModal
+                    key={index}
+                    courseCode={classItem.codigoTurma}
+                    courseName={classItem.nomeCurso}
+                    onClick={() => open("/gerenciamento/turma", "_self")}
+                    simple
+                  />
+                ))}
+              </div>
+            </ScrollArea>
+          </section>
+
+          <section className="flex flex-col justify-between gap-4 w-full py-8 lg:py-8 md:px-14 
+            lg:px-0 px-4 lg:w-1/2 h-full md:mb-8">
+            <div className="flex flex-col gap-6 md:mt-8 lg:pr-28">
+              <h2 className="px-4 text-3xl font-title font-bold text-accent-foreground">
+                Gerenciar Usuários
+              </h2>
+              <SearchBar
+                className="px-4"
+                placeholder="Buscar um usuário"
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                filter
+              />
+            </div>
+            <div className="lg:pr-28">
+              <Lista
+                isDialogOpen={isDialogOpen}
+                setIsDialogOpen={setIsDialogOpen}
+                setSearchQuery={setSearchQueryUsuarios}
+                searchQuery={searchQueryUsuarios}
+                tipo="edit"
+                setSelectedContact={() => { }}
+                usuarios={usuariosArray}
+                className="px-4"
+              />
+            </div>
+          </section>
+        </div>
       </ProtectedRoute>
     </>
   );

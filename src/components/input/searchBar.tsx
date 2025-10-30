@@ -21,7 +21,7 @@ export default function SearchBar({
   searchQuery,
   setSearchQuery,
   placeholder = "Pesquisar",
-  filter = false,
+  filter,
   children,
 }: SearchBarParams) {
   return (

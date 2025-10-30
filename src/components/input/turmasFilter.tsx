@@ -37,7 +37,6 @@ export default function TurmaFilter({
 
   useEffect(() => {
     setFiltered(filteredMedModals!);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
 
   return (

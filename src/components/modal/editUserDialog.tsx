@@ -1,4 +1,4 @@
-import { Usuario } from "../lista";
+import { Usuario } from "../../utils/types";
 import { Input } from "../ui/input";
 import ActionModal from "./actionModal";
 import { useEffect, useState } from "react";
