@@ -1,27 +1,20 @@
 import api from "@/utils/axios";
-import { Conselho, Usuario } from "@/utils/types";
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { useEffect, useState } from "react";
-import { TextClickCopy } from "./textcopy";
-import { cn } from "@/lib/utils";
-import { FaStar } from "react-icons/fa6";
-import { Checkbox } from "@radix-ui/react-checkbox";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, Label } from "@radix-ui/react-dropdown-menu";
 import ButtonTT from "./button/ButtonTT";
-import { Icon } from "./button/smallButton";
 import ActionModal from "./modal/actionModal";
-import EditUserDialog from "./modal/editUserDialog";
 import { Textarea } from "./ui/textarea";
 import UserInfo from "./userInfo";
 import UserActions from "./userActions";
 import UserCheckbox from "./usercheckbox";
+import { Conselho, Usuario } from "@/utils/types";
+import { UserConselho } from "./userConselho";
+import AddButton from "./button/addButton";
 
 interface ListCellProps {
     usuario?: Usuario;
     usuarioProfessor?: Usuario;
     copy?: boolean;
     children?: React.ReactNode;
-    selected?: boolean;
     toggleSelected: (id: number | undefined) => void;
     tipo: "checkbox"
     | "edit"
@@ -32,7 +25,7 @@ interface ListCellProps {
     | "limpa";
     onClick?: () => void;
     loading?: boolean;
-    removeUser?: () => void;
+    removeUser: () => void;
     isUserAlreadySelected?: boolean;
     isStarred?: boolean;
     onStarClick?: () => void;
@@ -64,15 +57,10 @@ export function ListCell({
     usuario: user,
     usuarioProfessor,
     copy,
-    selected,
     toggleSelected,
     tipo,
-    onClick,
-    loading,
     removeUser,
     isUserAlreadySelected,
-    isStarred,
-    onStarClick,
     conselho,
     isDialogOpen,
     setIsDialogOpen,
@@ -111,18 +99,18 @@ export function ListCell({
         }
     }, [user]);
 
-    if (loading) {
+    /*if (loading) {
         return (
             <li className="h-[60px] flex items-center justify-between py-2 px-3 rounded-md shadow-sm bg-card/70 animate-pulse mb-2 last:mb-0"></li>
         );
-    }
+    }*/
 
     return (
         <li
             key={usuario?.id}
             className={`flex items-center justify-between py-2 px-3 rounded-md shadow bg-card mb-2 last:mb-0 
           ${tipo === "edit" ? "cursor-pointer" : ""}`}
-            onClick={(e) => {
+            onClick={(e) => {/*
                 if (tipo === "edit") {
                     if (isAnyDialogOpen) return;
                     e.stopPropagation();
@@ -137,7 +125,7 @@ export function ListCell({
                     if (onClick) onClick();
                     toggleSelected(usuario?.id);
                 }
-            }}
+            */}}
         >
             <UserInfo nome={usuario?.nome} email={usuario?.email} copy={copy} />
 
@@ -155,61 +143,28 @@ export function ListCell({
             )}
 
             {tipo === "checkbox" && <UserCheckbox usuario={usuario} toggleSelected={toggleSelected} />}
-
-            {tipo === "add" && !isUserAlreadySelected && (
-                <ButtonTT
-                    tooltip="Adicionar"
-                    variant="ghost"
-                    icon="Plus"
-                    mode="small"
-                    className="text-secondary"
-                    onClick={() => setIsDialogOpen(true)}
+            
+            {tipo === "conselho" && campoForm && (
+                <UserConselho
+                    campoForm={campoForm}
+                    setCampoForm={setCampoForm}
+                    setIsDialogOpen={setIsDialogOpen}
+                    setIsFormModalOpen={setIsFormModalOpen}
+                    isFormModalOpen
+                    usuario={usuario}
+                    conselho={conselho!}
+                    usuarioProfessor={usuarioProfessor}
                 />
             )}
 
-            {tipo === "star" && usuario?.role === "aluno" && (
-                <div className="flex items-center space-x-2">
-                    <ButtonTT
-                        tooltip={
-                            isStarred ? "Remover representante" : "Promover a representante"
-                        }
-                        className="text-primary"
-                        variant="ghost"
-                        icon="Star"
-                        filled={isStarred}
-                        mode="small"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            if (onStarClick) onStarClick();
-                        }}
-                    />
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <div>
-                                <ButtonTT
-                                    tooltip="Remover da turma"
-                                    mode="small"
-                                    variant="ghost"
-                                    icon="MoreVertical"
-                                />
-                            </div>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="cursor-pointer text-destructive">
-                                <Icon icon="BiSolidTrashAlt" /> Remover da turma
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    <EditUserDialog
-                        usuario={usuario!}
-                        setUsuario={setUsuario}
-                        isOpen={isDialogOpen}
-                        setOpen={setIsDialogOpen}
-                    />
-                </div>
+            {tipo === "add" && (
+                <AddButton 
+                    isUserAlreadySelected={isUserAlreadySelected}
+                    onOpen={() => isDialogOpen}
+                />
             )}
 
-            {tipo === "excluir" && usuario?.role === "aluno" && (
+            {/*tipo === "excluir" && usuario?.role === "aluno" && (
                 <div className="flex items-center space-x-2">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -235,8 +190,8 @@ export function ListCell({
                         setOpen={setIsDialogOpen}
                     />
                 </div>
-            )}
-            {tipo === "conselho" && campoForm && (
+            )*/}
+            {/*tipo === "conselho" && campoForm && (
                 <>
                     <ButtonTT
                         tooltip="Fazer anotação"
@@ -318,7 +273,7 @@ export function ListCell({
                         }
                     />
                 </>
-            )}
+            )*/}
         </li>
     );
 }

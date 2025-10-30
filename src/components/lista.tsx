@@ -74,7 +74,6 @@ export default function Lista({
         {(tipo === "excluir") && (
           <ButtonTT
             variant="secondary"
-            onClick={() => console.log("Clicou em adicionar")}
             tooltip="Adicionar usuário"
             mode="default"
           >
@@ -91,8 +90,6 @@ export default function Lista({
                 key={index}
                 usuario={usuario}
                 conselho={conselho!}
-                selected={selectedUsuario?.id === usuario.id}
-                onClick={() => props.setSelectedContact(usuario)}
                 toggleSelected={() => toggleUsuario(usuario)}
                 tipo={tipo}
                 isUserAlreadySelected={selectedUsers?.some(

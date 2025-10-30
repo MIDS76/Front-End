@@ -13,7 +13,7 @@ interface UserActionsProps {
   setEditingUser: React.Dispatch<React.SetStateAction<Usuario>>;
   isConfirmOpen: boolean;
   setIsConfirmOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  removeUser: (usuarioId: number) => void;
+  removeUser: () => void;
 }
 
 const UserActions = ({
@@ -77,7 +77,7 @@ const UserActions = ({
       actionButtonLabel="Excluir"
       destructive
       onConfirm={() => {
-        removeUser(usuario.id);
+        removeUser
       }}
     />
   </div>
