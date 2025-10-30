@@ -8,22 +8,17 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import TextField from "@/components/input/textField";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import usuarios from "@/data/usuarios.json";
 
 export default function GereciarTurma() {
-  const allUsers: Usuario[] = Array.from({ length: 12 }, (_, index) => ({
-    id: index + 1,
-    nome: `Usuário ${index + 1}`,
-    email: `usuario${index + 1}@email.com`,
-    role: "aluno",
-  }));
+  const usuariosArray = Object.values(usuarios);
 
   const [userFilter, setUserFilter] = useState("Alunos");
   const [selectedUsers, setSelectedUsers] = useState<Usuario[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const filteredUsers = allUsers.filter((user) =>
-    userFilter === "Alunos" ? user.id % 2 === 0 : user.id % 2 !== 0
-  );
+  const professores = usuariosArray.filter((user) => user.role === "Professor");
+  const alunos = usuariosArray.filter((user) => user.role === "Aluno");
 
   const selectUser = (user: Usuario) => {
     setSelectedUsers((prev) =>
@@ -37,6 +32,8 @@ export default function GereciarTurma() {
     document.title = "Gerenciando Turma - ConselhEXPERT";
   }, []);
 
+  const filteredUsers = userFilter === "Alunos" ? alunos : professores;
+
   return (
     <ProtectedRoute>
     <div className="p-6">
@@ -49,7 +46,7 @@ export default function GereciarTurma() {
             <div className="bg-muted rounded-lg mb-4 p-4">
               <h3 className="font-medium text-card-foreground">Resumo</h3>
               <p className="text-sm text-muted-foreground">
-                Professores: <b>5</b>, Alunos: <b>15</b>
+                Professores: <b>{professores.length}</b>, Alunos: <b>{alunos.length}</b>
               </p>
             </div>
             <div className="mb-4">

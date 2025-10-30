@@ -11,6 +11,7 @@ export default function AddButton({ isUserAlreadySelected, onOpen, className }: 
   if (isUserAlreadySelected) return null;
 
   return (
+
     <ButtonTT
       tooltip="Adicionar"
       variant="ghost"

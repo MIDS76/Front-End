@@ -83,9 +83,15 @@ export function ListCell({
             key={usuario?.id}
             className={`flex items-center justify-between py-2 px-3 rounded-md shadow bg-card mb-2 last:mb-0 
           ${tipo === "edit" ? "cursor-pointer" : ""}`}
-            onClick={(e) => {}}
+            onClick={(e) => { }}
         >
-            <UserInfo nome={usuario?.nome} email={usuario?.email} copy={copy} />
+            <div className="flex flex-row items-center w-full">
+                <UserInfo nome={usuario?.nome} email={usuario?.email} copy={copy} />
+
+                <div className="text-sm text-muted-foreground inline-block">
+                    <p>{(usuario?.role ?? "").toLocaleUpperCase()}</p>
+                </div>
+            </div>
 
             {tipo === "edit" && (
                 <UserActions
@@ -101,7 +107,7 @@ export function ListCell({
             )}
 
             {tipo === "checkbox" && <UserCheckbox usuario={usuario} toggleSelected={toggleSelected} />}
-            
+
             {tipo === "conselho" && campoForm && (
                 <UserConselho
                     campoForm={campoForm}
@@ -116,9 +122,9 @@ export function ListCell({
             )}
 
             {tipo === "add" && (
-                <AddButton 
+                <AddButton
                     isUserAlreadySelected={isUserAlreadySelected}
-                        onOpen={() => toggleSelected(usuario?.id)}
+                    onOpen={() => toggleSelected(usuario?.id)}
                 />
             )}
         </li>

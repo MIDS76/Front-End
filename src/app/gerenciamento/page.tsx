@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { useEffect } from "react";
 import { Usuario, Turma } from "@/utils/types";
 import MedModal from "@/components/modal/medModal";
-import TurmaFilter from "@/components/input/turmasFilter";
 import Lista from "@/components/lista";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import turmas from "@/data/turma.json";
