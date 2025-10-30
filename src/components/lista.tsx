@@ -45,7 +45,8 @@ export default function Lista({
   const [filteredUsers, setFilteredUsers] = useState<Usuario[]>();
 
   const toggleUsuario = (usuario: Usuario) => {
-    setSelectedUsuario((prev) => (prev?.id === usuario.id ? null : usuario));
+    props.setSelectedContact(usuario);
+    setSelectedUsuario(usuario);
   };
 
   const [searchQuery, setSearchQuery] = useState("");

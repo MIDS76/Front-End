@@ -2,9 +2,24 @@ import ActionModal from "@/components/modal/actionModal";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Conselho, Usuario } from "@/utils/types";
-import { CampoConselho } from "./listcell";
 import ButtonTT from "./button/ButtonTT";
 
+export interface CampoConselho {
+    id: number;
+    pontosFortes: string;
+    oportunidadesMelhoria: string;
+    sugestoes: string;
+    conselho: {
+        id: number;
+    };
+    usuario: {
+        id: number;
+    };
+    professor?: {
+        id: number;
+    };
+    unidadeCurricular?: string;
+}
 
 interface UserConselhoProps {
     campoForm: CampoConselho | null;

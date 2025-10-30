@@ -77,8 +77,9 @@ const UserActions = ({
       actionButtonLabel="Excluir"
       destructive
       onConfirm={() => {
-        removeUser
-      }}
+          removeUser();
+          setIsConfirmOpen(false);
+        }}
     />
   </div>
 );

@@ -1,13 +1,9 @@
-import api from "@/utils/axios";
 import { useEffect, useState } from "react";
-import ButtonTT from "./button/ButtonTT";
-import ActionModal from "./modal/actionModal";
-import { Textarea } from "./ui/textarea";
 import UserInfo from "./userInfo";
 import UserActions from "./userActions";
 import UserCheckbox from "./usercheckbox";
 import { Conselho, Usuario } from "@/utils/types";
-import { UserConselho } from "./userConselho";
+import { CampoConselho, UserConselho } from "./userConselho";
 import AddButton from "./button/addButton";
 
 interface ListCellProps {
@@ -34,23 +30,6 @@ interface ListCellProps {
     isDialogOpen: boolean;
     setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
     setEditingUser: React.Dispatch<React.SetStateAction<Usuario>>;
-}
-
-export interface CampoConselho {
-    id: number;
-    pontosFortes: string;
-    oportunidadesMelhoria: string;
-    sugestoes: string;
-    conselho: {
-        id: number;
-    };
-    usuario: {
-        id: number;
-    };
-    professor?: {
-        id: number;
-    };
-    unidadeCurricular?: string;
 }
 
 export function ListCell({
@@ -99,33 +78,12 @@ export function ListCell({
         }
     }, [user]);
 
-    /*if (loading) {
-        return (
-            <li className="h-[60px] flex items-center justify-between py-2 px-3 rounded-md shadow-sm bg-card/70 animate-pulse mb-2 last:mb-0"></li>
-        );
-    }*/
-
     return (
         <li
             key={usuario?.id}
             className={`flex items-center justify-between py-2 px-3 rounded-md shadow bg-card mb-2 last:mb-0 
           ${tipo === "edit" ? "cursor-pointer" : ""}`}
-            onClick={(e) => {/*
-                if (tipo === "edit") {
-                    if (isAnyDialogOpen) return;
-                    e.stopPropagation();
-                    setIsDialogOpen(false);
-                    setIsDropDownOpen(false);
-
-                    setTimeout(() => {
-                        setEditingUser(usuario);
-                        setIsDialogOpen(true);
-                    }, 100);
-                } else {
-                    if (onClick) onClick();
-                    toggleSelected(usuario?.id);
-                }
-            */}}
+            onClick={(e) => {}}
         >
             <UserInfo nome={usuario?.nome} email={usuario?.email} copy={copy} />
 
@@ -160,120 +118,9 @@ export function ListCell({
             {tipo === "add" && (
                 <AddButton 
                     isUserAlreadySelected={isUserAlreadySelected}
-                    onOpen={() => isDialogOpen}
+                        onOpen={() => toggleSelected(usuario?.id)}
                 />
             )}
-
-            {/*tipo === "excluir" && usuario?.role === "aluno" && (
-                <div className="flex items-center space-x-2">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <div>
-                                <ButtonTT
-                                    tooltip="Remover da turma"
-                                    mode="small"
-                                    variant="ghost"
-                                    icon="MoreVertical"
-                                />
-                            </div>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="cursor-pointer text-destructive">
-                                <Icon icon="BiSolidTrashAlt" /> Remover da turma
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    <EditUserDialog
-                        usuario={usuario!}
-                        setUsuario={setUsuario}
-                        isOpen={isDialogOpen}
-                        setOpen={setIsDialogOpen}
-                    />
-                </div>
-            )*/}
-            {/*tipo === "conselho" && campoForm && (
-                <>
-                    <ButtonTT
-                        tooltip="Fazer anotação"
-                        variant="ghost"
-                        icon="MdEditSquare"
-                        mode="small"
-                        className="text-secondary scale-75"
-                        onClick={() => {
-                            setIsFormModalOpen(true);
-                            setIsDialogOpen(true);
-                        }}
-                    />
-                    <ActionModal
-                        customPosition={!usuarioProfessor}
-                        removeBg
-                        isOpen={isFormModalOpen}
-                        setOpen={setIsFormModalOpen}
-                        title={usuario.nome}
-                        description={usuario.email}
-                        actionButtonLabel="Salvar"
-                        onConfirm={() => {
-                            const campo: CampoConselho = {
-                                id: campoForm?.id,
-                                pontosFortes: !campoForm.pontosFortes
-                                    ? " "
-                                    : campoForm.pontosFortes.trim(),
-                                oportunidadesMelhoria: !campoForm.oportunidadesMelhoria
-                                    ? " "
-                                    : campoForm.oportunidadesMelhoria.trim(),
-                                sugestoes: !campoForm.sugestoes
-                                    ? " "
-                                    : campoForm.sugestoes.trim(),
-                                conselho: { id: conselho?.id ?? 0 },
-                                usuario: { id: usuario?.id ?? 0 },
-                            };
-
-                            if (usuarioProfessor) {
-                                campo.professor = { id: usuarioProfessor?.id ?? 0 };
-                                campo.unidadeCurricular = "java";
-                                api.post(`formularios/criar/professor`, campo).then(() => { });
-                            } else {
-                                api.post(`formularios/criar/usuario`, campo).then(() => { });
-                            }
-                        }}
-                        onClose={() => setIsDialogOpen(false)}
-                        conteudo={
-                            <div className="flex flex-col gap-4">
-                                <Label>Insira os pontos fortes</Label>
-                                <Textarea
-                                    className="max-h-[200px]"
-                                    placeholder={"Insira os pontos fortes"}
-                                    value={campoForm.pontosFortes}
-                                    onChange={(e) =>
-                                        setCampoForm({ ...campoForm, pontosFortes: e.target.value })
-                                    }
-                                />
-                                <Label>Insira as oportunidades de melhoria</Label>
-                                <Textarea
-                                    className="max-h-[200px]"
-                                    placeholder={"Insira as oportunidades de melhoria"}
-                                    value={campoForm.oportunidadesMelhoria}
-                                    onChange={(e) =>
-                                        setCampoForm({
-                                            ...campoForm,
-                                            oportunidadesMelhoria: e.target.value,
-                                        })
-                                    }
-                                />
-                                <Label>Insira as sugestões</Label>
-                                <Textarea
-                                    className="max-h-[200px]"
-                                    placeholder={"Insira as sugestões"}
-                                    value={campoForm.sugestoes}
-                                    onChange={(e) =>
-                                        setCampoForm({ ...campoForm, sugestoes: e.target.value })
-                                    }
-                                />
-                            </div>
-                        }
-                    />
-                </>
-            )*/}
         </li>
     );
 }
