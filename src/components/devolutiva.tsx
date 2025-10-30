@@ -94,7 +94,7 @@ const instituicao = [
 ];
 
 
-export default function Devolutiva() {
+export default function DevolutivaAluno() {
 
   return (
     <div className="w-full px-4">

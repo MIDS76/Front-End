@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 import MedModal from "@/components/modal/medModal";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { SlidersHorizontal } from "lucide-react";
 import FiltrosPesquisa from "@/components/modal/FiltrosPesquisa";
+import BackgroundDevolutiva from "@/components/ui/background-devolutiva";
 
 interface Feedback {
   pontosFortes: string;
@@ -73,7 +75,6 @@ const conselhos: Conselho[] = [
   },
 ];
 
-
 interface DevolutivaAlunoProps {
   isOpen: boolean;
   onClose: () => void;
@@ -81,17 +82,23 @@ interface DevolutivaAlunoProps {
   periodo?: string;
 }
 
-function DevolutivaAluno({ isOpen, onClose, feedback, periodo }: DevolutivaAlunoProps) {
+function DevolutivaAluno({
+  isOpen,
+  onClose,
+  feedback,
+  periodo,
+}: DevolutivaAlunoProps) {
   return (
     <aside
-  className={cn(
-    "fixed top-0 right-0 z-10 flex flex-col w-full lg:w-[480px] h-full",
-    "transform transition-transform duration-300 ease-in-out border-l shadow-lg bg-card", // bg-card igual ao modal
-    isOpen ? "translate-x-0" : "translate-x-full"
-  )}
->
-      <Card className="h-full border-t-0">
-        <CardHeader className="flex flex-col items-start justify-between">
+      className={cn(
+        // 🔥 aside fixo na lateral, abaixo do header
+        "fixed top-[5rem] right-0 z-10 flex flex-col w-full lg:w-[480px] h-[calc(100vh-5rem)] p-6",
+        "transform transition-transform duration-300 ease-in-out",
+        isOpen ? "translate-x-0" : "translate-x-full"
+      )}
+    >
+      <Card className="h-full border-t-0 shadow-md bg-white">
+        <CardHeader className="flex flex-col items-start justify-between relative">
           <CardTitle className="font-title text-accent-foreground text-lg mb-1">
             Conselho Publicado
           </CardTitle>
@@ -99,6 +106,7 @@ function DevolutivaAluno({ isOpen, onClose, feedback, periodo }: DevolutivaAluno
             {periodo || "Período não informado"}
           </span>
           <ButtonTT
+            className="absolute top-8 right-12"
             variant="ghost"
             mode="small"
             onClick={onClose}
@@ -116,15 +124,27 @@ function DevolutivaAluno({ isOpen, onClose, feedback, periodo }: DevolutivaAluno
             <div className="grid gap-4">
               <div>
                 <Label>Pontos Fortes</Label>
-                <Textarea value={feedback.pontosFortes} readOnly className="resize-none" />
+                <Textarea
+                  value={feedback.pontosFortes}
+                  readOnly
+                  className="resize-none"
+                />
               </div>
               <div>
                 <Label>Oportunidades de Melhoria</Label>
-                <Textarea value={feedback.oportunidades} readOnly className="resize-none" />
+                <Textarea
+                  value={feedback.oportunidades}
+                  readOnly
+                  className="resize-none"
+                />
               </div>
               <div>
                 <Label>Sugestões</Label>
-                <Textarea value={feedback.sugestoes} readOnly className="resize-none" />
+                <Textarea
+                  value={feedback.sugestoes}
+                  readOnly
+                  className="resize-none"
+                />
               </div>
             </div>
           )}
@@ -145,7 +165,9 @@ export default function AlunoHome() {
   );
 
   if (anoFiltro) {
-    conselhosFiltrados = conselhosFiltrados.filter((c) => c.periodo.includes(anoFiltro));
+    conselhosFiltrados = conselhosFiltrados.filter((c) =>
+      c.periodo.includes(anoFiltro)
+    );
   }
 
   conselhosFiltrados.sort((a, b) => {
@@ -154,12 +176,16 @@ export default function AlunoHome() {
     return ordenacao === "recente" ? anoB - anoA : anoA - anoB;
   });
 
-  const conselhoSelecionado = conselhos.find((c) => c.id === selectedConselho);
+  const conselhoSelecionado = conselhos.find(
+    (c) => c.id === selectedConselho
+  );
 
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-[#f5f5f5]">
       <div className="flex-1 p-8">
-        <h1 className="text-2xl font-semibold mb-4 text-primary">Meus Conselhos</h1>
+        <h1 className="text-2xl font-semibold mb-4 text-primary">
+          Meus Conselhos
+        </h1>
 
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-start gap-2">
           <Input
@@ -198,7 +224,9 @@ export default function AlunoHome() {
                 courseName="Conselho"
                 onClick={() => setSelectedConselho(c.id)}
                 className={`transition-transform hover:scale-[1.02] cursor-pointer ${
-                  selectedConselho === c.id ? "ring-2 ring-primary scale-[1.02]" : ""
+                  selectedConselho === c.id
+                    ? "ring-2 ring-primary scale-[1.02]"
+                    : ""
                 }`}
               >
                 <div className="text-muted-foreground text-right">
@@ -207,27 +235,22 @@ export default function AlunoHome() {
               </MedModal>
             ))
           ) : (
-          <div className="display: block; margin-left: auto; margin-right: auto;">
-            Nenhum conselho encontrado!
-          </div>
-        
-       
-        
-
-
+            <div className="text-center text-muted-foreground mt-6">
+              Nenhum conselho encontrado!
+            </div>
           )}
         </div>
       </div>
 
-      <div className="w-full lg:w-[480px] p-6">
+      {/* Painel lateral fixo */}
+      <BackgroundDevolutiva>
         <DevolutivaAluno
           isOpen={selectedConselho !== null}
           onClose={() => setSelectedConselho(null)}
           feedback={conselhoSelecionado?.feedback ?? null}
           periodo={conselhoSelecionado?.periodo}
         />
-      </div>
+      </BackgroundDevolutiva>
     </div>
   );
-
-          }
+}
