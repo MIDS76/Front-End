@@ -24,7 +24,7 @@ export default function Header({ login = false, className }: HeaderProps) {
       <Link href="/" className="mr-6 flex items-center gap-2 sm:gap-4" prefetch>
         <Logo size={48} fill="fill-accent-foreground" />
         <h1 className="hidden sm:block sm:text-3xl text-accent-foreground font-title font-bold">
-          Portal do Conselho
+          ConselhEXPERT
         </h1>
       </Link>
 
