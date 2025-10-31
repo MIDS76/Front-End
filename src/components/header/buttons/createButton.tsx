@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import ButtonTT from "../button/ButtonTT";
+import ButtonTT from "../../button/ButtonTT";
 import { BsFillPeopleFill } from "react-icons/bs";
 import { FaUserPlus } from "react-icons/fa";
 import { IoDocumentText } from "react-icons/io5";
@@ -11,8 +11,8 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import NovoUserModal from "../modal/novoUserModal";
+} from "../../ui/dropdown-menu";
+import NovoUserModal from "../../modal/novoUserModal";
 import { MdManageAccounts } from "react-icons/md";
 
 export default function CreateButton() {

@@ -19,6 +19,10 @@
   box-shadow: none !important;
 }
 
+.font-text {
+  font-family: var(--font-text);
+}
+
 :root {
   --background: 0 0% 94.51%;
   --foreground: 184 5% 10%;

@@ -7,14 +7,17 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 interface CampoTextoProps {
+
   name?: string;
   label: string;
   placeholder: string;
   type: string;
-  id: string;
+  id?: string;
   className?: string;
   value?: string;
   editavel?: boolean;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void; // new add
+  required?: boolean;// new add
 }
 
 export default function TextField({
@@ -32,7 +35,7 @@ export default function TextField({
   return (
     <div className="flex flex-col gap-2 ">
       <Label
-        className={className + " whitespace-nowrap flex items-center"}
+        className={className + " whitespace-nowrap flex items-center font-semibold"}
         htmlFor={id}
       >
         {label}

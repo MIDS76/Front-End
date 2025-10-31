@@ -15,7 +15,7 @@ import SmallButton, { Icon, SmallButtonProps } from "./smallButton";
 
 export interface ButtonTTProps extends ButtonProps {
   mode?: "micro" | "small" | "default" | "text-icon";
-  tooltip: string;
+  tooltip?: string;
   children?: React.ReactNode;
   iconSide?: "left" | "right";
   className?: string;
