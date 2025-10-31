@@ -22,7 +22,6 @@ export default function FiltrosPesquisa({ onSortChange, onYearChange }: FiltrosP
       </DropdownMenuLabel>
 
       <div className="flex flex-col gap-2 px-2 pb-2">
-        {/* Ordenação */}
         <DropdownMenuGroup>
           <DropdownMenuLabel className="flex flex-row items-center font-medium text-sm text-accent-foreground ml-[-8px]">
             <MdSortByAlpha className="mr-2" size={16} /> Ordenar por
