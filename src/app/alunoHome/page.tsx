@@ -213,7 +213,7 @@ export default function AlunoHome() {
   const conselhoSelecionado = conselhos.find((c) => c.id === selectedConselho);
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen">
+    <div className="flex flex-col lg:flex-row h-screen pt-24">
       {/* ------------------ LISTA DE CONSELHOS ------------------ */}
       <div className="flex-1 p-8">
         {/* Título e filtro */}
