@@ -33,7 +33,7 @@ export default function Login() {
 
     if (success) {
       if (user) {
-        router.push('/' + user.perfil); // Redireciona para a rota baseada no perfil
+        router.push(`/${user.perfil}`);
       }
     } else {
       setError(true);

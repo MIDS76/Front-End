@@ -21,7 +21,7 @@ export default function Header({ login = false, className }: HeaderProps) {
 
   return (
     <header className={cn("flex h-20 py-4 w-full shrink-0 items-center px-4 md:px-8 justify-between", header, className)}>
-      <Link href="/" className="mr-6 flex items-center gap-2 sm:gap-4" prefetch>
+      <Link href={`${userRole}`} className="mr-6 flex items-center gap-2 sm:gap-4" prefetch>
         <Logo size={48} fill="fill-accent-foreground" />
         <h1 className="hidden sm:block sm:text-3xl text-accent-foreground font-title font-bold">
           ConselhEXPERT
