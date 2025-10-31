@@ -65,13 +65,13 @@ export default function MedModal({
         <CardContent
           className={`flex-1 p-4 ${loading ? "bg-muted rounded-lg" : ""}`}
         >
-          <p
+          <div
             className={`text-sm ${
               loading ? "text-muted dark:text-muted" : "text-muted-foreground"
             }`}
           >
             {children}
-          </p>
+          </div>
         </CardContent>
       )}
     </Card>
