@@ -1,105 +1,146 @@
 "use client";
 
+import Header from "@/components/header/header";
 import { useState } from "react";
-import ButtonTT from "@/components/button/ButtonTT";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-export default function PortalDoPreConselho() {
-  const [selectedDate, setSelectedDate] = useState(16); 
+export default function PortalConselho() {
+  const [selectedDate, setSelectedDate] = useState<number | null>(16);
 
-  const getDaysInMonth = (month: number, year: number) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
+  const days = [
+    [25, 26, 27, 28, 1, 2, 3],
+    [4, 5, 6, 7, 8, 9, 10],
+    [11, 12, 13, 14, 15, 16, 17],
+    [18, 19, 20, 21, 22, 23, 24],
+    [25, 26, 27, 28, 29, 30, 1],
+  ];
 
-  const getFirstDayOfMonth = (month: number, year: number) => {
-    return new Date(year, month, 1).getDay();
-  };
+  // exemplo: dias que têm conselho (verde claro)
+  const diasComConselho = [13];
 
-  const renderCalendar = () => {
-    const month = 9; 
-    const year = 2025;
-    const daysInMonth = getDaysInMonth(month, year);
-    const firstDay = getFirstDayOfMonth(month, year);
-    const days = [];
-
-    const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-    const weekDayHeaders = weekDays.map((day, index) => (
-      <div key={`header-${index}`} className="text-xs font-semibold text-gray-600 p-2">
-        {day}
-      </div>
-    ));
-
-    for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="p-2"></div>);
-    }
-
-    for (let i = 1; i <= daysInMonth; i++) {
-      const isSelected = i === selectedDate;
-      const isHighlighted = i === 13; 
-
-      let dayClass = "p-2 text-sm rounded cursor-pointer transition-colors ";
-      if (isSelected) {
-        dayClass += "bg-green-700 text-white font-bold";
-      } else if (isHighlighted) {
-        dayClass += "bg-gray-200 text-gray-700";
-      } else {
-        dayClass += "text-gray-700 hover:bg-gray-100";
-      }
-
-      days.push(
-        <div
-          key={`day-${i}`}
-          className={dayClass}
-          onClick={() => setSelectedDate(i)}
-        >
-          {i}
-        </div>
-      );
-    }
-
-    return [...weekDayHeaders, ...days];
-  };
+  const cards = [
+    { titulo: "Conselho", periodo: "05/2024 até 09/2024", status: "Publicado" },
+    { titulo: "Conselho", periodo: "05/2024 até 09/2024", status: "Publicado" },
+    { titulo: "Conselho", periodo: "05/2024 até 09/2024", status: "Publicado" },
+    { titulo: "Conselho", periodo: "05/2024 até 09/2024", status: "Publicado" },
+    { titulo: "Conselho", periodo: "05/2024 até 09/2024", status: "Publicado" },
+  ];
 
   return (
-    <main className="relative h-screen w-full overflow-hidden bg-white">
-      <div className="h-full flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-4xl ring-4 ring-black ring-opacity-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="flex flex-col justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  Conselho da turma MI 76
-                </h1>
-                <p className="text-lg text-gray-600 mb-6">
-                  05/2025 até 09/2025
-                </p>
-              </div>
-              
-              <ButtonTT
-                mode="default"
-                className=" text-white font-medium py-3 px-6 self-start"
-              >
-                Próximo passo &gt;
-              </ButtonTT>
-            </div>
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+    
 
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
-                Selecione a data do Conselho
-              </h2>
-              
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="text-center font-semibold text-gray-800 mb-4">
-                  Outubro 2025
+      <main className="p-6 md:p-8 flex gap-6 md:gap-8">
+        {/* Left column - Disponibilidades */}
+        <section className="flex-1 max-w-[640px] bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="bg-[#225B5C] text-white text-lg font-semibold py-3 px-6">
+            Disponibilidades [...]
+          </div>
+
+          <div className="p-5 bg-[#E6F0F0] min-h-[420px]">
+            <div className="grid grid-cols-2 gap-4">
+              {cards.map((c, idx) => (
+                <div
+                  key={idx}
+                  className="bg-[#38A7A8] rounded-md shadow-md overflow-hidden w-full"
+                >
+                  <div className="p-3 text-white">
+                    <div className="text-xs">Conselho</div>
+                    <div className="text-sm font-semibold mt-1">{c.periodo}</div>
+                  </div>
+
+                  <div className="bg-white px-3 py-2 text-xs text-gray-700 flex justify-between items-center">
+                    <span className="font-semibold text-xs">Status:</span>
+                    <span className="text-xs">{c.status}</span>
+                  </div>
                 </div>
-                
-                <div className="grid grid-cols-7 gap-1">
-                  {renderCalendar()}
-                </div>
-              </div>
+              ))}
             </div>
           </div>
-        </div>
-      </div>
-    </main>
+        </section>
+
+        {/* Right column - Calendário */}
+        <section className="flex-[1] bg-white rounded-lg shadow-md overflow-hidden relative">
+          <div className="bg-[#225B5C] text-white text-lg font-semibold py-3 px-6 text-center">
+            Selecione a data do Conselho
+          </div>
+
+          {/* month header */}
+          <div className="px-6 py-3 border-b flex items-center justify-between">
+            <button className="p-2 text-gray-700 hover:text-[#225B5C]">
+              <ChevronLeft />
+            </button>
+            <div className="text-sm font-semibold text-gray-800">ABRIL 2025</div>
+            <button className="p-2 text-gray-700 hover:text-[#225B5C]">
+              <ChevronRight />
+            </button>
+          </div>
+
+          {/* calendar body */}
+          <div className="p-6">
+            <div className="grid grid-cols-7 text-center font-semibold text-gray-600 mb-3 text-xs">
+              <div>DOM</div>
+              <div>SEG</div>
+              <div>TER</div>
+              <div>QUA</div>
+              <div>QUI</div>
+              <div>SEX</div>
+              <div>SAB</div>
+            </div>
+
+            {/* grid with fixed row heights so the cells align nicely */}
+            <div className="grid grid-cols-7 gap-3">
+              {days.flat().map((day, i) => {
+                const isConselho = diasComConselho.includes(day);
+                const isSelected = selectedDate === day;
+
+                // estilos diferenciados:
+                // - selecionado: bloco maior, verde escuro, número em branco
+                // - conselho: bloco verde claro (retângulo)
+                // - padrão: número pequeno
+                return (
+                  <div
+                    key={i}
+                    className="flex justify-center items-start h-16"
+                    // wrapper para manter célula alinhada
+                  >
+                    {isSelected ? (
+                      <button
+                        onClick={() => setSelectedDate(day)}
+                        className="bg-[#225B5C] text-white rounded-lg px-4 py-2 shadow-md w-16 h-12 flex items-center justify-center text-sm font-semibold"
+                      >
+                        {day}
+                      </button>
+                    ) : isConselho ? (
+                      <button
+                        onClick={() => setSelectedDate(day)}
+                        className="bg-[#C8DFDD] text-gray-800 rounded-lg px-4 py-2 w-16 h-12 flex items-center justify-center text-sm font-semibold border border-[#BFD6D3]"
+                      >
+                        {day}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setSelectedDate(day)}
+                        className="text-sm text-gray-700 hover:bg-gray-100 rounded-md w-8 h-8 flex items-center justify-center"
+                      >
+                        {day}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Next button bottom-right (like design) */}
+          <div className="absolute right-6 bottom-6">
+            <Button className="bg-[#225B5C] text-white hover:bg-[#1c4d4e] px-4 py-2 rounded-md">
+              Próximo passo →
+            </Button>
+          </div>
+        </section>
+      </main>
+    </div>
   );
 }
