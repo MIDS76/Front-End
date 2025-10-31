@@ -3,12 +3,13 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-type Perfil = "Aluno" | "pedagogico" | "admin";
+type Perfil = "aluno" | "pedagogico" | "admin";
 
 interface User {
   nome: string;
   email: string;
   perfil: Perfil;
+
   token: string;
 }
 
@@ -38,9 +39,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     const fakeUsers = [
-      { email: "aluno@email.com", password: "aluno123", perfil: "Aluno" },
-      { email: "pedagogico@email.com", password: "pedagogico123", perfil: "pedagogico" },
-      { email: "admin@email.com", password: "admin123", perfil: "admin" },
+      { email: "aluno@email.com", password: "aluno123", perfil: "aluno"},
+      { email: "pedagogico@email.com", password: "pedagogico123", perfil: "pedagogico"},
+      { email: "admin@email.com", password: "admin123", perfil: "admin"},
     ];
 
     const found = fakeUsers.find(
