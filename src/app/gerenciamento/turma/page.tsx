@@ -17,7 +17,6 @@ export default function GereciarTurma() {
   const [selectedUsers, setSelectedUsers] = useState<Usuario[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const professores = usuariosArray.filter((user) => user.role === "Professor");
   const alunos = usuariosArray.filter((user) => user.role === "Aluno");
 
   const selectUser = (user: Usuario) => {
@@ -32,8 +31,6 @@ export default function GereciarTurma() {
     document.title = "Gerenciando Turma - ConselhEXPERT";
   }, []);
 
-  const filteredUsers = userFilter === "Alunos" ? alunos : professores;
-
   return (
     <ProtectedRoute>
     <div className="p-6">
@@ -46,7 +43,7 @@ export default function GereciarTurma() {
             <div className="bg-muted rounded-lg mb-4 p-4">
               <h3 className="font-medium text-card-foreground">Resumo</h3>
               <p className="text-sm text-muted-foreground">
-                Professores: <b>{professores.length}</b>, Alunos: <b>{alunos.length}</b>
+                 Alunos Ativos: <b>{alunos.length}</b>
               </p>
             </div>
             <div className="mb-4">
@@ -93,7 +90,7 @@ export default function GereciarTurma() {
 
         <div className="w-full md:w-3/5 px-4 mt-8">
           <div className="flex mb-4 ml-4 rounded-md overflow-hidden">
-            <button
+            {/*<button
               className={`py-2 px-4 text-center ${
                 userFilter === "Alunos"
                   ? "bg-primary text-card dark:text-card-foreground"
@@ -112,7 +109,7 @@ export default function GereciarTurma() {
               onClick={() => setUserFilter("Professores")}
             >
               Professores
-            </button>
+            </button>*/}
           </div>
 
           <h2 className="ml-4 text-2xl font-semibold mb-4 text-card-foreground">
@@ -122,7 +119,7 @@ export default function GereciarTurma() {
           <Lista
             isDialogOpen={isDialogOpen}
             setIsDialogOpen={setIsDialogOpen}
-            usuarios={filteredUsers}
+            usuarios={alunos}
             setSelectedContact={selectUser}
             tipo={userFilter === "Alunos" ? "edit" : "excluir"}
             selectedUsers={selectedUsers}
