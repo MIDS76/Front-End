@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import ActionModal from "@/components/modal/actionModal";
@@ -9,80 +9,23 @@ import { toast } from "sonner";
 
 type CampoFormulario = {
   titulo: string;
-  descricao: string;
   positivos: string;
   melhoria: string;
   sugestoes: string;
 };
 
 const avaliacaoAlunos: CampoFormulario[] = [
-  {
-    titulo: "Aluno 1",
-    descricao:
-      "Avalie o desempenho, postura e evolução do aluno, destacando pontos positivos, aspectos a melhorar e sugestões para o desenvolvimento individual.",
-    positivos: "",
-    melhoria: "",
-    sugestoes: "",
-  },
-  {
-    titulo: "Aluno 2",
-    descricao:
-      "Avalie o desempenho, postura e evolução do aluno, destacando pontos positivos, aspectos a melhorar e sugestões para o desenvolvimento individual.",
-    positivos: "",
-    melhoria: "",
-    sugestoes: "",
-  },
-  {
-    titulo: "Aluno 3",
-    descricao:
-      "Avalie o desempenho, postura e evolução do aluno, destacando pontos positivos, aspectos a melhorar e sugestões para o desenvolvimento individual.",
-    positivos: "",
-    melhoria: "",
-    sugestoes: "",
-  },
-  {
-    titulo: "Aluno 4",
-    descricao:
-      "Avalie o desempenho, postura e evolução do aluno, destacando pontos positivos, aspectos a melhorar e sugestões para o desenvolvimento individual.",
-    positivos: "",
-    melhoria: "",
-    sugestoes: "",
-  },
+  { titulo: "Aluno 1", positivos: "", melhoria: "", sugestoes: "" },
+  { titulo: "Aluno 2", positivos: "", melhoria: "", sugestoes: "" },
+  { titulo: "Aluno 3", positivos: "", melhoria: "", sugestoes: "" },
+  { titulo: "Aluno 4", positivos: "", melhoria: "", sugestoes: "" },
 ];
-
-const colorMap: Record<string, string> = {
-  green: "#2B5E64",
-  blue: "#2B3347",
-  purple: "#462772",
-  pink: "#8D2065",
-  orange: "#825A2C",
-};
 
 export default function ConselhoCoordenacao() {
   const [formulario, setFormulario] = useState<CampoFormulario[]>(avaliacaoAlunos);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [pagina, setPagina] = useState(0);
-  const [primaryColor, setPrimaryColor] = useState<string>("green"); 
-
-  useEffect(() => {
-    const savedColor = localStorage.getItem("primaryColor");
-    if (savedColor && colorMap[savedColor]) {
-      setPrimaryColor(savedColor);
-    }
-
-    const handleColorChange = (event: Event) => {
-      const newColor = (event as CustomEvent).detail;
-      if (colorMap[newColor]) {
-        setPrimaryColor(newColor);
-      }
-    };
-
-    window.addEventListener("primaryColorChange", handleColorChange);
-
-    return () => {
-      window.removeEventListener("primaryColorChange", handleColorChange);
-    };
-  }, []);
+  const [searchQueryUsuarios, setSearchQueryUsuarios] = useState("");
 
   const handleChange = (campo: keyof CampoFormulario, valor: string) => {
     const novoFormulario = [...formulario];
@@ -98,104 +41,102 @@ export default function ConselhoCoordenacao() {
   const secaoAtual = formulario[pagina];
 
   return (
-    <div className="w-full h-screen flex flex-col justify-center items-center px-8 transition-all duration-300">
-      <div className="flex flex-col lg:flex-row gap-8 items-start">
-        <div
-          style={{ backgroundColor: colorMap[primaryColor] }}
-          className="rounded-lg shadow p-6 w-full lg:w-[650px] flex flex-col gap-6 transition-colors duration-300"
-        >
-          <h2 className="text-2xl text-white font-h1">
-            JGS - AI MIDS76 2024/1 INT1
-          </h2>
-          <h2 className="text-2xl text-white font-h1">WEG MI76</h2>
+    <div className="w-full h-screen flex flex-col items-center px-8 py-8">
+      <div className="flex w-full justify-center gap-8">
+        <div className="flex flex-col w-full max-w-[650px] gap-2">
+          <div className="rounded-lg shadow p-4 w-full bg-[#2B5E64] flex flex-col gap-1">
+            <h2 className="text-lg text-white font-semibold">JGS - AI MIDS 2024/1 INT1</h2>
+            <h2 className="text-lg text-white font-semibold">WEG - MI 76</h2>
+          </div>
+
+          <input
+            type="text"
+            placeholder="Buscar um usuário"
+            value={searchQueryUsuarios}
+            onChange={(e) => setSearchQueryUsuarios(e.target.value)}
+            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#71A151]"
+          />
+
+          <div className="bg-gray-100 rounded-md shadow-inner w-full h-[420px] overflow-y-auto"></div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 w-full lg:w-[650px] flex flex-col gap-6">
-          <div className="flex flex-row items-center gap-3 mt-2">
-            <img
-              src="/Artur.png"
-              alt="Foto do aluno"
-              className="w-24 h-24 rounded-full object-cover"
-            />
-            <div>
-              <h2 className="text-3xl font-bold text-foreground">
-                {secaoAtual.titulo}
-              </h2>
-              <p className="text-base font-bold text-gray-800">0000</p>
+        <div className="flex flex-col items-end w-full max-w-[650px]">
+          <div className="bg-white rounded-lg shadow p-6 w-full flex flex-col gap-6">
+            <div className="flex flex-row items-center gap-3 mt-2">
+              <img
+                src="/Artur.png"
+                alt="Foto do aluno"
+                className="w-20 h-20 rounded-full object-cover"
+              />
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">
+                  {secaoAtual.titulo}
+                </h2>
+                <p className="text-base font-medium text-gray-700"></p>
+              </div>
+            </div>
+
+            <div className="mt-6 pl-2 pr-4 space-y-6">
+              <div>
+                <Label className="text-sm font-semibold text-foreground">
+                  Pontos positivos
+                </Label>
+                <Textarea
+                  placeholder="Insira aqui os pontos positivos..."
+                  className="mt-2 resize-none bg-card"
+                  value={secaoAtual.positivos}
+                  onChange={(e) => handleChange("positivos", e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Label className="text-sm font-semibold text-foreground">
+                  Pontos de melhoria
+                </Label>
+                <Textarea
+                  placeholder="Insira aqui os pontos de melhoria..."
+                  className="mt-2 resize-none bg-card"
+                  value={secaoAtual.melhoria}
+                  onChange={(e) => handleChange("melhoria", e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Label className="text-sm font-semibold text-foreground">
+                  Sugestões
+                </Label>
+                <Textarea
+                  placeholder="Insira aqui as sugestões..."
+                  className="mt-2 resize-none bg-card"
+                  value={secaoAtual.sugestoes}
+                  onChange={(e) => handleChange("sugestoes", e.target.value)}
+                />
+              </div>
             </div>
           </div>
 
-          <div className="mt-6 pl-2 pr-4 space-y-6">
-            <div>
-              <Label className="text-[14px] leading-[20px] font-semibold text-foreground">
-                Pontos positivos
-              </Label>
-              <Textarea
-                placeholder="Insira aqui os pontos positivos..."
-                className="mt-2 resize-none bg-card"
-                value={secaoAtual.positivos}
-                onChange={(e) => handleChange("positivos", e.target.value)}
-              />
-            </div>
-
-            <div>
-              <Label className="text-[14px] leading-[20px] font-semibold text-foreground">
-                Pontos de melhoria
-              </Label>
-              <Textarea
-                placeholder="Insira aqui os pontos de melhoria..."
-                className="mt-2 resize-none bg-card"
-                value={secaoAtual.melhoria}
-                onChange={(e) => handleChange("melhoria", e.target.value)}
-              />
-            </div>
-
-            <div>
-              <Label className="text-[14px] leading-[20px] font-semibold text-foreground">
-                Sugestões
-              </Label>
-              <Textarea
-                placeholder="Insira aqui as sugestões..."
-                className="mt-2 resize-none bg-card"
-                value={secaoAtual.sugestoes}
-                onChange={(e) => handleChange("sugestoes", e.target.value)}
-              />
-            </div>
+          <div className="mt-4">
+            {pagina < formulario.length - 1 ? (
+              <ButtonTT
+                tooltip="Próximo"
+                mode="default"
+                onClick={() => setPagina(pagina + 1)}
+                className="text-sm leading-[20px] w-40"
+              >
+                Próximo passo
+              </ButtonTT>
+            ) : (
+              <ButtonTT
+                tooltip="Salvar"
+                mode="default"
+                onClick={() => setIsConfirmOpen(true)}
+                className="text-sm leading-[20px] w-40"
+              >
+                Enviar
+              </ButtonTT>
+            )}
           </div>
         </div>
-      </div>
-
-      <div className="flex justify-end gap-4 mt-6 w-full max-w-[calc(650px*2+32px)]">
-        {pagina > 0 && (
-          <ButtonTT
-            tooltip="Anterior"
-            mode="default"
-            onClick={() => setPagina(pagina - 1)}
-            className="text-[14px] leading-[20px] bg-white text-black border border-gray-300 hover:bg-gray-100 w-36"
-          >
-            Anterior
-          </ButtonTT>
-        )}
-
-        {pagina < formulario.length - 1 ? (
-          <ButtonTT
-            tooltip="Próximo"
-            mode="default"
-            onClick={() => setPagina(pagina + 1)}
-            className="text-[14px] leading-[20px] w-36"
-          >
-            Próximo Passo
-          </ButtonTT>
-        ) : (
-          <ButtonTT
-            tooltip="Salvar"
-            mode="default"
-            onClick={() => setIsConfirmOpen(true)}
-            className="text-[14px] leading-[20px] w-36"
-          >
-            Enviar
-          </ButtonTT>
-        )}
       </div>
 
       <ActionModal
