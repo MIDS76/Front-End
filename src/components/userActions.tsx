@@ -64,16 +64,16 @@ const UserActions = ({
             }, 100);
           }}
         >
-          <Icon icon="BiSolidTrashAlt" /> Excluir
+          <Icon icon="BiSolidTrashAlt" /> Desativar
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
     <ActionModal
       isOpen={isConfirmOpen}
       setOpen={setIsConfirmOpen}
-      title="Excluir Usuário"
-      description={`Tem certeza que deseja excluir o usuário ${usuario.nome}?`}
-      actionButtonLabel="Excluir"
+      title="Desativar Usuário"
+      description={`Tem certeza que deseja desativar o usuário ${usuario.nome}?`}
+      actionButtonLabel="Desativar"
       destructive
       onConfirm={() => {
           removeUser();

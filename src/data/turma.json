@@ -6,27 +6,27 @@
     },
     "turma2": {
         "id": 2,
-        "codigoTurma": "MI76",
-        "nomeCurso": "Desenvolvimento de Sistemas"
+        "codigoTurma": "MF76",
+        "nomeCurso": "Ferramentaria"
     },
     "turma3": {
         "id": 3,
-        "codigoTurma": "MI76",
-        "nomeCurso": "Desenvolvimento de Sistemas"
+        "codigoTurma": "ME76",
+        "nomeCurso": "Manutenção Eletroeletrônica"
     },
     "turma4": {
         "id": 4,
-        "codigoTurma": "MI76",
-        "nomeCurso": "Desenvolvimento de Sistemas"
+        "codigoTurma": "MT76",
+        "nomeCurso": "Eletrotécnica"
     },
     "turma5": {
         "id": 5,
-        "codigoTurma": "MI76",
-        "nomeCurso": "Desenvolvimento de Sistemas"
+        "codigoTurma": "MM76",
+        "nomeCurso": "Manutenção Mecânica"
     },
     "turma6": {
         "id": 6,
-        "codigoTurma": "MI76",
+        "codigoTurma": "MI77",
         "nomeCurso": "Desenvolvimento de Sistemas"
     }
 }

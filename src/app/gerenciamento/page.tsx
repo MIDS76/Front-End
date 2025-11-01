@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useEffect } from "react";
-import { Usuario, Turma } from "@/utils/types";
+import {Turma } from "@/utils/types";
 import MedModal from "@/components/modal/medModal";
 import Lista from "@/components/lista";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -10,6 +10,7 @@ import turmas from "@/data/turma.json";
 import usuarios from "@/data/usuarios.json";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SearchBar from "@/components/input/searchBar";
+import { useRouter } from "next/router";
 
 
 export default function GerenciamentoUsersTurmas() {
@@ -44,8 +45,13 @@ export default function GerenciamentoUsersTurmas() {
       document.title = "Gerenciamento - ConselhEXPERT";
     };
   }, []);
-  
 
+  const router = useRouter();
+
+  const handleTurmaClick = (id: number) => {
+    router.push(`/gerenciar-turma/${id}`);
+  };
+  
   return (
     <>
       <ProtectedRoute>
@@ -72,7 +78,7 @@ export default function GerenciamentoUsersTurmas() {
                     key={index}
                     courseCode={classItem.codigoTurma}
                     courseName={classItem.nomeCurso}
-                    onClick={() => open("/gerenciamento/turma", "_self")}
+                    onClick={() => handleTurmaClick(classItem.id)}
                     simple
                   />
                 ))}

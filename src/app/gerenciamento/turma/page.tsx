@@ -4,16 +4,25 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Usuario } from "@/utils/types";
 import Lista from "@/components/lista";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import TextField from "@/components/input/textField";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import usuarios from "@/data/usuarios.json";
+import turmas from "@/data/turma.json";
+import { useRouter } from "next/router";
 
-export default function GereciarTurma() {
+interface GerenciarTurmaProps {
+  params: {
+    id: number;
+  };
+}
+
+export default function GereciarTurma({params}: GerenciarTurmaProps) {
   const usuariosArray = Object.values(usuarios);
+  const turmasArray = Object.values(turmas);
+  const router = useRouter();
+  const { id } = params;
 
-  const [userFilter, setUserFilter] = useState("Alunos");
   const [selectedUsers, setSelectedUsers] = useState<Usuario[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -25,7 +34,8 @@ export default function GereciarTurma() {
     );
   };
 
-  const router = useRouter();
+  const getTurmaById = (id: number) => Object.values(turmas).find(turma => turma.id === id);
+  const turma = getTurmaById(id);
 
   useEffect(() => {
     document.title = "Gerenciando Turma - ConselhEXPERT";
@@ -51,14 +61,14 @@ export default function GereciarTurma() {
                 label="Nome"
                 type="text"
                 id="className"
-                value="MI 74"
+                value={turma?.codigoTurma}
                 placeholder="Insira o nome curto da turma (ex: MI 74)"
                 editavel={true}
               />
             </div>
             <div className="mb-4">
               <TextField
-                value="Desenvolvimento de Sistemas de Informação"
+                value={turma?.nomeCurso}
                 label="Curso"
                 type="text"
                 id="course"
@@ -90,30 +100,11 @@ export default function GereciarTurma() {
 
         <div className="w-full md:w-3/5 px-4 mt-8">
           <div className="flex mb-4 ml-4 rounded-md overflow-hidden">
-            {/*<button
-              className={`py-2 px-4 text-center ${
-                userFilter === "Alunos"
-                  ? "bg-primary text-card dark:text-card-foreground"
-                  : "bg-muted dark:text-card-foregroundr"
-              }`}
-              onClick={() => setUserFilter("Alunos")}
-            >
-              Alunos
-            </button>
-            <button
-              className={`py-2 rounded-r-md px-4 text-center ${
-                userFilter === "Professores"
-                  ? "bg-primary text-card dark:text-card-foreground"
-                  : "bg-muted dark:text-card-foreground"
-              }`}
-              onClick={() => setUserFilter("Professores")}
-            >
-              Professores
-            </button>*/}
+            {/*Colocar lugar para importar planilha*/}
           </div>
 
           <h2 className="ml-4 text-2xl font-semibold mb-4 text-card-foreground">
-            {userFilter} da Turma
+            Alunos da Turma
           </h2>
 
           <Lista
@@ -121,7 +112,7 @@ export default function GereciarTurma() {
             setIsDialogOpen={setIsDialogOpen}
             usuarios={alunos}
             setSelectedContact={selectUser}
-            tipo={userFilter === "Alunos" ? "edit" : "excluir"}
+            tipo={"edit"}
             selectedUsers={selectedUsers}
           />
           <div
