@@ -1,5 +1,3 @@
-// src/components/modals/confirmacaoNovoUser.tsx
-
 import { ReactNode } from "react";
 
 interface ConfirmacaoNovoUserProps {
@@ -39,27 +37,29 @@ export default function ConfirmacaoNovoUser({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[9999] transition-opacity duration-300">
+      <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl animate-in fade-in-0 zoom-in-95">
         {children || (
           <>
             <div className="text-center mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
                 {title}
               </h3>
-              <p className="text-sm text-gray-500">{message}</p>
+              <p className="text-sm text-gray-600">{message}</p>
             </div>
 
-            <div className="flex justify-center gap-4">
+            <div className="flex justify-center gap-4 mt-8">
               <button
                 onClick={handleCancel}
-                className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                className="px-6 py-2 rounded-md font-medium text-white transition-all duration-200 shadow-sm hover:brightness-90"
+                style={{ backgroundColor: "#931632" }}
               >
                 {cancelText}
               </button>
               <button
                 onClick={handleConfirm}
-                className="px-6 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-900 transition-colors"
+                className="px-6 py-2 rounded-md font-medium text-white transition-all duration-200 shadow-sm hover:brightness-90"
+                style={{ backgroundColor: "#19323C" }}
               >
                 {confirmText}
               </button>
