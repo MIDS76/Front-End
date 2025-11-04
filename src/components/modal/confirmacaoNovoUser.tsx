@@ -1,4 +1,7 @@
+"use client";
+
 import { ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 interface ConfirmacaoNovoUserProps {
   isOpen: boolean;
@@ -34,9 +37,12 @@ export default function ConfirmacaoNovoUser({
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[9999] backdrop-blur-sm animate-in fade-in-0 duration-200">
-      <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl animate-in fade-in-0 zoom-in-95">
+  const modalContent = (
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[1px] transition-opacity duration-200"
+      style={{ zIndex: 10000 }}
+    >
+      <div className="bg-white rounded-2xl p-7 max-w-md w-full mx-4 shadow-2xl animate-in fade-in-0 zoom-in-95">
         {children || (
           <>
             <div className="text-center mb-6">
@@ -67,4 +73,9 @@ export default function ConfirmacaoNovoUser({
       </div>
     </div>
   );
+
+ 
+  return typeof window !== "undefined"
+    ? createPortal(modalContent, document.body)
+    : null;
 }
