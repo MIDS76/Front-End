@@ -7,14 +7,14 @@ import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import dynamic from "next/dynamic";
 
-import { Turma, convertDate } from "@/components/modal/conselhosModal";
+import { convertDate } from "@/components/modal/conselhosModal";
 import { Page, etapas } from "@/utils/types";
 import api from "@/utils/axios";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "usehooks-ts";
 import ButtonTT from "@/components/button/ButtonTT";
 import Timeline from "@/components/timeline";
-import { Usuario } from "@/components/lista";
+import { Usuario, Conselho } from "@/utils/types";
 
 const Lista = dynamic(() => import("@/components/lista"), { ssr: false });
 const PreConselhoFormulario = dynamic(
@@ -28,14 +28,6 @@ const OpinioesProfessoresModal = dynamic(
 const Devolutiva = dynamic(() => import("@/components/devolutiva"), {
   ssr: false,
 });
-
-export interface Conselho {
-  id: number;
-  dataInicio: Date;
-  dataFim: Date;
-  etapa: number;
-  turma: Turma;
-}
 
 export default function ConselhoContent() {
   const [etapa, setEtapa] = useState(1);

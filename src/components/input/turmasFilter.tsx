@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Turma } from "../modal/conselhosModal";
+import { Turma } from "../../utils/types";
 import SearchBar from "./searchBar";
 
 interface TurmaFilterProps {
@@ -37,7 +37,6 @@ export default function TurmaFilter({
 
   useEffect(() => {
     setFiltered(filteredMedModals!);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
 
   return (

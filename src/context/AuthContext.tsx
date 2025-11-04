@@ -50,6 +50,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (!found) return false;
 
+    // Set the cookie for middleware authentication
+    document.cookie = "isLoggedIn=true; path=/";
+
     const loggedUser: User = {
       nome: found.email.split("@")[0],
       email: found.email,
@@ -64,6 +67,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = () => {
     localStorage.removeItem("user");
+    // Remove the authentication cookie
+    document.cookie = "isLoggedIn=false; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     setUser(null);
     router.push("/login");
   };

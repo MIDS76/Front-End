@@ -2,35 +2,39 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import Lista, { Usuario } from "@/components/lista";
-import { useRouter } from "next/navigation";
+import { Usuario } from "@/utils/types";
+import Lista from "@/components/lista";
 import { toast } from "sonner";
 import TextField from "@/components/input/textField";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import usuarios from "@/data/usuarios.json";
+import turmas from "@/data/turma.json";
+import { useParams, useRouter } from "next/navigation";
 
-export default function GereciarTurma() {
-  const allUsers: Usuario[] = Array.from({ length: 12 }, (_, index) => ({
-    id: index + 1,
-    nome: `Usuário ${index + 1}`,
-    email: `usuario${index + 1}@email.com`,
-    role: "aluno",
-  }));
+interface GerenciarTurmaProps {
+  params: {
+    id: string;
+  };
+}
 
-  const [userFilter, setUserFilter] = useState("Alunos");
+export default function GereciarTurma({params}: GerenciarTurmaProps) {
+  const usuariosArray = Object.values(usuarios);
+  const turmasArray = Object.values(turmas);
+  const router = useRouter();
+  const { id } = useParams();
+
   const [selectedUsers, setSelectedUsers] = useState<Usuario[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const filteredUsers = allUsers.filter((user) =>
-    userFilter === "Alunos" ? user.id % 2 === 0 : user.id % 2 !== 0
-  );
+  const alunos = usuariosArray.filter((user) => user.role === "Aluno");
+  const turmaId = Number(id);
+  const turma = turmasArray.find((t) => t.id === turmaId);
 
   const selectUser = (user: Usuario) => {
     setSelectedUsers((prev) =>
       prev.some((selected) => selected.id === user.id) ? prev : [...prev, user]
     );
   };
-
-  const router = useRouter();
 
   useEffect(() => {
     document.title = "Gerenciando Turma - ConselhEXPERT";
@@ -48,7 +52,7 @@ export default function GereciarTurma() {
             <div className="bg-muted rounded-lg mb-4 p-4">
               <h3 className="font-medium text-card-foreground">Resumo</h3>
               <p className="text-sm text-muted-foreground">
-                Professores: <b>5</b>, Alunos: <b>15</b>
+                 Alunos Ativos: <b>{alunos.length}</b>
               </p>
             </div>
             <div className="mb-4">
@@ -56,14 +60,14 @@ export default function GereciarTurma() {
                 label="Nome"
                 type="text"
                 id="className"
-                value="MI 74"
+                value={turma?.codigoTurma}
                 placeholder="Insira o nome curto da turma (ex: MI 74)"
                 editavel={true}
               />
             </div>
             <div className="mb-4">
               <TextField
-                value="Desenvolvimento de Sistemas de Informação"
+                value={turma?.nomeCurso}
                 label="Curso"
                 type="text"
                 id="course"
@@ -95,38 +99,19 @@ export default function GereciarTurma() {
 
         <div className="w-full md:w-3/5 px-4 mt-8">
           <div className="flex mb-4 ml-4 rounded-md overflow-hidden">
-            <button
-              className={`py-2 px-4 text-center ${
-                userFilter === "Alunos"
-                  ? "bg-primary text-card dark:text-card-foreground"
-                  : "bg-muted dark:text-card-foregroundr"
-              }`}
-              onClick={() => setUserFilter("Alunos")}
-            >
-              Alunos
-            </button>
-            <button
-              className={`py-2 rounded-r-md px-4 text-center ${
-                userFilter === "Professores"
-                  ? "bg-primary text-card dark:text-card-foreground"
-                  : "bg-muted dark:text-card-foreground"
-              }`}
-              onClick={() => setUserFilter("Professores")}
-            >
-              Professores
-            </button>
+            {/*Colocar lugar para importar planilha*/}
           </div>
 
           <h2 className="ml-4 text-2xl font-semibold mb-4 text-card-foreground">
-            {userFilter} da Turma
+            Alunos da Turma
           </h2>
 
           <Lista
             isDialogOpen={isDialogOpen}
             setIsDialogOpen={setIsDialogOpen}
-            usuarios={filteredUsers}
+            usuarios={alunos}
             setSelectedContact={selectUser}
-            tipo={userFilter === "Alunos" ? "star" : "excluir"}
+            tipo={"edit"}
             selectedUsers={selectedUsers}
           />
           <div

@@ -3,11 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import Lista, { Usuario } from "@/components/lista";
+import Lista from "@/components/lista";
 import { toast } from "sonner";
 import TextField from "@/components/input/textField";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { Usuario } from "@/utils/types";
 
 export default function CriarTurma() {
   const allUsers: Usuario[] = Array.from({ length: 6 }, (_, index) => ({
