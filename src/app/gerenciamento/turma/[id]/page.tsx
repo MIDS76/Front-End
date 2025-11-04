@@ -9,11 +9,11 @@ import TextField from "@/components/input/textField";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import usuarios from "@/data/usuarios.json";
 import turmas from "@/data/turma.json";
-import { useRouter } from "next/router";
+import { useParams, useRouter } from "next/navigation";
 
 interface GerenciarTurmaProps {
   params: {
-    id: number;
+    id: string;
   };
 }
 
@@ -21,21 +21,20 @@ export default function GereciarTurma({params}: GerenciarTurmaProps) {
   const usuariosArray = Object.values(usuarios);
   const turmasArray = Object.values(turmas);
   const router = useRouter();
-  const { id } = params;
+  const { id } = useParams();
 
   const [selectedUsers, setSelectedUsers] = useState<Usuario[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const alunos = usuariosArray.filter((user) => user.role === "Aluno");
+  const turmaId = Number(id);
+  const turma = turmasArray.find((t) => t.id === turmaId);
 
   const selectUser = (user: Usuario) => {
     setSelectedUsers((prev) =>
       prev.some((selected) => selected.id === user.id) ? prev : [...prev, user]
     );
   };
-
-  const getTurmaById = (id: number) => Object.values(turmas).find(turma => turma.id === id);
-  const turma = getTurmaById(id);
 
   useEffect(() => {
     document.title = "Gerenciando Turma - ConselhEXPERT";

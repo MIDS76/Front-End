@@ -10,7 +10,7 @@ import turmas from "@/data/turma.json";
 import usuarios from "@/data/usuarios.json";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SearchBar from "@/components/input/searchBar";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 
 export default function GerenciamentoUsersTurmas() {
@@ -49,7 +49,7 @@ export default function GerenciamentoUsersTurmas() {
   const router = useRouter();
 
   const handleTurmaClick = (id: number) => {
-    router.push(`/gerenciar-turma/${id}`);
+    router.push(`/gerenciamento/turma/${id}`);
   };
   
   return (
