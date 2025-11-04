@@ -217,10 +217,10 @@ export default function AlunoHome() {
       {/* ------------------ LISTA DE CONSELHOS ------------------ */}
       <div className="flex-1 p-8">
         {/* Título e filtro */}
-        <div className="flex items-center gap-2 mb-6">
+        <div className="flex items-center gap-2 mb-6 mt-20">
           <h1 className="text-2xl font-semibold text-primary">
             Meus Conselhos
-          </h1>
+            </h1>
 
           {/* Dropdown de filtros */}
           <DropdownMenu>
