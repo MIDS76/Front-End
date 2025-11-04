@@ -56,7 +56,7 @@ export default function LandingPage() {
     <ProtectedRoute>
     <main className="w-full flex flex-col">
       <div className="flex flex-row flex-auto">
-        <section className="w-full max-h-full md:w-3/5 xl:w-3/4 h-full flex flex-col items-start p-4 pt-16 gap-y-4">
+      <section className="w-full max-h-full md:w-3/5 xl:w-3/4 h-full flex flex-col items-start p-4 pt-24 gap-y-4">
           <h2 className=" font-title text-2xl font-bold text-accent-foreground px-4">
             Todas as turmas
           </h2>
@@ -82,19 +82,20 @@ export default function LandingPage() {
           />
         </section>
         <section
-          className={`${
-            sideModalOpen ? "pointer-events-auto" : "pointer-events-none"
-          } md:h-auto absolute right-0 w-3/4 md:w-2/5 xl:w-1/4 md:flex flex-col items-center justify-center md:bg-accent bg-none overflow-x-hidden`}
-        >
-          <p className="hidden md:block md:absolute bottom-1/2 text-muted-foreground">
-            Selecione uma turma
-          </p>
-          <ConselhosModal
-            turma={selectedTurma}
-            isOpen={sideModalOpen}
-            onClose={() => setSideModalOpen(false)}
-          />
-        </section>
+    className={`${
+      sideModalOpen ? "pointer-events-auto" : "pointer-events-none"
+    } absolute right-0 top-0 h-screen w-3/4 md:w-2/5 xl:w-1/4 md:flex flex-col items-center justify-center md:bg-accent bg-none overflow-x-hidden`}
+  >
+    <p className="hidden md:block md:absolute bottom-1/2 text-muted-foreground">
+      Selecione uma turma
+    </p>
+    <ConselhosModal
+      turma={selectedTurma}
+      isOpen={sideModalOpen}
+      onClose={() => setSideModalOpen(false)}
+    />
+</section>
+
       </div>
     </main>
     </ProtectedRoute>
