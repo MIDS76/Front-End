@@ -33,8 +33,7 @@ export const USER_ROLES = [
   { value: "TECNICO_PEDAGOGICO", label: "Técnico Pedagógico" },
   { value: "SUPERVISOR", label: "Supervisor" },
   { value: "PROFESSOR", label: "Professor" },
-  { value: "REPRESENTANTE", label: "Representante" },
-  { value: "ALUNO", label: "Aluno" },
+
 ] as const;
 
 export type UserRoles = (typeof USER_ROLES)[number]["value"];
