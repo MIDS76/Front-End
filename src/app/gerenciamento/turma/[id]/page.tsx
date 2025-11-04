@@ -12,12 +12,10 @@ import turmas from "@/data/turma.json";
 import { useParams, useRouter } from "next/navigation";
 
 interface GerenciarTurmaProps {
-  params: {
-    id: string;
-  };
+  
 }
 
-export default function GereciarTurma({params}: GerenciarTurmaProps) {
+export default function GereciarTurma() {
   const usuariosArray = Object.values(usuarios);
   const turmasArray = Object.values(turmas);
   const router = useRouter();
