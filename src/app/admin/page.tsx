@@ -10,6 +10,7 @@ import { Page, Turma } from "@/utils/types";
 import Paginacao from "@/components/paginacao";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SearchBar from "@/components/input/searchBar";
+import FiltrosDinamicos from "@/components/filtros/FiltrosDinamicos";
 
 export default function LandingPage() {
   const [dataAleatoria] = useState(() => {
@@ -70,11 +71,10 @@ export default function LandingPage() {
 
             <SearchBar
               className="w-full xl:w-3/5 2xl:w-2/5 px-4"
-              placeholder="Buscar uma turma..."
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
-              filter={true}
-              type="turma" 
+              filter
+              filtrosMostrar={{ aluno: false, turma: true, conselho: false }}
             />
 
             <ScrollArea className="w-full h-[500px] mt-8">
@@ -91,9 +91,8 @@ export default function LandingPage() {
           </section>
 
           <section
-            className={`${
-              sideModalOpen ? "pointer-events-auto" : "pointer-events-none"
-            } absolute right-0 top-0 h-screen w-3/4 md:w-2/5 xl:w-1/4 md:flex flex-col items-center justify-center md:bg-accent bg-none overflow-x-hidden`}
+            className={`${sideModalOpen ? "pointer-events-auto" : "pointer-events-none"
+              } absolute right-0 top-0 h-screen w-3/4 md:w-2/5 xl:w-1/4 md:flex flex-col items-center justify-center md:bg-accent bg-none overflow-x-hidden`}
           >
             <p className="hidden md:block md:absolute bottom-1/2 text-muted-foreground">
               Selecione uma turma
@@ -112,7 +111,7 @@ export default function LandingPage() {
   function ListaTurmas() {
     if (isLoading || error)
       return (
-        <MedModal loading courseCode="..." courseName="..." onClick={() => {}}>
+        <MedModal loading courseCode="..." courseName="..." onClick={() => { }}>
           ...
         </MedModal>
       );

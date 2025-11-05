@@ -16,7 +16,11 @@ interface SearchBarParams {
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   placeholder?: string;
   filter?: boolean;
-  type?: "aluno" | "turma" | "conselho";
+  filtrosMostrar?: {
+    aluno?: boolean;
+    turma?: boolean;
+    conselho?: boolean;
+  };
   children?: React.ReactNode;
 }
 
@@ -26,15 +30,9 @@ export default function SearchBar({
   setSearchQuery,
   placeholder = "Pesquisar...",
   filter = false,
-  type = "turma",
+  filtrosMostrar, 
   children,
 }: SearchBarParams) {
-  const mostrarFiltros = {
-    aluno: type === "aluno",
-    turma: type === "turma",
-    conselho: type === "conselho",
-  };
-
   return (
     <div
       className={`flex flex-row items-center gap-2 justify-between w-full ${className}`}
@@ -63,11 +61,9 @@ export default function SearchBar({
 
           <DropdownMenuContent
             align="end"
-            className={`select-none min-w-[220px] ${
-              type ? "p-0 bg-transparent shadow-none border-none" : "p-2 pt-0"
-            }`}
+            className="select-none min-w-[220px] p-0 bg-transparent shadow-none border-none"
           >
-            <FiltrosDinamicos mostrar={mostrarFiltros} />
+            <FiltrosDinamicos mostrar={filtrosMostrar} />
           </DropdownMenuContent>
         </DropdownMenu>
       )}
