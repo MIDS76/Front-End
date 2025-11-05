@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import ButtonTT from "@/components/button/ButtonTT";
 import { cn } from "@/lib/utils";
+import Paginacao from "@/components/paginacao";
+
 
 // Dropdown e filtros
 import {
@@ -193,12 +195,22 @@ export default function AlunoHome() {
   const [selectedConselho, setSelectedConselho] = useState<number | null>(null);
   const [filtro, setFiltro] = useState(""); // Filtro por texto
   const [ordenacao, setOrdenacao] = useState<"recente" | "antigo">("recente");
-  const [anoFiltro, setAnoFiltro] = useState<string>(""); // Filtro por ano
+  const [anoFiltro, setAnoFiltro] = useState<string>("");  // Filtro por ano
+  const [paginaAtual, setPaginaAtual] = useState(0);
+  const itensPorPagina = 3; //quantidadde de cards por pagina
 
   // ------------------ FILTRAGEM E ORDENAÇÃO ------------------
   let conselhosFiltrados = conselhos.filter((c) =>
     c.periodo.toLowerCase().includes(filtro.toLowerCase())
   );
+  // Divide os conselhos em páginas
+const inicio = paginaAtual * itensPorPagina;
+const fim = inicio + itensPorPagina;
+const conselhosPaginados = conselhosFiltrados.slice(inicio, fim);
+
+// Calcula o total de páginas
+const totalPages = Math.ceil(conselhosFiltrados.length / itensPorPagina);
+
 
   if (anoFiltro) {
     conselhosFiltrados = conselhosFiltrados.filter((c) =>
@@ -251,8 +263,8 @@ export default function AlunoHome() {
 
         {/* GRID DE CONSELHOS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {conselhosFiltrados.length > 0 ? (
-            conselhosFiltrados.map((c) => (
+          {conselhosPaginados.length > 0 ? (
+            conselhosPaginados.map((c) => (
               <MedModal
                 key={c.id}
                 courseCode={c.periodo}
@@ -272,9 +284,17 @@ export default function AlunoHome() {
             <div className="text-center text-muted-foreground mt-6">
               Nenhum conselho encontrado!
             </div>
-            
           )}
         </div>
+
+        {/* PAGINAÇÃO */}
+        <div className="fixed bottom-6 left-0 right-0 flex justify-center">
+              <Paginacao
+                paginaAtual={paginaAtual}
+                setPaginaAtual={setPaginaAtual}
+                totalPages={totalPages}
+              />
+            </div>
       </div>
 
       {/* ------------------ PAINEL LATERAL ------------------ */}
