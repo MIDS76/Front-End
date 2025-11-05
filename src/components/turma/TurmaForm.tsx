@@ -162,7 +162,7 @@ export default function TurmaForm({ title, initialData, alunos, onSubmit }: Turm
                     </div>
                 </div>
 
-                <div className="w-full md:w-3/5 px-4 mt-8">
+                <div className="w-full md:w-3/5 p-4 mt-16">
                     <div className="flex mb-4 ml-4 rounded-md overflow-hidden">
                         {title === "Criar Turma" && (
                             <div className="mt-6">
