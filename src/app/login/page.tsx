@@ -100,36 +100,37 @@ export default function Login() {
             </div>
 
    
-            <div className="flex flex-col gap-1">
-              <label
-                htmlFor="password"
-                className="text-sm font-semibold text-gray-800"
-              >
+            <div className="flex flex-col gap-1 relative">
+            <label
+              htmlFor="password"
+              className="text-sm font-semibold text-gray-800"
+            >
+            </label>
+            <TextField
+              id="password"
+              name="password"
+              label="Senha"
+              placeholder="Insira sua senha"
+              type="password"
+            />
 
-              </label>
-              <TextField
-                id="password"
-                name="password"
-                label="Senha"
-                placeholder="Insira sua senha"
-                type="password"
-              />
+        
 
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(true)}
-                className="text-xs text-primary hover:underline text-left mt-1 mb-6"
-              >
-                Esqueceu sua senha?
-              </button>
-            </div>
-
-
+            {/* ⚠️ Mensagem de erro logo abaixo do campo de senha */}
             {error && (
-              <p className="text-destructive text-sm text-center">
+              <p className="text-destructive text-sm absolute bottom-11 mt-0">
                 {errorMessage}
               </p>
             )}
+        
+           <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              className="text-xs text-primary hover:underline text-left mt-1 mb-2"
+            >
+              Esqueceu sua senha?
+            </button>
+            </div>
 
             <ButtonTT mode="default" tooltip="Fazer login" type="submit">
               Login
