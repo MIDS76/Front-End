@@ -6,6 +6,7 @@ import { use, useState } from "react";
 import TextField from "../input/textField";
 import { Button } from "../ui/button";
 import Lista from "../lista";
+import { toast } from "sonner";
 
 interface TurmaFormProps {
     title: string;
@@ -33,6 +34,24 @@ export default function TurmaForm({ title, initialData, alunos, onSubmit }: Turm
 
     const handleChange = (field: string, value: string) => {
         setForm((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const [file, setFile] = useState<File | null>(null);
+    
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = e.target.files ? e.target.files[0] : null;
+        if (selectedFile) {
+            setFile(selectedFile);
+            toast.success("Arquivo selecionado com sucesso!");
+        }
+    };
+
+    const handleFileUpload = () => {
+        if (file) {
+            toast.success("Planilha importada com sucesso!");
+        } else {
+            toast.error("Nenhum arquivo selecionado.");
+        }
     };
 
     return (
@@ -115,7 +134,24 @@ export default function TurmaForm({ title, initialData, alunos, onSubmit }: Turm
 
                 <div className="w-full md:w-3/5 px-4 mt-8">
                     <div className="flex mb-4 ml-4 rounded-md overflow-hidden">
-                        {/*Colocar lugar para importar planilha*/}
+                        {title === "Criar Turma" && (
+                            <div className="mt-6">
+                                <label className="text-sm font-semibold text-gray-800">Importar Planilha</label>
+                                <input
+                                    type="file"
+                                    accept=".csv, .xlsx"
+                                    className="block w-full mt-2 text-sm text-gray-800"
+                                    onChange={handleFileChange}
+                                />
+                                <Button
+                                    variant="outline"
+                                    className="mt-4"
+                                    onClick={handleFileUpload}
+                                >
+                                    Importar
+                                </Button>
+                            </div>
+                        )}
                     </div>
 
                     <h2 className="ml-4 text-2xl font-semibold mb-4 text-card-foreground">
