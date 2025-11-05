@@ -274,3 +274,12 @@ h2,h3,p,label,button,input {
     @apply bg-background text-foreground;
   }
 }
+
+/*adicicao nova , UserNovo*/
+[data-state="open"].dialog-overlay {
+  z-index: 9998 !important;
+}
+[data-state="open"].dialog-content {
+  z-index: 9999 !important;
+}
+

@@ -94,7 +94,7 @@ const instituicao = [
 ];
 
 
-export default function Devolutiva() {
+export default function DevolutivaAluno() {
 
   return (
     <div className="w-full px-4">
@@ -108,7 +108,7 @@ export default function Devolutiva() {
               Alunos
             </TabsTrigger>
             <TabsTrigger
-              value="professores"
+              value="professores" 
               className="font-bold text-popover-foreground"
             >
               Professores

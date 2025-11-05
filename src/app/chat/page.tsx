@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { Chat } from "@/components/chat/chat";
-import { Usuario } from "@/components/lista";
 import { useWindowSize } from "usehooks-ts";
-import { Page } from "@/utils/types";
+import { Page, Usuario } from "@/utils/types";
 import ChatList from "@/components/chat/chatList";
 import ProtectedRoute from "@/components/ProtectedRoute";
 

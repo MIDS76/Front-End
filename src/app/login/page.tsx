@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import TextField from "@/components/input/textField";
 import Form from "next/form";
 import ButtonTT from "@/components/button/ButtonTT";
-import { useState } from "react";
+import { useState } from "react"; 
 import { useAuth } from "@/context/AuthContext";
 import PasswordResetModal from "@/components/modal/enviarVerificacao";
 
@@ -29,10 +29,10 @@ export default function Login() {
       return;
     }
 
-    const success = await login(email, password);
+    const loggedUser = await login(email, password);
 
-    if (success) {
-      router.push("/"); 
+    if (loggedUser) {
+        router.push(`/${loggedUser.perfil}`);
     } else {
       setError(true);
       setErrorMessage("Login ou senha incorretos.");
@@ -42,7 +42,7 @@ export default function Login() {
   return (
     <main className="relative min-h-screen w-full overflow-hidden flex flex-col">
      
-      <header className="w-full bg-white border-b border-blue-200 py-4 px-8 flex items-center justify-start">
+      {/* <header className="w-full bg-white border-b border-blue-200 py-4 px-8 flex items-center justify-start">
         <div className="flex items-center gap-3">
           <Image
             src="public/logo.svg"
@@ -54,7 +54,7 @@ export default function Login() {
             Portal do Conselho
           </h1>
         </div>
-      </header>
+      </header> */}
 
    
       <div className="relative flex-1 flex items-center justify-center">

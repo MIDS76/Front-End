@@ -6,13 +6,41 @@ export interface Page<T> {
   number: number;
 }
 
+export interface Turma {
+  id: number;
+  codigoTurma: string;
+  nomeCurso: string;
+  conselhos?: Conselho[];
+  usuarios?: Usuario[];
+}
+
+export interface Conselho {
+  id: number;
+  dataInicio: Date;
+  dataFim: Date;
+  etapa: number;
+  turma: Turma;
+}
+
+export interface Usuario {
+  id: number;
+  nome: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+}
+
 export const USER_ROLES = [
   { value: "TECNICO_PEDAGOGICO", label: "Técnico Pedagógico" },
   { value: "SUPERVISOR", label: "Supervisor" },
   { value: "PROFESSOR", label: "Professor" },
-  { value: "REPRESENTANTE", label: "Representante" },
-  { value: "ALUNO", label: "Aluno" },
+
 ] as const;
+
+export const ACTIVE = [
+  { value: "true", label: "Ativo" },
+  { value: "false", label: "Inativo" },
+]
 
 export type UserRoles = (typeof USER_ROLES)[number]["value"];
 

@@ -1,3 +1,5 @@
+"use client";
+
 import CreateButton from "./buttons/createButton";
 import DashboardButton from "./buttons/DashboardButton";
 import NotificationButton from "./buttons/NotificationButton";

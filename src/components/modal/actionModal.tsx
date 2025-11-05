@@ -48,7 +48,7 @@ export default function ActionModal({
       <DialogContent
         withOverlay={!removeBg}
         onInteractOutside={(e) => {
-          e.preventDefault();
+          e.preventDefault(); 
         }}
         className={cn(
           removeBg && customPosition && "lg:left-1/3 md:left-1/4",
@@ -59,8 +59,13 @@ export default function ActionModal({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
+
+      
         <section>{conteudo}</section>
+
+       
         <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2">
+      
           <DialogClose asChild>
             <ButtonTT
               tooltip="none"
@@ -71,16 +76,15 @@ export default function ActionModal({
               {closeButtonLabel}
             </ButtonTT>
           </DialogClose>
-          <DialogClose asChild>
-            <ButtonTT
-              tooltip={actionButtonLabel}
-              mode="default"
-              variant={destructive ? "destructive" : "default"}
-              onClick={onConfirm!}
-            >
-              {actionButtonLabel}
-            </ButtonTT>
-          </DialogClose>
+
+          <ButtonTT
+            tooltip={actionButtonLabel}
+            mode="default"
+            variant={destructive ? "destructive" : "default"}
+            onClick={onConfirm}
+          >
+            {actionButtonLabel}
+          </ButtonTT>
         </DialogFooter>
       </DialogContent>
     </Dialog>
