@@ -1,44 +1,44 @@
-{
-    "turma1": {
+[
+    {
         "id": 1,
         "codigoTurma": "MI76",
         "nomeCurso": "Desenvolvimento de Sistemas",
         "dataInicio": "2023-08-01",
         "dataFim": "2025-07-31"
     },
-    "turma2": {
+    {
         "id": 2,
         "codigoTurma": "MF76",
         "nomeCurso": "Ferramentaria",
         "dataInicio": "2023-08-01",
         "dataFim": "2025-07-31"
     },
-    "turma3": {
+    {
         "id": 3,
         "codigoTurma": "ME76",
         "nomeCurso": "Manutenção Eletroeletrônica",
         "dataInicio": "2023-08-01",
         "dataFim": "2025-07-31"
     },
-    "turma4": {
+    {
         "id": 4,
         "codigoTurma": "MT76",
         "nomeCurso": "Eletrotécnica",
         "dataInicio": "2023-08-01",
         "dataFim": "2025-07-31"
     },
-    "turma5": {
+    {
         "id": 5,
         "codigoTurma": "MM76",
         "nomeCurso": "Manutenção Mecânica",
         "dataInicio": "2023-08-01",
         "dataFim": "2025-07-31"
     },
-    "turma6": {
+    {
         "id": 6,
         "codigoTurma": "MI77",
         "nomeCurso": "Desenvolvimento de Sistemas",
         "dataInicio": "2023-08-01",
         "dataFim": "2025-07-31"
     }
-}
+]

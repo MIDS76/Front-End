@@ -9,8 +9,8 @@ import TurmaForm from "@/components/turma/TurmaForm";
 import { useRouter } from "next/navigation";
 
 export default function GereciarTurma() {
-  const usuariosArray = Object.values(usuarios);
-  const turmasArray = Object.values(turmas);
+  const usuariosArray = usuarios;
+  const turmasArray = turmas;
   const { id } = useParams();
 
   const router = useRouter();

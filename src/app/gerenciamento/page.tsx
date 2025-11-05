@@ -30,8 +30,8 @@ export default function GerenciamentoUsersTurmas() {
     }))
   );
 
-  const turmasArray = Object.values(turmas);
-  const usuariosArray = Object.values(usuarios);
+  const turmasArray = turmas;
+  const usuariosArray = usuarios;
 
   useEffect(() => {
     if (turmas) {

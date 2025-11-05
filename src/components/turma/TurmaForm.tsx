@@ -2,7 +2,7 @@
 
 import { Usuario } from "@/utils/types";
 import { useRouter } from "next/navigation";
-import { use, useState } from "react";
+import { useState } from "react";
 import TextField from "../input/textField";
 import { Button } from "../ui/button";
 import Lista from "../lista";
@@ -23,7 +23,6 @@ interface TurmaFormProps {
 
 export default function TurmaForm({ title, initialData, alunos, onSubmit }: TurmaFormProps) {
     const router = useRouter();
-
     const [selectedUsers, setSelectedUsers] = useState<Usuario[]>([]);
     const [form, setForm] = useState({
         codigoTurma: initialData?.codigoTurma || "",
@@ -31,6 +30,8 @@ export default function TurmaForm({ title, initialData, alunos, onSubmit }: Turm
         dataIncio: initialData?.dataIncio || "",
         dataFim: initialData?.dataFim || "",
     });
+
+    const [nome, setNome] = useState("");
 
     const handleChange = (field: string, value: string) => {
         setForm((prev) => ({ ...prev, [field]: value }));
