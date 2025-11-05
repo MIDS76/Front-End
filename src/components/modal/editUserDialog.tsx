@@ -64,7 +64,7 @@ export default function EditUserDialog({
             items={ACTIVE}
             value={active}
             onChange={setActive}
-            placeholder=""
+            placeholder="Selecione o status do usuário"
             emptyMessage="Nenhuma opção encontrada"
             width="100%"
           />
