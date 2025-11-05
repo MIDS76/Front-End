@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; 
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import ActionModal from "@/components/modal/actionModal";
 import ButtonTT from "@/components/button/ButtonTT";
 import { toast } from "sonner";
+import Lista, { Usuario } from "@/components/lista";
 
 type CampoFormulario = {
   titulo: string;
@@ -16,17 +18,27 @@ type CampoFormulario = {
 };
 
 const avaliacaoAlunos: CampoFormulario[] = [
-  { titulo: "Nome do aluno", cadastro: "0000", positivos: "", melhoria: "", sugestoes: "" },
-  { titulo: "Nome do aluno", cadastro: "0000", positivos: "", melhoria: "", sugestoes: "" },
-  { titulo: "Nome do aluno", cadastro: "0000", positivos: "", melhoria: "", sugestoes: "" },
-  { titulo: "Nome do aluno", cadastro: "0000", positivos: "", melhoria: "", sugestoes: "" },
+  { titulo: "Artur Neves Hopner", cadastro: "0001", positivos: "", melhoria: "", sugestoes: "" },
+  { titulo: "Letícia Moretti", cadastro: "0002", positivos: "", melhoria: "", sugestoes: "" },
+  { titulo: "Bruna Júlia Reckziegel", cadastro: "0003", positivos: "", melhoria: "", sugestoes: "" },
+  { titulo: "Giulia Fugel", cadastro: "0004", positivos: "", melhoria: "", sugestoes: "" },
 ];
 
 export default function ConselhoCoordenacao() {
-  const [formulario, setFormulario] = useState<CampoFormulario[]>(avaliacaoAlunos);
+  const router = useRouter(); 
+
+  const [formulario, setFormulario] = useState<CampoFormulario[]>(() => {
+    const salvo = localStorage.getItem("conselho-formulario");
+    return salvo ? JSON.parse(salvo) : avaliacaoAlunos;
+  });
+
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [pagina, setPagina] = useState(0);
   const [searchQueryUsuarios, setSearchQueryUsuarios] = useState("");
+
+  useEffect(() => {
+    localStorage.setItem("conselho-formulario", JSON.stringify(formulario));
+  }, [formulario]);
 
   const handleChange = (campo: keyof CampoFormulario, valor: string) => {
     const novoFormulario = [...formulario];
@@ -37,19 +49,35 @@ export default function ConselhoCoordenacao() {
   const handleSalvar = () => {
     toast.success("Conselho salvo com sucesso!");
     localStorage.setItem("conselho-formulario", JSON.stringify(formulario));
+
+    setTimeout(() => {
+      router.push("/"); 
+    }, 800); 
   };
 
   const secaoAtual = formulario[pagina];
+
+  const camposPreenchidos =
+    secaoAtual.positivos.trim() !== "" &&
+    secaoAtual.melhoria.trim() !== "" &&
+    secaoAtual.sugestoes.trim() !== "";
+
+  const todosPreenchidos = formulario.every(
+    (aluno) =>
+      aluno.positivos.trim() !== "" &&
+      aluno.melhoria.trim() !== "" &&
+      aluno.sugestoes.trim() !== ""
+  );
 
   return (
     <div className="w-full flex flex-col items-center px-8 py-8">
       <div className="flex w-full justify-center gap-8">
         <div className="flex flex-col w-full max-w-[750px] gap-2">
-        <div className="bg-white rounded-lg shadow p-4 mb-2">
-        <h5 className="text-3xl font-semibold text-foreground mb-1">JGS - AI MIDS 2024/1 INT1</h5>
-        <div className="border-b border-gray-400 my-2"></div>
-        <h5 className="text-3xl font-semibold text-foreground">WEG - MI 76</h5>
-        </div>
+          <div className="bg-white rounded-lg shadow p-4 mb-2">
+            <h5 className="text-3xl font-semibold text-foreground">JGS - AI MIDS 2024/1 INT1</h5>
+            <div className="border-b border-gray-400 my-2"></div>
+            <h5 className="text-3xl font-semibold text-foreground">WEG - MI 76</h5>
+          </div>
 
           <input
             type="text"
@@ -59,7 +87,7 @@ export default function ConselhoCoordenacao() {
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#71A151] mb-2"
           />
 
-          <div className="bg-gray-100 rounded-md shadow-inner w-full h-[420px] overflow-y-auto"></div>
+          <div className="bg-gray-200 rounded-md shadow-inner w-full h-[377px] overflow-y-auto"></div>
         </div>
 
         <div className="flex flex-col items-end w-full max-w-[750px]">
@@ -74,7 +102,9 @@ export default function ConselhoCoordenacao() {
                 <h2 className="text-2xl font-bold text-foreground">
                   {secaoAtual.titulo}
                 </h2>
-                <p className="text-base font-medium text-gray-700">Cadastro: {secaoAtual.cadastro}</p>
+                <p className="text-base font-medium text-gray-700">
+                  Cadastro: {secaoAtual.cadastro}
+                </p>
               </div>
             </div>
 
@@ -117,26 +147,45 @@ export default function ConselhoCoordenacao() {
             </div>
           </div>
 
-          <div className="mt-4">
-            {pagina < formulario.length - 1 ? (
+          <div className="flex justify-between items-center pt-6 w-full">
+            <div className="flex gap-4">
+              <ButtonTT
+                tooltip="Anterior"
+                mode="default"
+                disabled={pagina === 0 || !camposPreenchidos}
+                onClick={() => setPagina((prev) => Math.max(prev - 1, 0))}
+                className={`text-[14px] leading-[20px] bg-white text-black border border-gray-300 hover:bg-gray-100 px-8 ${pagina === 0 || !camposPreenchidos ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+              >
+                Anterior
+              </ButtonTT>
+
               <ButtonTT
                 tooltip="Próximo"
                 mode="default"
-                onClick={() => setPagina(pagina + 1)}
-                className="text-sm leading-[20px] w-40"
+                disabled={pagina === formulario.length - 1 || !camposPreenchidos}
+                onClick={() =>
+                  setPagina((prev) => Math.min(prev + 1, formulario.length - 1))
+                }
+                className={`text-[14px] leading-[20px] bg-white text-black border border-gray-300 hover:bg-gray-100 px-8 ${pagina === formulario.length - 1 || !camposPreenchidos
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                  }`}
               >
-                Próximo passo
+                Próximo
               </ButtonTT>
-            ) : (
-              <ButtonTT
-                tooltip="Salvar"
-                mode="default"
-                onClick={() => setIsConfirmOpen(true)}
-                className="text-sm leading-[20px] w-40"
-              >
-                Enviar
-              </ButtonTT>
-            )}
+            </div>
+
+            <ButtonTT
+              tooltip="Próximo passo"
+              mode="default"
+              disabled={!todosPreenchidos}
+              onClick={() => setIsConfirmOpen(true)}
+              className={`text-[14px] leading-[20px] px-8 ${!todosPreenchidos ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+            >
+              Próximo passo
+            </ButtonTT>
           </div>
         </div>
       </div>
