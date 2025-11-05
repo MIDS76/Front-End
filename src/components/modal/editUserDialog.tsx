@@ -1,4 +1,5 @@
-import { Usuario } from "../../utils/types";
+import { ACTIVE, Usuario } from "../../utils/types";
+import { Combobox } from "../ui/combobox";
 import { Input } from "../ui/input";
 import ActionModal from "./actionModal";
 import { useEffect, useState } from "react";
@@ -18,10 +19,12 @@ export default function EditUserDialog({
 }: EditUserDialogProps) {
   const [nome, setNome] = useState(usuario.nome);
   const [email, setEmail] = useState(usuario.email);
+  const [active, setActive] = useState(usuario.isActive ? "true" : "false");
 
   useEffect(() => {
     setNome(usuario.nome);
     setEmail(usuario.email);
+    setActive(usuario.isActive ? "true" : "false");
   }, [usuario]);
 
   return (
@@ -56,6 +59,14 @@ export default function EditUserDialog({
             value={email}
             className="w-full"
             onChange={(e) => setEmail(e.target.value)}
+          />
+          <Combobox
+            items={ACTIVE}
+            value={active}
+            onChange={setActive}
+            placeholder=""
+            emptyMessage="Nenhuma opção encontrada"
+            width="100%"
           />
         </div>
       }

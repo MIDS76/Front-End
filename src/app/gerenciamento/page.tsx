@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { useEffect } from "react";
-import {Turma } from "@/utils/types";
 import MedModal from "@/components/modal/medModal";
 import Lista from "@/components/lista";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,28 +16,9 @@ export default function GerenciamentoUsersTurmas() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchQueryUsuarios, setSearchQueryUsuarios] = useState("");
 
-  const [turmasFiltradas, setTurmasFiltradas] = React.useState<Turma[]>(
-    Array.from({ length: 10 }, (_, index) => ({
-      id: index + 1,
-      codigoTurma: `Turma ${index + 1}`,
-      nomeCurso: `Turma ${index + 1}`,
-      dataInicio: new Date().toISOString(),
-      dataFim: new Date().toISOString(),
-      status: "Ativa",
-    }))
-  );
-
-  const turmasArray = Object.values(turmas);
-  const usuariosArray = Object.values(usuarios);
-
-  useEffect(() => {
-    if (turmas) {
-      setTurmasFiltradas(turmasArray);
-    }
-
-  }, [turmas]);
+  const turmasArray = turmas;
+  const usuariosArray = usuarios;
 
   useEffect(() => {
     return () => {
@@ -73,7 +53,7 @@ export default function GerenciamentoUsersTurmas() {
 
             <ScrollArea className="w-full h-[600px] mt-5 md:w-[450px] md:m-auto">
               <div className="grid grid-cols-1 gap-6 px-4">
-                {turmasFiltradas?.map((classItem, index) => (
+                {turmasArray?.map((classItem, index) => (
                   <MedModal
                     key={index}
                     courseCode={classItem.codigoTurma}
@@ -104,10 +84,7 @@ export default function GerenciamentoUsersTurmas() {
               <Lista
                 isDialogOpen={isDialogOpen}
                 setIsDialogOpen={setIsDialogOpen}
-                setSearchQuery={setSearchQueryUsuarios}
-                searchQuery={searchQueryUsuarios}
                 tipo="edit"
-                setSelectedContact={() => { }}
                 usuarios={usuariosArray}
                 className="px-4"
               />

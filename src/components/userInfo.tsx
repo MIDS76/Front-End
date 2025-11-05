@@ -5,10 +5,11 @@ interface UserInfoProps {
   nome: string;
   email: string;
   copy?: boolean;
+  active: boolean;
 }
 
-const UserInfo = ({ nome, email, copy }: UserInfoProps) => (
-  <div className="flex gap-2 items-center w-1/2">
+const UserInfo = ({ nome, email, copy, active }: UserInfoProps) => (
+  <div className={`flex gap-2 items-center w-1/2 ${!active ? 'opacity-50 cursor-not-allowed' : ''}`}>
     <Avatar>
       <AvatarImage alt={nome} />
       <AvatarFallback className="select-none">

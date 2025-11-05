@@ -21,7 +21,7 @@ interface ListCellProps {
     | "limpa";
     onClick?: () => void;
     loading?: boolean;
-    removeUser: () => void;
+    removeUser?: () => void;
     isUserAlreadySelected?: boolean;
     isStarred?: boolean;
     onStarClick?: () => void;
@@ -34,43 +34,16 @@ interface ListCellProps {
 
 export function ListCell({
     usuario: user,
-    usuarioProfessor,
     copy,
     toggleSelected,
     tipo,
-    removeUser,
     isUserAlreadySelected,
-    conselho,
-    isDialogOpen,
     setIsDialogOpen,
     setEditingUser,
 }: ListCellProps) {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-    const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-    const [preenchido, setPreenchido] = useState(false);
     const [usuario, setUsuario] = useState<Usuario>({} as Usuario);
-    const isAnyDialogOpen = isDialogOpen || isConfirmOpen || isFormModalOpen;
-    const [campoForm, setCampoForm] = useState<CampoConselho | null>(null);
     const [isDropDownOpen, setIsDropDownOpen] = useState(false);
-
-    useEffect(() => {
-        if (campoForm)
-            setPreenchido(
-                campoForm?.pontosFortes.trim().length > 0 &&
-                campoForm?.oportunidadesMelhoria.trim().length > 0 &&
-                campoForm?.sugestoes.trim().length > 0
-            );
-    }, [campoForm]);
-
-    const campo = {
-        usuario: { id: user?.id ?? 0 + 1 },
-        conselho: { id: conselho?.id },
-        pontosFortes: "",
-        oportunidadesMelhoria: "",
-        sugestoes: "",
-        unidadeCurricular: "java",
-        professor: { id: usuarioProfessor?.id },
-    };
 
     useEffect(() => {
         if (user) {
@@ -81,15 +54,12 @@ export function ListCell({
     return (
         <li
             key={usuario?.id}
-            className={`flex items-center justify-between py-2 px-3 rounded-md shadow bg-card mb-2 last:mb-0 
-          ${tipo === "edit" ? "cursor-pointer" : ""}`}
-            onClick={(e) => { }}
+            className={`flex items-center justify-between py-2 px-3 rounded-md shadow bg-card mb-2 last:mb-0`}
         >
             <div className="flex flex-row items-center w-full">
-                <UserInfo nome={usuario?.nome} email={usuario?.email} copy={copy} />
-
+                <UserInfo nome={usuario?.nome} email={usuario?.email} copy={copy} active={usuario.isActive} />
                 <div className="text-sm text-muted-foreground inline-block">
-                    <p>{(usuario?.role ?? "").toLocaleUpperCase()}</p>
+                    <p className={`${!usuario.isActive ? 'text-gray-400' : ''}`}>{(usuario?.role ?? "").toLocaleUpperCase()}</p>
                 </div>
             </div>
 
@@ -102,24 +72,10 @@ export function ListCell({
                     setIsDialogOpen={setIsDialogOpen}
                     isConfirmOpen={isConfirmOpen}
                     setIsConfirmOpen={setIsConfirmOpen}
-                    removeUser={removeUser}
                 />
             )}
 
             {tipo === "checkbox" && <UserCheckbox usuario={usuario} toggleSelected={toggleSelected} />}
-
-            {tipo === "conselho" && campoForm && (
-                <UserConselho
-                    campoForm={campoForm}
-                    setCampoForm={setCampoForm}
-                    setIsDialogOpen={setIsDialogOpen}
-                    setIsFormModalOpen={setIsFormModalOpen}
-                    isFormModalOpen
-                    usuario={usuario}
-                    conselho={conselho!}
-                    usuarioProfessor={usuarioProfessor}
-                />
-            )}
 
             {tipo === "add" && (
                 <AddButton
