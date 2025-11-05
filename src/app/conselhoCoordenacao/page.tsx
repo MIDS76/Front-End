@@ -9,16 +9,17 @@ import { toast } from "sonner";
 
 type CampoFormulario = {
   titulo: string;
+  cadastro: string;
   positivos: string;
   melhoria: string;
   sugestoes: string;
 };
 
 const avaliacaoAlunos: CampoFormulario[] = [
-  { titulo: "Aluno 1", positivos: "", melhoria: "", sugestoes: "" },
-  { titulo: "Aluno 2", positivos: "", melhoria: "", sugestoes: "" },
-  { titulo: "Aluno 3", positivos: "", melhoria: "", sugestoes: "" },
-  { titulo: "Aluno 4", positivos: "", melhoria: "", sugestoes: "" },
+  { titulo: "Nome do aluno", cadastro: "0000", positivos: "", melhoria: "", sugestoes: "" },
+  { titulo: "Nome do aluno", cadastro: "0000", positivos: "", melhoria: "", sugestoes: "" },
+  { titulo: "Nome do aluno", cadastro: "0000", positivos: "", melhoria: "", sugestoes: "" },
+  { titulo: "Nome do aluno", cadastro: "0000", positivos: "", melhoria: "", sugestoes: "" },
 ];
 
 export default function ConselhoCoordenacao() {
@@ -41,26 +42,27 @@ export default function ConselhoCoordenacao() {
   const secaoAtual = formulario[pagina];
 
   return (
-    <div className="w-full h-screen flex flex-col items-center px-8 py-8">
+    <div className="w-full flex flex-col items-center px-8 py-8">
       <div className="flex w-full justify-center gap-8">
-        <div className="flex flex-col w-full max-w-[650px] gap-2">
-          <div className="rounded-lg shadow p-4 w-full bg-[#2B5E64] flex flex-col gap-1">
-            <h2 className="text-lg text-white font-semibold">JGS - AI MIDS 2024/1 INT1</h2>
-            <h2 className="text-lg text-white font-semibold">WEG - MI 76</h2>
-          </div>
+        <div className="flex flex-col w-full max-w-[750px] gap-2">
+        <div className="bg-white rounded-lg shadow p-4 mb-2">
+        <h5 className="text-3xl font-semibold text-foreground mb-1">JGS - AI MIDS 2024/1 INT1</h5>
+        <div className="border-b border-gray-400 my-2"></div>
+        <h5 className="text-3xl font-semibold text-foreground">WEG - MI 76</h5>
+        </div>
 
           <input
             type="text"
             placeholder="Buscar um usuário"
             value={searchQueryUsuarios}
             onChange={(e) => setSearchQueryUsuarios(e.target.value)}
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#71A151]"
+            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#71A151] mb-2"
           />
 
           <div className="bg-gray-100 rounded-md shadow-inner w-full h-[420px] overflow-y-auto"></div>
         </div>
 
-        <div className="flex flex-col items-end w-full max-w-[650px]">
+        <div className="flex flex-col items-end w-full max-w-[750px]">
           <div className="bg-white rounded-lg shadow p-6 w-full flex flex-col gap-6">
             <div className="flex flex-row items-center gap-3 mt-2">
               <img
@@ -72,7 +74,7 @@ export default function ConselhoCoordenacao() {
                 <h2 className="text-2xl font-bold text-foreground">
                   {secaoAtual.titulo}
                 </h2>
-                <p className="text-base font-medium text-gray-700"></p>
+                <p className="text-base font-medium text-gray-700">Cadastro: {secaoAtual.cadastro}</p>
               </div>
             </div>
 
