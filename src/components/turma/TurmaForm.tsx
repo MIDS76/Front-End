@@ -13,32 +13,58 @@ interface TurmaFormProps {
     initialData?: {
         codigoTurma: string;
         nomeCurso: string;
-        dataIncio: string;
+        dataInicio: string;
         dataFim: string;
     };
     alunos: Usuario[];
-    onSubmit: (form: { codigoTurma: string; nomeCurso: string; dataIncio: string; dataFim: string },
+    onSubmit: (form: { codigoTurma: string; nomeCurso: string; dataInicio: string; dataFim: string },
         alunos: Usuario[]) => void;
 }
 
 export default function TurmaForm({ title, initialData, alunos, onSubmit }: TurmaFormProps) {
     const router = useRouter();
-    const [selectedUsers, setSelectedUsers] = useState<Usuario[]>([]);
+
     const [form, setForm] = useState({
         codigoTurma: initialData?.codigoTurma || "",
         nomeCurso: initialData?.nomeCurso || "",
-        dataIncio: initialData?.dataIncio || "",
+        dataInicio: initialData?.dataInicio || "",
         dataFim: initialData?.dataFim || "",
     });
 
-    const [nome, setNome] = useState("");
+    const [errors, setErrors] = useState<{ codigoTurma?: string; nomeCurso?: string; dataInicio?: string; dataFim?: string; listaAlunos?: string }>({});
+
+    const validate = () => {
+        const newErrors: typeof errors = {};
+
+        if (!form.codigoTurma.trim()) newErrors.codigoTurma = "O código da turma é obrigatório.";
+        if (!form.nomeCurso.trim()) newErrors.nomeCurso = "O nome do curso é obrigatório.";
+        if (!form.dataInicio.trim()) newErrors.dataInicio = "Selecione a data de início da turma.";
+        if (!form.dataFim.trim()) newErrors.dataFim = "Selecione a data de fim da turma.";
+        if (alunos.length === 0) newErrors.listaAlunos = "Adicione os alunos à turma.";
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSubmit = () => {
+        if (validate()) {
+            onSubmit(form, alunos);
+            setTimeout(() => {
+                router.back();
+            }, 1500);
+        } else {
+            toast.error("Preencha todos os campos corretamente!");
+        }
+    };
+
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     const handleChange = (field: string, value: string) => {
         setForm((prev) => ({ ...prev, [field]: value }));
     };
 
     const [file, setFile] = useState<File | null>(null);
-    
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files ? e.target.files[0] : null;
         if (selectedFile) {
@@ -54,6 +80,8 @@ export default function TurmaForm({ title, initialData, alunos, onSubmit }: Turm
             toast.error("Nenhum arquivo selecionado.");
         }
     };
+
+
 
     return (
         <div className="p-6">
@@ -78,6 +106,7 @@ export default function TurmaForm({ title, initialData, alunos, onSubmit }: Turm
                                 placeholder="Ex: MI 74"
                                 editavel={true}
                                 onChange={(e) => handleChange("codigoTurma", e.target.value)}
+                                error={errors.codigoTurma}
                             />
                         </div>
                         <div className="mb-4">
@@ -88,26 +117,29 @@ export default function TurmaForm({ title, initialData, alunos, onSubmit }: Turm
                                 id="course"
                                 placeholder="Insira o curso"
                                 onChange={(e) => handleChange("nomeCurso", e.target.value)}
+                                error={errors.nomeCurso}
                             />
                         </div>
                         <div className="mb-4">
                             <TextField
-                                value={form.dataIncio}
+                                value={form.dataInicio}
                                 label="Data de Início"
-                                type="text"
+                                type="date"
                                 id="dataInicio"
                                 placeholder="Insira a data de início da turma"
                                 onChange={(e) => handleChange("dataInicio", e.target.value)}
+                                error={errors.dataInicio}
                             />
                         </div>
                         <div className="mb-4">
                             <TextField
-                                value={form.dataIncio}
+                                value={form.dataFim}
                                 label="Data de Fim"
-                                type="text"
+                                type="date"
                                 id="dataFim"
                                 placeholder="Insira a data de fim da turma"
                                 onChange={(e) => handleChange("dataFim", e.target.value)}
+                                error={errors.dataFim}
                             />
                         </div>
                         <div className="flex justify-start gap-2 mt-auto">
@@ -121,10 +153,7 @@ export default function TurmaForm({ title, initialData, alunos, onSubmit }: Turm
                             </Button>
                             <Button
                                 onClick={() => {
-                                    onSubmit(form, selectedUsers);
-                                    setTimeout(() => {
-                                        router.back();
-                                    }, 1500);
+                                    handleSubmit();
                                 }}
                             >
                                 Salvar
@@ -158,18 +187,16 @@ export default function TurmaForm({ title, initialData, alunos, onSubmit }: Turm
                     <h2 className="ml-4 text-2xl font-semibold mb-4 text-card-foreground">
                         Alunos da Turma
                     </h2>
+                    
+                    {errors.listaAlunos && (
+                            <p className="text-red-500 text-sm mt-2 text-center">{errors.listaAlunos}</p>
+                        )}
 
                     <Lista
-                        isDialogOpen={false}
-                        setIsDialogOpen={() => { }}
+                        isDialogOpen={isDialogOpen}
+                        setIsDialogOpen={setIsDialogOpen}
                         usuarios={alunos}
-                        setSelectedContact={(u) =>
-                            setSelectedUsers((prev) =>
-                                prev.some((s) => s.id === u.id) ? prev : [...prev, u]
-                            )
-                        }
-                        tipo={"edit"}
-                        selectedUsers={selectedUsers}
+                        tipo={title === "Criar Turma" ? "limpa" : "edit"}
                     />
                     <div
                         className="rounded-md shadow-sm overflow-y-auto pr-2"

@@ -25,7 +25,7 @@ export default function GereciarTurma() {
         initialData={{
           codigoTurma: turma?.codigoTurma ?? "",
           nomeCurso: turma?.nomeCurso ?? "",
-          dataIncio: turma?.dataInicio ?? "",
+          dataInicio: turma?.dataInicio ?? "",
           dataFim: turma?.dataFim ?? "",
         }}
         alunos={alunos}

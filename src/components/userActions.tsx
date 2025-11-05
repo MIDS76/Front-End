@@ -12,7 +12,7 @@ interface UserActionsProps {
   setEditingUser: React.Dispatch<React.SetStateAction<Usuario>>;
   isConfirmOpen: boolean;
   setIsConfirmOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  removeUser: () => void;
+  removeUser?: () => void;
 }
 
 const UserActions = ({
@@ -20,10 +20,7 @@ const UserActions = ({
   isDropDownOpen,
   setIsDropDownOpen,
   setEditingUser,
-  setIsDialogOpen,
-  isConfirmOpen,
-  setIsConfirmOpen,
-  removeUser,
+  setIsDialogOpen
 }: UserActionsProps) => (
     
     <div className="flex items-center space-x-2">
@@ -53,33 +50,8 @@ const UserActions = ({
         >
           <Icon icon="MdEditSquare" /> Editar
         </DropdownMenuItem>
-        <DropdownMenuItem
-          className="cursor-pointer text-destructive"
-          onClick={(e: { stopPropagation: () => void }) => {
-            e.stopPropagation();
-            setIsConfirmOpen(false);
-            setIsDropDownOpen(false);
-            setTimeout(() => {
-              setIsConfirmOpen(true);
-            }, 100);
-          }}
-        >
-          <Icon icon="BiSolidTrashAlt" /> Desativar
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-    <ActionModal
-      isOpen={isConfirmOpen}
-      setOpen={setIsConfirmOpen}
-      title="Desativar Usuário"
-      description={`Tem certeza que deseja desativar o usuário ${usuario.nome}?`}
-      actionButtonLabel="Desativar"
-      destructive
-      onConfirm={() => {
-          removeUser();
-          setIsConfirmOpen(false);
-        }}
-    />
   </div>
 );
 

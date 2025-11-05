@@ -27,6 +27,7 @@ export interface Usuario {
   nome: string;
   email: string;
   role: string;
+  isActive: boolean;
 }
 
 export const USER_ROLES = [
@@ -35,6 +36,11 @@ export const USER_ROLES = [
   { value: "PROFESSOR", label: "Professor" },
 
 ] as const;
+
+export const ACTIVE = [
+  { value: "true", label: "Ativo" },
+  { value: "false", label: "Desativado" },
+]
 
 export type UserRoles = (typeof USER_ROLES)[number]["value"];
 
