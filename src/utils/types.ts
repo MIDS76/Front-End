@@ -39,7 +39,7 @@ export const USER_ROLES = [
 
 export const ACTIVE = [
   { value: "true", label: "Ativo" },
-  { value: "false", label: "Desativado" },
+  { value: "false", label: "Inativo" },
 ]
 
 export type UserRoles = (typeof USER_ROLES)[number]["value"];
