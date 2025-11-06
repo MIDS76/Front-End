@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import Paginacao from "@/components/paginacao";
 
 
+
 // Dropdown e filtros
 import {
   DropdownMenu,
@@ -185,11 +186,9 @@ function DevolutivaAluno({
       </CardContent>
     </Card>
   </aside>
-  
+
   );
 }
-
-
 // ------------------ COMPONENTE PRINCIPAL: AlunoHome ------------------
 export default function AlunoHome() {
   const [selectedConselho, setSelectedConselho] = useState<number | null>(null);
@@ -233,7 +232,7 @@ const totalPages = Math.ceil(conselhosFiltrados.length / itensPorPagina);
       <div className="flex-1 p-8">
         {/* Título e filtro */}
         <div className="flex items-center gap-2 mb-6 mt-20">
-          <h1 className="text-2xl font-semibold text-primary">
+          <h1 className="font-title text-2xl font-bold text-accent-foreground px-4">
             Meus Conselhos
             </h1>
 
