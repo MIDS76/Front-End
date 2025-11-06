@@ -18,6 +18,7 @@ interface ListaProps {
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setSearchQuery?: React.Dispatch<React.SetStateAction<string>>;
+  onSelectUsuario?: (usuario: Usuario, index: number) => void;
 }
 
 export default function Lista({
@@ -26,7 +27,8 @@ export default function Lista({
   tipo,
   conselho,
   isDialogOpen,
-  setIsDialogOpen
+  setIsDialogOpen,
+  onSelectUsuario
 }: ListaProps) {
   const [selectedUsuarios, setSelectedUsuarios] = useState<Usuario[]>([]);
   const [editingUser, setEditingUser] = useState<Usuario>({} as Usuario);
@@ -43,19 +45,25 @@ export default function Lista({
     <section className="flex flex-col items-stretch justify-start w-full gap-4 ">
       <ScrollArea className={cn(className, "flex flex-col")}>
         {usuarios?.map((usuario, index) => (
-          <ListCell
-            isDialogOpen={isDialogOpen}
-            setIsDialogOpen={setIsDialogOpen}
-            key={index}
-            usuario={usuario}
-            conselho={conselho!}
-            toggleSelected={() => toggleUsuario(usuario)}
-            tipo={tipo}
-            setEditingUser={setEditingUser}
-            copy
-          />
+          <div
+            key={usuario.id??index}
+            onClick={() => onSelectUsuario && onSelectUsuario(usuario, index)}
+            className="cursor-pointer"
+          >
+            <ListCell
+              isDialogOpen={isDialogOpen}
+              setIsDialogOpen={setIsDialogOpen}
+              usuario={usuario}
+              conselho={conselho!}
+              toggleSelected={() => toggleUsuario(usuario)}
+              tipo={tipo}
+              setEditingUser={setEditingUser}
+              copy
+            />
+          </div>
         ))}
       </ScrollArea>
+
       {tipo === "edit" && (
         <EditUserDialog
           usuario={editingUser!}

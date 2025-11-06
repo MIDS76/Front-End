@@ -1,72 +1,148 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import ActionModal from "@/components/modal/actionModal";
 import ButtonTT from "@/components/button/ButtonTT";
 import { toast } from "sonner";
-import Lista, { Usuario } from "@/components/lista";
+import { Usuario } from "@/utils/types";
+import usuariosData from "@/data/usuarios.json";
 
 type CampoFormulario = {
   titulo: string;
-  cadastro: string;
   positivos: string;
   melhoria: string;
   sugestoes: string;
 };
 
-const avaliacaoAlunos: CampoFormulario[] = [
-  { titulo: "Artur Neves Hopner", cadastro: "0001", positivos: "", melhoria: "", sugestoes: "" },
-  { titulo: "Letícia Moretti", cadastro: "0002", positivos: "", melhoria: "", sugestoes: "" },
-  { titulo: "Bruna Júlia Reckziegel", cadastro: "0003", positivos: "", melhoria: "", sugestoes: "" },
-  { titulo: "Giulia Fugel", cadastro: "0004", positivos: "", melhoria: "", sugestoes: "" },
-];
-
 export default function ConselhoCoordenacao() {
-  const router = useRouter(); 
-
-  const [formulario, setFormulario] = useState<CampoFormulario[]>(() => {
-    const salvo = localStorage.getItem("conselho-formulario");
-    return salvo ? JSON.parse(salvo) : avaliacaoAlunos;
-  });
-
+  const router = useRouter();
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [formulario, setFormulario] = useState<CampoFormulario[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [pagina, setPagina] = useState(0);
   const [searchQueryUsuarios, setSearchQueryUsuarios] = useState("");
+  const [usuarioSelecionado, setUsuarioSelecionado] = useState<Usuario | null>(null);
+  const [errosCampos, setErrosCampos] = useState({
+    positivos: false,
+    melhoria: false,
+    sugestoes: false,
+  });
 
   useEffect(() => {
-    localStorage.setItem("conselho-formulario", JSON.stringify(formulario));
+    const alunos = usuariosData.filter((u) => u.role === "Aluno");
+    setUsuarios(alunos);
+
+    const salvoRaw = localStorage.getItem("conselho-formulario");
+    if (!salvoRaw) {
+      const inicial = alunos.map((aluno) => ({
+        titulo: aluno.nome,
+        positivos: "",
+        melhoria: "",
+        sugestoes: "",
+      }));
+      setFormulario(inicial);
+      return;
+    }
+
+    try {
+      const salvo: CampoFormulario[] = JSON.parse(salvoRaw);
+      const alinhado = alunos.map((aluno) => {
+        const achado = salvo.find((s) => s.titulo === aluno.nome);
+        return (
+          achado ?? {
+            titulo: aluno.nome,
+            positivos: "",
+            melhoria: "",
+            sugestoes: "",
+          }
+        );
+      });
+      setFormulario(alinhado);
+      localStorage.setItem("conselho-formulario", JSON.stringify(alinhado));
+    } catch {
+      const inicial = alunos.map((aluno) => ({
+        titulo: aluno.nome,
+        positivos: "",
+        melhoria: "",
+        sugestoes: "",
+      }));
+      setFormulario(inicial);
+      localStorage.setItem("conselho-formulario", JSON.stringify(inicial));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (formulario.length > 0) {
+      localStorage.setItem("conselho-formulario", JSON.stringify(formulario));
+    }
   }, [formulario]);
 
   const handleChange = (campo: keyof CampoFormulario, valor: string) => {
     const novoFormulario = [...formulario];
     novoFormulario[pagina] = { ...novoFormulario[pagina], [campo]: valor };
     setFormulario(novoFormulario);
+    setErrosCampos((prev) => ({ ...prev, [campo]: false }));
+  };
+
+  const validarCampos = () => {
+    const secaoAtual = formulario[pagina];
+    const erros = {
+      positivos: secaoAtual.positivos.trim() === "",
+      melhoria: secaoAtual.melhoria.trim() === "",
+      sugestoes: secaoAtual.sugestoes.trim() === "",
+    };
+    setErrosCampos(erros);
+
+    if (erros.positivos || erros.melhoria || erros.sugestoes) {
+      toast.error("Preencha todos os campos antes de continuar!");
+      return false;
+    }
+    return true;
+  };
+
+  const trocarPagina = (novaPagina: number) => {
+    if (!validarCampos()) return;
+    setPagina(novaPagina);
+    setUsuarioSelecionado(usuarios[novaPagina]);
+  };
+
+  const trocarAluno = (aluno: Usuario, index: number) => {
+    if (!validarCampos()) return;
+    setPagina(index);
+    setUsuarioSelecionado(aluno);
   };
 
   const handleSalvar = () => {
+    if (!validarCampos()) return;
+
     toast.success("Conselho salvo com sucesso!");
     localStorage.setItem("conselho-formulario", JSON.stringify(formulario));
-
-    setTimeout(() => {
-      router.push("/"); 
-    }, 800); 
+    setTimeout(() => router.push("/"), 800);
   };
 
-  const secaoAtual = formulario[pagina];
+  const alunosFiltrados = usuarios.filter((usuario) =>
+    usuario.nome.toLowerCase().includes(searchQueryUsuarios.toLowerCase())
+  );
 
-  const camposPreenchidos =
-    secaoAtual.positivos.trim() !== "" &&
-    secaoAtual.melhoria.trim() !== "" &&
-    secaoAtual.sugestoes.trim() !== "";
+  const secaoAtual = usuarioSelecionado
+    ? formulario.find((f) => f.titulo === usuarioSelecionado.nome) ?? {
+        titulo: "",
+        positivos: "",
+        melhoria: "",
+        sugestoes: "",
+      }
+    : formulario[pagina] ?? {
+        titulo: "",
+        positivos: "",
+        melhoria: "",
+        sugestoes: "",
+      };
 
   const todosPreenchidos = formulario.every(
-    (aluno) =>
-      aluno.positivos.trim() !== "" &&
-      aluno.melhoria.trim() !== "" &&
-      aluno.sugestoes.trim() !== ""
+    (f) => f.positivos.trim() && f.melhoria.trim() && f.sugestoes.trim()
   );
 
   return (
@@ -87,62 +163,91 @@ export default function ConselhoCoordenacao() {
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#71A151] mb-2"
           />
 
-          <div className="bg-gray-200 rounded-md shadow-inner w-full h-[377px] overflow-y-auto"></div>
+          <div className="bg-gray-100 rounded-md shadow-inner w-full h-[377px] overflow-y-auto p-1">
+            {alunosFiltrados.map((aluno) => {
+              const index = formulario.findIndex((f) => f.titulo === aluno.nome);
+              return (
+                <button
+                  key={aluno.id}
+                  onClick={() => trocarAluno(aluno, index)}
+                  className={`flex items-center gap-3 w-full p-3 my-1 rounded-md text-left bg-white border border-gray-200 shadow-sm hover:shadow-md transition ${
+                    secaoAtual.titulo === aluno.nome ? "bg-gray-50 border-gray-300" : ""
+                  }`}
+                >
+                  <img
+                    src={`/${aluno.nome.split(" ")[0]}.png`}
+                    alt={aluno.nome}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  <div>
+                    <h4 className="font-medium text-gray-900">{aluno.nome}</h4>
+                    <p className="text-sm text-gray-600">{aluno.email}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="flex flex-col items-end w-full max-w-[750px]">
           <div className="bg-white rounded-lg shadow p-6 w-full flex flex-col gap-6">
             <div className="flex flex-row items-center gap-3 mt-2">
               <img
-                src="/Artur.png"
-                alt="Foto do aluno"
+                src={`/${usuarioSelecionado?.nome.split(" ")[0] || "default"}.png`}
+                alt={usuarioSelecionado?.nome || "Foto do aluno"}
                 className="w-20 h-20 rounded-full object-cover"
               />
               <div>
                 <h2 className="text-2xl font-bold text-foreground">
-                  {secaoAtual.titulo}
+                  {secaoAtual.titulo || "Selecione um aluno"}
                 </h2>
-                <p className="text-base font-medium text-gray-700">
-                  Cadastro: {secaoAtual.cadastro}
-                </p>
               </div>
             </div>
 
             <div className="mt-6 pl-2 pr-4 space-y-6">
               <div>
-                <Label className="text-sm font-semibold text-foreground">
-                  Pontos positivos
-                </Label>
+                <Label className="text-sm font-semibold text-foreground">Pontos positivos</Label>
                 <Textarea
                   placeholder="Insira aqui os pontos positivos..."
-                  className="mt-2 resize-none bg-card"
+                  className={`mt-2 resize-none bg-card ${
+                    errosCampos.positivos ? "border-2 border-red-500 focus-visible:ring-red-500" : ""
+                  }`}
                   value={secaoAtual.positivos}
                   onChange={(e) => handleChange("positivos", e.target.value)}
                 />
+                {errosCampos.positivos && (
+                  <p className="text-sm text-red-500 mt-1">Este campo é obrigatório!</p>
+                )}
               </div>
 
               <div>
-                <Label className="text-sm font-semibold text-foreground">
-                  Pontos de melhoria
-                </Label>
+                <Label className="text-sm font-semibold text-foreground">Pontos de melhoria</Label>
                 <Textarea
                   placeholder="Insira aqui os pontos de melhoria..."
-                  className="mt-2 resize-none bg-card"
+                  className={`mt-2 resize-none bg-card ${
+                    errosCampos.melhoria ? "border-2 border-red-500 focus-visible:ring-red-500" : ""
+                  }`}
                   value={secaoAtual.melhoria}
                   onChange={(e) => handleChange("melhoria", e.target.value)}
                 />
+                {errosCampos.melhoria && (
+                  <p className="text-sm text-red-500 mt-1">Este campo é obrigatório!</p>
+                )}
               </div>
 
               <div>
-                <Label className="text-sm font-semibold text-foreground">
-                  Sugestões
-                </Label>
+                <Label className="text-sm font-semibold text-foreground">Sugestões</Label>
                 <Textarea
                   placeholder="Insira aqui as sugestões..."
-                  className="mt-2 resize-none bg-card"
+                  className={`mt-2 resize-none bg-card ${
+                    errosCampos.sugestoes ? "border-2 border-red-500 focus-visible:ring-red-500" : ""
+                  }`}
                   value={secaoAtual.sugestoes}
                   onChange={(e) => handleChange("sugestoes", e.target.value)}
                 />
+                {errosCampos.sugestoes && (
+                  <p className="text-sm text-red-500 mt-1">Este campo é obrigatório!</p>
+                )}
               </div>
             </div>
           </div>
@@ -152,10 +257,11 @@ export default function ConselhoCoordenacao() {
               <ButtonTT
                 tooltip="Anterior"
                 mode="default"
-                disabled={pagina === 0 || !camposPreenchidos}
-                onClick={() => setPagina((prev) => Math.max(prev - 1, 0))}
-                className={`text-[14px] leading-[20px] bg-white text-black border border-gray-300 hover:bg-gray-100 px-8 ${pagina === 0 || !camposPreenchidos ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                onClick={() => trocarPagina(pagina - 1)}
+                disabled={pagina === 0}
+                className={`text-[14px] leading-[20px] bg-white text-black border border-gray-300 hover:bg-gray-100 px-8 ${
+                  pagina === 0 ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
                 Anterior
               </ButtonTT>
@@ -163,14 +269,11 @@ export default function ConselhoCoordenacao() {
               <ButtonTT
                 tooltip="Próximo"
                 mode="default"
-                disabled={pagina === formulario.length - 1 || !camposPreenchidos}
-                onClick={() =>
-                  setPagina((prev) => Math.min(prev + 1, formulario.length - 1))
-                }
-                className={`text-[14px] leading-[20px] bg-white text-black border border-gray-300 hover:bg-gray-100 px-8 ${pagina === formulario.length - 1 || !camposPreenchidos
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
-                  }`}
+                onClick={() => trocarPagina(pagina + 1)}
+                disabled={pagina === formulario.length - 1}
+                className={`text-[14px] leading-[20px] bg-white text-black border border-gray-300 hover:bg-gray-100 px-8 ${
+                  pagina === formulario.length - 1 ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
                 Próximo
               </ButtonTT>
@@ -181,8 +284,9 @@ export default function ConselhoCoordenacao() {
               mode="default"
               disabled={!todosPreenchidos}
               onClick={() => setIsConfirmOpen(true)}
-              className={`text-[14px] leading-[20px] px-8 ${!todosPreenchidos ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+              className={`text-[14px] leading-[20px] px-8 ${
+                !todosPreenchidos ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
               Próximo passo
             </ButtonTT>
