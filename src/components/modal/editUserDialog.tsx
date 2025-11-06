@@ -3,19 +3,20 @@ import { Combobox } from "../ui/combobox";
 import { Input } from "../ui/input";
 import ActionModal from "./actionModal";
 import { useEffect, useState } from "react";
+import usuariosLista from "@/data/usuarios.json";
 
 interface EditUserDialogProps {
   usuario: Usuario;
-  setUsuario: React.Dispatch<React.SetStateAction<Usuario>>;
   isOpen: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onUpdate: (updatedUsuario: Usuario) => void;
 }
 
 export default function EditUserDialog({
   usuario,
-  setUsuario,
   isOpen,
   setOpen,
+  onUpdate
 }: EditUserDialogProps) {
   const [nome, setNome] = useState(usuario.nome);
   const [email, setEmail] = useState(usuario.email);
@@ -27,6 +28,18 @@ export default function EditUserDialog({
     setActive(usuario.isActive ? "true" : "false");
   }, [usuario]);
 
+  const handleUpdateUser = () => {
+    const updatedUsuario = {
+      ...usuario,
+      nome,
+      email,
+      isActive: active === "true",
+    };
+
+    onUpdate(updatedUsuario);
+    setOpen(false);
+  }
+
   return (
     <ActionModal
       isOpen={isOpen}
@@ -36,12 +49,7 @@ export default function EditUserDialog({
         setOpen(false);
       }}
       onConfirm={() => {
-        setUsuario({
-          ...usuario,
-          nome,
-          email
-        });
-        setOpen(false);
+        handleUpdateUser();
       }}
       description=""
       conteudo={
@@ -64,7 +72,7 @@ export default function EditUserDialog({
             items={ACTIVE}
             value={active}
             onChange={setActive}
-            placeholder="Selecione o status do usuário"
+            placeholder=""
             emptyMessage="Nenhuma opção encontrada"
             width="100%"
           />
