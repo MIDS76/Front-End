@@ -75,6 +75,10 @@ export default function ConselhoPage() {
     setTimeout(() => setShowMessage(false), 2000);
   }
 
+  function handleRemover(unidade: string) {
+    setSalvos((prev) => prev.filter((s) => s.unidade !== unidade));
+  }
+
   useEffect(() => {}, []);
 
   return (
@@ -160,21 +164,21 @@ export default function ConselhoPage() {
             </div>
           </div>
 
-          {/* Botão de Salvar abaixo do card da direita */}
-          <div className="flex justify-end mt-4 w-[785px] mx-auto">
+          {/* Botão Salvar + Mensagem lado a lado */}
+          <div className="flex justify-end mt-4 w-[775px] mx-auto">
             <div className="flex items-center gap-3">
-              <button
-                onClick={handleSalvar}
-                className="bg-[#0f5653] hover:bg-[#0c4946] text-white px-5 py-2 rounded-md text-sm font-medium shadow-md"
-              >
-                Salvar
-              </button>
-
               {showMessage && (
                 <span className="text-[#0f5653] text-sm font-medium">
                   Unidade salva com sucesso!
                 </span>
               )}
+
+              <button
+                onClick={handleSalvar}
+                className="bg-[#0f5653] hover:bg-[#0c4946] text-white px-6 py-2 rounded-md text-sm font-medium shadow-md"
+              >
+                Salvar
+              </button>
             </div>
           </div>
         </div>
@@ -206,8 +210,17 @@ export default function ConselhoPage() {
                   <div className="text-sm text-gray-700 w-1/2 truncate">
                     {s.unidade}
                   </div>
-                  <div className="text-sm font-medium text-gray-800 w-1/2 text-right truncate">
-                    {s.professor}
+                  <div className="flex items-center justify-end gap-2 w-1/2 truncate">
+                    <span className="text-sm font-medium text-gray-800 truncate">
+                      {s.professor}
+                    </span>
+                    <button
+                      onClick={() => handleRemover(s.unidade)}
+                      className="text-gray-400 hover:text-red-600 text-sm font-bold"
+                      title="Remover"
+                    >
+                      ×
+                    </button>
                   </div>
                 </div>
               ))
