@@ -6,8 +6,10 @@ import ConselhosModal from "@/components/modal/conselhosModal";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import useSWR from "swr";
 
-import { Page, Turma } from "@/utils/types";
-import Paginacao from "@/components/paginacao";
+
+import { Page } from "@/utils/types";
+
+import Paginacao from "@/components/paginacao/paginacao";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SearchBar from "@/components/input/searchBar";
 import FiltrosDinamicos from "@/components/filtros/FiltrosDinamicos";

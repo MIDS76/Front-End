@@ -9,7 +9,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import Lista, { Usuario } from "@/components/lista";
+import Lista, { Usuario } from "@/components/lista/lista";
 import ButtonTT from "@/components/button/ButtonTT";
 import { toast } from "sonner";
 

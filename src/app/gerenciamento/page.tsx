@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
 import MedModal from "@/components/modal/medModal";
-import Lista from "@/components/lista";
+import Lista from "@/components/lista/lista";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import turmas from "@/data/turma.json";
 import usuarios from "@/data/usuarios.json";
@@ -48,6 +48,7 @@ export default function GerenciamentoUsersTurmas() {
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
                 filter
+                filtrosMostrar={{ aluno: false, turma: true, conselho: false }}
               />
             </div>
 
@@ -78,6 +79,7 @@ export default function GerenciamentoUsersTurmas() {
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
                 filter
+                filtrosMostrar={{ aluno: true, turma: false, conselho: false }}
               />
             </div>
             <div className="lg:pr-28">

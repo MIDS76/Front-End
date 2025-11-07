@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Usuario } from "./lista";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -18,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/context/AuthContext";
+import { Usuario } from "@/utils/types";
 
 export function ConfigDialog() {
   const [isOpen, setOpen] = React.useState(false);
@@ -123,6 +123,7 @@ export function ConfigDialog() {
     nome: "Aluno",
     email: "aluno@gmail.com",
     role: "ALUNO",
+    isActive: true
   };
 
   return (

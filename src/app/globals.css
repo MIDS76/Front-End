@@ -1,6 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@300;400;500;600;700&family=Noto+Sans:wght@300;400;500;600;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -243,38 +242,53 @@
   --radius: 0.75rem;
 }
 
-.typography-default {
-  --font-h1: "IBM Plex Serif", serif;
+
+/* Fonte padrão (sem serifa — Noto Sans) */
+.font-sans {
+  --font-h1: "Noto Sans", sans-serif;
   --font-text: "Noto Sans", sans-serif;
 }
 
-.typography-alternative {
+/* Fonte com serifa  */
+.font-serif {
   --font-h1: "IBM Plex Serif", serif;
-  --font-text: "Libre Caslon Text", serif;
+  --font-text: "IBM Plex Serif", serif;
 }
 
-h1 {
+/* Aplica as variáveis nos elementos */
+h1, h2, h3 {
   font-family: var(--font-h1);
 }
 
-h2,h3,p,label,button,input {
+body, p, label, button, input, textarea {
   font-family: var(--font-text);
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+/* --- Tipografia global --- */
+
+/* Fonte padrão sem serifa */
+html.default,
+.typography-default {
+  --font-text: "Noto Sans", sans-serif;
+  font-family: var(--font-text);
 }
 
-/*adicicao nova , UserNovo*/
-[data-state="open"].dialog-overlay {
-  z-index: 9998 !important;
+/* Fonte alternativa com serifa */
+html.alternative,
+.typography-alternative {
+  --font-text: "Noto Serif", serif;
+  font-family: var(--font-text);
 }
-[data-state="open"].dialog-content {
-  z-index: 9999 !important;
+
+/* Garante que o body herda */
+body {
+  font-family: var(--font-text);
+}
+html.alternative .font-title {
+  font-family: "Noto Serif", serif;
+}
+
+html.default .font-title {
+  font-family: "Noto Sans", sans-serif;
 }
 
