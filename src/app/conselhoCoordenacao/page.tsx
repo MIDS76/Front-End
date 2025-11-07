@@ -163,6 +163,7 @@ export default function ConselhoCoordenacao() {
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#71A151] mb-2"
           />
 
+          {/*Usar o componente lista.tsx, se não der modificar o componente lista*/}
           <div className="bg-gray-100 rounded-md shadow-inner w-full h-[377px] overflow-y-auto p-1">
             {alunosFiltrados.map((aluno) => {
               const index = formulario.findIndex((f) => f.titulo === aluno.nome);
@@ -191,6 +192,7 @@ export default function ConselhoCoordenacao() {
 
         <div className="flex flex-col items-end w-full max-w-[750px]">
           <div className="bg-white rounded-lg shadow p-6 w-full flex flex-col gap-6">
+            {/**Usar userInfo */}
             <div className="flex flex-row items-center gap-3 mt-2">
               <img
                 src={`/${usuarioSelecionado?.nome.split(" ")[0] || "default"}.png`}
