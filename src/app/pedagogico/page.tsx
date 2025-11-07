@@ -5,9 +5,9 @@ import turmasData from "@/data/turma.json";
 import { Turma } from "@/utils/types";
 import MedModal from "@/components/modal/medModal";
 import SearchBar from "@/components/input/searchBar";
-import Paginacao from "@/components/paginacao";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ListaConselhos from "@/components/modal/listaConselhos"; // Adicione este import
+import Paginacao from "@/components/paginacao/paginacao";
 
 export default function PedagogicoPage() {
   const [dataAleatoria] = useState(() => {
