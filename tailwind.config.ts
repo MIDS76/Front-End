@@ -58,8 +58,8 @@ export default {
   		},
   		fontFamily: {
   			title: [
-  				'IBM Plex Serif',
-  				'serif'
+  				'Noto Sans',
+  				'sans-serif'
   			],
   			body: [
   				'Noto Sans',

@@ -1,38 +1,44 @@
-{
-    "usuario1": {
+[
+    {
         "id": 1,
         "nome": "Raquel",
         "email": "raquel@gmail.com",
-        "role": "Aluno"
+        "role": "Aluno",
+        "isActive": true
     },
-    "usuario2": {
+    {
         "id": 2,
         "nome": "Juscelino",
         "email": "juscelino@gmail.com",
-        "role": "Professor"
+        "role": "Professor",
+        "isActive": true
     },
-    "usuario3": {
+    {
         "id": 3,
         "nome": "Isabeli",
         "email": "isabeli@gmail.com",
-        "role": "Aluno"
+        "role": "Aluno",
+        "isActive": false
     },
-    "usuario4": {
+    {
         "id": 4,
         "nome": "Julia Macena",
         "email": "julia_macena@gmail.com",
-        "role": "Aluno"
+        "role": "Aluno",
+        "isActive": true
     },
-    "usuario5": {
+    {
         "id": 5,
         "nome": "Geovanna",
         "email": "geovanna@gmail.com",
-        "role": "Professor"
+        "role": "Professor",
+        "isActive": true
     },
-    "usuario6": {
+    {
         "id": 6,
         "nome": "Julia Gabrieli",
         "email": "julia_gabrieli@gmail.com",
-        "role": "Aluno"
+        "role": "Aluno",
+        "isActive": true
     }
-}
+]
