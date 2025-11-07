@@ -7,7 +7,7 @@ import { Mensagem, SalaChat } from "@/app/chat/page";
 import { toast } from "sonner";
 import { useRef } from "react";
 import { Usuario } from "@/utils/types";
-import { TextClickCopy } from "../textcopy";
+import { TextClickCopy } from "../lista/textcopy";
 
 interface ChatProps {
   contact: Usuario;
