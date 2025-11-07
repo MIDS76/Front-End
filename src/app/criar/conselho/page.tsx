@@ -236,7 +236,7 @@ export default function ConselhoPage() {
           <div className="absolute bottom-6 right-6">
             <button
               className="bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] text-base px-7 py-3 rounded-md shadow-md font-medium hover:bg-[hsl(var(--secondary))]"
-              onClick={() => router.push("/conselho/conselhoRepresentante")} // 👈 redireciona pra nova tela
+              onClick={() => router.push("/criar/conselho/representante")} // 👈 redireciona pra nova tela
             >
               Próximo passo
             </button>
