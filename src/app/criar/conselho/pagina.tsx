@@ -5,8 +5,6 @@ import { Button } from "@/components/ui/button";
 import Lista, { Usuario } from "@/components/lista";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import MedModal from "@/components/modal/medModal";
-import TurmaFilter from "@/components/input/turmasFilter";
-import { cn } from "@/lib/utils";
 import ProximoConselho from "./proximoConselho";
 import { useSearchParams } from "next/navigation";
 
