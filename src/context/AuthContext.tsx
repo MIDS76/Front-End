@@ -15,7 +15,7 @@ interface User {
 
 interface AuthContextProps {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<User | null>;
   logout: () => void;
   hasPermission: (roles: Perfil[]) => boolean;
   loading: boolean;
@@ -29,7 +29,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
-    // Recupera sessão existente do localStorage
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
@@ -37,7 +36,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<User | null> => {
     const fakeUsers = [
       { email: "aluno@email.com", password: "aluno123", perfil: "aluno"},
       { email: "pedagogico@email.com", password: "pedagogico123", perfil: "pedagogico"},
@@ -48,7 +47,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       (u) => u.email === email && u.password === password
     );
 
-    if (!found) return false;
+    if (!found) return null;
+
+    document.cookie = "isLoggedIn=true; path=/";
 
     const loggedUser: User = {
       nome: found.email.split("@")[0],
@@ -59,11 +60,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     localStorage.setItem("user", JSON.stringify(loggedUser));
     setUser(loggedUser);
-    return true;
+    return loggedUser;
   };
 
   const logout = () => {
     localStorage.removeItem("user");
+    document.cookie = "isLoggedIn=false; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     setUser(null);
     router.push("/login");
   };

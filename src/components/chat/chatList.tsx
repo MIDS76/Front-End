@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { ListCell, Usuario } from "../lista";
 import SearchBar from "../input/searchBar";
 import UsuariosListModal from "../modal/usuariosListModal";
 import ButtonTT from "../button/ButtonTT";
+import { Usuario } from "@/utils/types";
 
 interface ChatListProps {
   onSelectUsuario: (contact: Usuario) => void;
@@ -41,7 +41,7 @@ export default function ChatList({
         </UsuariosListModal>
       </SearchBar>
       <ul>
-        {usuarios?.map((contact) => (
+        {/*usuarios?.map((contact) => (
           <ListCell
             key={contact.id}
             usuario={contact}
@@ -52,7 +52,7 @@ export default function ChatList({
             setIsDialogOpen={() => {}}
             setEditingUser={() => {}}
           />
-        ))}
+        ))*/}
       </ul>
     </section>
   );

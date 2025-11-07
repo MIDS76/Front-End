@@ -13,7 +13,7 @@ export default function Login() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const { login, user } = useAuth();
+  const { login } = useAuth();
   const router = useRouter();
 
   const handleLogin = async (data: FormData) => {
@@ -29,12 +29,10 @@ export default function Login() {
       return;
     }
 
-    const success = await login(email, password);
+    const loggedUser = await login(email, password);
 
-    if (success) {
-      if (user) {
-        router.push('/' + user.perfil); // Redireciona para a rota baseada no perfil
-      }
+    if (loggedUser) {
+        router.push(`/${loggedUser.perfil}`);
     } else {
       setError(true);
       setErrorMessage("Login ou senha incorretos.");

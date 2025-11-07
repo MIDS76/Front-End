@@ -44,14 +44,14 @@ export default function MedModal({
       >
         <div className="pt-2 h-full">
           <h3
-            className={`font-semibold text-lg text-card dark:text-card-foreground ${
+            className={`font-semibold text-3xl text-card dark:text-card-foreground ${
               loading ? "text-card/70 dark:text-muted/70" : ""
             }`}
           >
             {courseCode}
           </h3>
           <p
-            className={`text-sm ${
+            className={`text-sm mt-3 ${
               loading
                 ? "text-card/70 dark:text-muted"
                 : "text-background dark:text-card-foreground"
