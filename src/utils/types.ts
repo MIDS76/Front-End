@@ -15,6 +15,8 @@ export interface Turma {
 }
 
 export interface Conselho {
+  periodoInicio(periodoInicio: any): import("react").ReactNode;
+  status: string;
   id: number;
   dataInicio: Date;
   dataFim: Date;

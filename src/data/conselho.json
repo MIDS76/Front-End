@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "turmaId": 4,
+    "periodoInicio": "2024-05-01",
+    "periodoFim": "2024-09-30",
+    "status": "Em Andamento"
+  },
+  {
+    "id": 2,
+    "turmaId": 4,
+    "periodoInicio": "2024-01-01",
+    "periodoFim": "2024-04-30",
+    "status": "Finalizado"
+  },
+  {
+    "id": 3,
+    "turmaId": 4,
+    "periodoInicio": "2024-05-01",
+    "periodoFim": "2024-09-30",
+    "status": "Em Andamento"
+  },
+  {
+    "id": 4,
+    "turmaId": 1,
+    "periodoInicio": "2025-02-01",
+    "periodoFim": "2025-07-30",
+    "status": "Em Andamento"
+  }
+]
