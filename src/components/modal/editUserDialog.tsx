@@ -1,25 +1,28 @@
 import { ACTIVE, Usuario } from "../../utils/types";
 import { Combobox } from "../ui/combobox";
-import { Input } from "../ui/input";
 import ActionModal from "./actionModal";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import TextField from "../input/textField";
+import { Label } from "@radix-ui/react-dropdown-menu";
 
 interface EditUserDialogProps {
   usuario: Usuario;
-  setUsuario: React.Dispatch<React.SetStateAction<Usuario>>;
   isOpen: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onUpdate: (updatedUsuario: Usuario) => void;
 }
 
 export default function EditUserDialog({
   usuario,
-  setUsuario,
   isOpen,
   setOpen,
+  onUpdate
 }: EditUserDialogProps) {
   const [nome, setNome] = useState(usuario.nome);
   const [email, setEmail] = useState(usuario.email);
   const [active, setActive] = useState(usuario.isActive ? "true" : "false");
+  const [errors, setErrors] = useState<{ nome?: string; email?: string; active?: string }>({});
 
   useEffect(() => {
     setNome(usuario.nome);
@@ -27,47 +30,101 @@ export default function EditUserDialog({
     setActive(usuario.isActive ? "true" : "false");
   }, [usuario]);
 
+  const validate = () => {
+    const newErrors: typeof errors = {};
+
+    if (!nome.trim()) newErrors.nome = "O nome é obrigatório.";
+    if (!email.trim()) {
+      newErrors.email = "O e-mail é obrigatório.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "E-mail inválido.";
+    }
+    if (!active.trim()) newErrors.active = "Selecione o status do usuário.";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleUpdateUser = () => {
+    if (validate()) {
+      const updatedUsuario = {
+        ...usuario,
+        nome,
+        email,
+        isActive: active === "true",
+      };
+
+      onUpdate(updatedUsuario);
+      setOpen(false);
+    } else {
+      toast.error("Preencha todos os campos corretamente!");
+    }
+  }
+
+  const handleCancel = () => {
+    setNome(usuario.nome);
+    setEmail(usuario.email);
+    setActive(usuario.isActive ? "true" : "false");
+    setErrors({});
+    setOpen(false);
+  };
+
   return (
     <ActionModal
       isOpen={isOpen}
       setOpen={setOpen}
       title="Editar Usuário"
       onClose={() => {
-        setOpen(false);
+        handleCancel();
       }}
       onConfirm={() => {
-        setUsuario({
-          ...usuario,
-          nome,
-          email
-        });
-        setOpen(false);
+        handleUpdateUser();
       }}
       description=""
       conteudo={
         <div className="flex flex-col gap-2">
-          <Input
-            type="text"
-            placeholder="Nome"
+          <TextField
             value={nome}
-            className="w-full"
+            label="Nome"
+            type="text"
+            id="nomeUsuario"
+            placeholder="nome"
             onChange={(e) => setNome(e.target.value)}
+            error={errors.nome}
           />
-          <Input
-            type="email"
-            placeholder="Email"
+          <TextField
             value={email}
-            className="w-full"
+            label="E-mail"
+            type="text"
+            id="email"
+            placeholder="email"
             onChange={(e) => setEmail(e.target.value)}
+            error={errors.email}
           />
-          <Combobox
-            items={ACTIVE}
-            value={active}
-            onChange={setActive}
-            placeholder=""
-            emptyMessage="Nenhuma opção encontrada"
-            width="100%"
-          />
+          <div className="flex flex-col gap-2 w-full">
+            <Label
+              className="whitespace-nowrap flex items-center font-semibold text-sm"
+            >
+              Status do Usuário
+            </Label>
+            <Combobox
+              items={ACTIVE}
+              value={active}
+              onChange={setActive}
+              placeholder="Selecione o status"
+              emptyMessage="Nenhuma opção encontrada"
+              width="100%"
+              className={`${""} ${
+                errors.active
+                  ? "border-red-500 focus-visible:ring-red-500"
+                  : "border-gray-300 focus-visible:ring-gray-400"
+              }`}
+            />
+            {errors.active && (
+              <p className="text-red-500 text-sm mt-1">{errors.active}</p>
+            )}
+          </div>
+
         </div>
       }
     ></ActionModal>
