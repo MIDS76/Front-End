@@ -66,7 +66,7 @@ export default function Login() {
           alt="Imagem de fundo de uma sala de reunião"
         />
 
-     
+     <div className="absolute inset-0 bg-sky-950/45"></div>
       <div className="relative z-10 bg-white p-8 rounded-2xl shadow-xl w-full max-w-md" style={{ paddingTop: '3rem', paddingBottom: '3rem' }}>
           <div className="text-left mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-3">
@@ -114,7 +114,7 @@ export default function Login() {
 
         
 
-            {/* ⚠️ Mensagem de erro logo abaixo do campo de senha */}
+            {/* Mensagem de erro logo abaixo do campo de senha */}
             {error && (
               <p className="text-destructive text-sm absolute bottom-11 mt-0">
                 {errorMessage}
