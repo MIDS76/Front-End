@@ -20,6 +20,7 @@ export interface ButtonTTProps extends ButtonProps {
   text?: string;
   iconSide?: "left" | "right";
   className?: string;
+  label?: string;
 }
 
 function TooltipPortal({ children }: { children: React.ReactNode }) {
