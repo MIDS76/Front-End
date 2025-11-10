@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation"; // 👈 importa o hook de navegação
+import { useRouter } from "next/navigation"; 
 import ButtonTT from "@/components/button/ButtonTT";
 
 export default function ConselhoPage() {
-  const router = useRouter(); // 👈 cria o roteador
+  const router = useRouter(); 
 
   const [unidades, setUnidades] = useState<string[]>([
     "Arquitetura de Redes",
