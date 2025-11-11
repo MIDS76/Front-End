@@ -32,6 +32,7 @@ export default function Lista({
 }: ListaProps) {
   const [selectedUsuarios, setSelectedUsuarios] = useState<Usuario[]>([]);
   const [editingUser, setEditingUser] = useState<Usuario>({} as Usuario);
+  const [updatedUsuarios, setUpdatedUsuarios] = useState<Usuario[]>(usuarios);
 
   const toggleUsuario = (usuario: Usuario) => {
     setSelectedUsuarios((prev) =>
@@ -41,35 +42,38 @@ export default function Lista({
     );
   };
 
+  const handleUpdateUser = (updatedUsuario: Usuario) => {
+    setUpdatedUsuarios((prevUsuarios) =>
+      prevUsuarios.map((usuario) =>
+        usuario.id === updatedUsuario.id ? updatedUsuario : usuario
+      )
+    );
+  };
+
   return (
     <section className="flex flex-col items-stretch justify-start w-full gap-4 ">
       <ScrollArea className={cn(className, "flex flex-col")}>
-        {usuarios?.map((usuario, index) => (
-          <div
-            key={usuario.id??index}
-            onClick={() => onSelectUsuario && onSelectUsuario(usuario, index)}
-            className="cursor-pointer"
-          >
-            <ListCell
-              isDialogOpen={isDialogOpen}
-              setIsDialogOpen={setIsDialogOpen}
-              usuario={usuario}
-              conselho={conselho!}
-              toggleSelected={() => toggleUsuario(usuario)}
-              tipo={tipo}
-              setEditingUser={setEditingUser}
-              copy
-            />
-          </div>
+        {updatedUsuarios?.map((usuario, index) => (
+          <ListCell
+            isDialogOpen={isDialogOpen}
+            setIsDialogOpen={setIsDialogOpen}
+            key={index}
+            usuario={usuario}
+            conselho={conselho!}
+            toggleSelected={() => toggleUsuario(usuario)}
+            tipo={tipo}
+            setEditingUser={setEditingUser}
+            copy
+          />
         ))}
       </ScrollArea>
 
       {tipo === "edit" && (
         <EditUserDialog
           usuario={editingUser!}
-          setUsuario={setEditingUser}
           isOpen={isDialogOpen}
           setOpen={setIsDialogOpen}
+          onUpdate={handleUpdateUser}
         />
       )}
     </section>

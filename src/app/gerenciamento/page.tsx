@@ -48,6 +48,7 @@ export default function GerenciamentoUsersTurmas() {
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
                 filter
+                filtrosMostrar={{ aluno: false, turma: true, conselho: false }}
               />
             </div>
 
@@ -78,6 +79,7 @@ export default function GerenciamentoUsersTurmas() {
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
                 filter
+                filtrosMostrar={{ aluno: true, turma: false, conselho: false }}
               />
             </div>
             <div className="lg:pr-28">

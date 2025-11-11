@@ -137,6 +137,7 @@ export default function PreConselhoFormulario() {
 
   return (
     <div className="w-full max-w-[calc(100%-464px)] mx-auto py-8">
+      {/*Transformar essa div em um componente*/}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <h1 className="text-3xl font-bold text-foreground">Pré-Conselho</h1>
         <p className="mt-2 text-base font-bold text-gray-800 mb-4">

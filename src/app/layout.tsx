@@ -1,6 +1,7 @@
 "use client";
 
 import "./globals.css";
+
 import Header from "@/components/header/header";
 import { Toaster } from "sonner";
 import { WebSocketProvider } from "@/context/WebSocketContext";
@@ -23,7 +24,7 @@ export default function RootLayout({
 
   return (
     <html lang="en" className="" suppressHydrationWarning>
-      <body className={`antialiased h-screen`}>
+      <body className="antialiased h-screen">
         <Tema attribute="class">
           {" "}
           <AuthProvider>
