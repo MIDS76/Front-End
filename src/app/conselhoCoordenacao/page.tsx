@@ -38,7 +38,7 @@ export default function ConselhoCoordenacao() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
-    const alunos = usuariosData.filter((u) => u.role === "Aluno");
+    const alunos = usuariosData.filter((u) => u.role === "Aluno" && u.isActive === true);
     setUsuarios(alunos);
 
     const salvoRaw = localStorage.getItem("conselho-formulario");
