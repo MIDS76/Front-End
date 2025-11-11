@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation"; 
-import ButtonTT from "@/components/button/ButtonTT";
+import { useRouter } from "next/navigation";
+import { FiSearch } from "react-icons/fi";
 
 export default function ConselhoPage() {
-  const router = useRouter(); 
+  const router = useRouter();
 
   const [unidades, setUnidades] = useState<string[]>([
     "Arquitetura de Redes",
@@ -49,6 +49,20 @@ export default function ConselhoPage() {
   const [salvos, setSalvos] = useState<{ unidade: string; professor: string }[]>([]);
   const [showMessage, setShowMessage] = useState(false);
 
+  const [buscaProfessor, setBuscaProfessor] = useState("");
+  const [buscaUnidade, setBuscaUnidade] = useState("");
+
+  // 🔎 Remove acentos
+  const normalizar = (texto: string) =>
+    texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+  const unidadesFiltradas = unidades.filter((u) =>
+    normalizar(u).includes(normalizar(buscaUnidade))
+  );
+  const professoresFiltrados = professores.filter((p) =>
+    normalizar(p).includes(normalizar(buscaProfessor))
+  );
+
   const isUcDisabled = (uc: string) => salvos.some((s) => s.unidade === uc);
 
   function toggleUnidade(uc: string) {
@@ -82,13 +96,11 @@ export default function ConselhoPage() {
     setSalvos((prev) => prev.filter((s) => s.unidade !== unidade));
   }
 
-  useEffect(() => {}, []);
-
   return (
     <div className="flex min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
       <main className="flex-1 px-12 pt-8 pb-12 mt-20">
         <div className="max-w-5xl mx-auto">
-          {/* Card de título */}
+          {/* Cabeçalho */}
           <div className="bg-[hsl(var(--card))] rounded-xl shadow-md p-6 mb-8 border border-[hsl(var(--border))] w-[775px] mx-auto">
             <h1 className="text-2xl font-semibold text-[hsl(var(--secondary))]">
               Conselho da turma MI 74
@@ -98,24 +110,36 @@ export default function ConselhoPage() {
             </p>
             <div className="border-t border-[hsl(var(--border))] mt-4 pt-4">
               <h2 className="text-lg font-medium text-[hsl(var(--foreground))]">
-                Selecione os professores de cada unidade curricular
+                Selecione os Professores de cada unidade curricular
               </h2>
             </div>
           </div>
 
           {/* Cards centrais */}
           <div className="flex justify-center gap-14 mt-6">
-            {/* Card Unidades */}
+            {/* CARD UNIDADES */}
             <div className="bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] shadow-sm w-[360px] h-[480px] p-5 flex flex-col">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-[hsl(var(--secondary))]">
-                  Selecione as unidades curriculares
-                </h3>
+              <h3 className="text-sm font-semibold text-[hsl(var(--secondary))] mb-2">
+                Selecione as unidades curriculares
+              </h3>
+
+              {/* 🔍 Campo de busca com ícone */}
+              <div className="relative mb-3">
+                <FiSearch className="absolute left-3 top-2.5 text-[hsl(var(--muted-foreground))]" />
+                <input
+                  type="text"
+                  placeholder="Buscar Unidade Curricular"
+                  value={buscaUnidade}
+                  onChange={(e) => setBuscaUnidade(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 text-sm border rounded-md border-[hsl(var(--border))] 
+                             bg-[hsl(var(--muted))] focus:outline-none focus:ring-1 
+                             focus:ring-[hsl(var(--primary))] placeholder:text-[hsl(var(--muted-foreground))]"
+                />
               </div>
 
               <div className="flex-1 overflow-y-auto pr-1">
                 <div className="grid gap-2">
-                  {unidades.map((uc) => (
+                  {unidadesFiltradas.map((uc) => (
                     <label
                       key={uc}
                       className={`flex items-center gap-3 text-sm ${
@@ -138,17 +162,29 @@ export default function ConselhoPage() {
               </div>
             </div>
 
-            {/* Card Professores */}
+            {/* CARD PROFESSORES */}
             <div className="bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] shadow-sm w-[360px] h-[480px] p-5 flex flex-col">
-              <div className="mb-3">
-                <h3 className="text-sm font-semibold text-[hsl(var(--secondary))]">
-                  Selecione os professores
-                </h3>
+              <h3 className="text-sm font-semibold text-[hsl(var(--secondary))] mb-2">
+                Selecione os professores
+              </h3>
+
+              {/* 🔍 Campo de busca com ícone */}
+              <div className="relative mb-3">
+                <FiSearch className="absolute left-3 top-2.5 text-[hsl(var(--muted-foreground))]" />
+                <input
+                  type="text"
+                  placeholder="Buscar Professor"
+                  value={buscaProfessor}
+                  onChange={(e) => setBuscaProfessor(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 text-sm border rounded-md border-[hsl(var(--border))] 
+                             bg-[hsl(var(--muted))] focus:outline-none focus:ring-1 
+                             focus:ring-[hsl(var(--primary))] placeholder:text-[hsl(var(--muted-foreground))]"
+                />
               </div>
 
               <div className="flex-1 overflow-y-auto pr-1">
                 <div className="grid gap-2">
-                  {professores.map((prof) => (
+                  {professoresFiltrados.map((prof) => (
                     <label
                       key={prof}
                       className="flex items-center gap-3 text-sm cursor-pointer text-[hsl(var(--foreground))]"
@@ -169,7 +205,7 @@ export default function ConselhoPage() {
             </div>
           </div>
 
-          {/* Botão Salvar + Mensagem lado a lado */}
+          {/* BOTÃO SALVAR */}
           <div className="flex justify-end mt-4 w-[775px] mx-auto">
             <div className="flex items-center gap-3">
               {showMessage && (
@@ -189,9 +225,8 @@ export default function ConselhoPage() {
         </div>
       </main>
 
-      {/* Log lateral */}
+      {/* LOG lateral */}
       <aside className="relative w-[400px] flex-shrink-0 mt-20 flex flex-col rounded-l-xl overflow-hidden shadow-md">
-        {/* Cabeçalho */}
         <div className="bg-[hsl(var(--primary))] p-4">
           <div className="text-[hsl(var(--primary-foreground))] font-semibold flex justify-between items-center mb-1 px-1">
             <span>Unidade Curricular</span>
@@ -199,7 +234,6 @@ export default function ConselhoPage() {
           </div>
         </div>
 
-        {/* Corpo */}
         <div className="flex-1 bg-[hsl(var(--muted))] p-4 flex flex-col relative overflow-y-auto">
           <div className="flex flex-col gap-3 mb-24 pr-2">
             {salvos.length === 0 ? (
@@ -232,11 +266,10 @@ export default function ConselhoPage() {
             )}
           </div>
 
-          {/* Botão fixo */}
           <div className="absolute bottom-6 right-6">
             <button
               className="bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] text-base px-7 py-3 rounded-md shadow-md font-medium hover:bg-[hsl(var(--secondary))]"
-              onClick={() => router.push("/criar/conselho/representante")} // 👈 redireciona pra nova tela
+              onClick={() => router.push("/criar/conselho/representante")}
             >
               Próximo passo
             </button>
