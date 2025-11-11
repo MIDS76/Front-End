@@ -105,10 +105,10 @@ export default function ConselhoPage() {
             <h1 className="text-2xl font-semibold text-[hsl(var(--secondary))]">
               Conselho da turma MI 74
             </h1>
-            <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">
+            <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1 mb-2">
               05/2025 até 09/2025
             </p>
-            <div className="border-t border-[hsl(var(--border))] mt-4 pt-4">
+            <div className="border-t border-[hsl(var(--border))] pt-3">
               <h2 className="text-lg font-medium text-[hsl(var(--foreground))]">
                 Selecione os Professores de cada unidade curricular
               </h2>
@@ -116,14 +116,14 @@ export default function ConselhoPage() {
           </div>
 
           {/* Cards centrais */}
-          <div className="flex justify-center gap-14 mt-6">
+          <div className="flex justify-center gap-14 mt-4">
             {/* CARD UNIDADES */}
             <div className="bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] shadow-sm w-[360px] h-[480px] p-5 flex flex-col">
               <h3 className="text-sm font-semibold text-[hsl(var(--secondary))] mb-2">
                 Selecione as unidades curriculares
               </h3>
 
-              {/* 🔍 Campo de busca com ícone */}
+              {/* 🔍 Campo de busca */}
               <div className="relative mb-3">
                 <FiSearch className="absolute left-3 top-2.5 text-[hsl(var(--muted-foreground))]" />
                 <input
@@ -132,7 +132,7 @@ export default function ConselhoPage() {
                   value={buscaUnidade}
                   onChange={(e) => setBuscaUnidade(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 text-sm border rounded-md border-[hsl(var(--border))] 
-                             bg-[hsl(var(--muted))] focus:outline-none focus:ring-1 
+                             bg-white focus:outline-none focus:ring-1 
                              focus:ring-[hsl(var(--primary))] placeholder:text-[hsl(var(--muted-foreground))]"
                 />
               </div>
@@ -168,7 +168,7 @@ export default function ConselhoPage() {
                 Selecione os professores
               </h3>
 
-              {/* 🔍 Campo de busca com ícone */}
+              {/* 🔍 Campo de busca */}
               <div className="relative mb-3">
                 <FiSearch className="absolute left-3 top-2.5 text-[hsl(var(--muted-foreground))]" />
                 <input
@@ -177,7 +177,7 @@ export default function ConselhoPage() {
                   value={buscaProfessor}
                   onChange={(e) => setBuscaProfessor(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 text-sm border rounded-md border-[hsl(var(--border))] 
-                             bg-[hsl(var(--muted))] focus:outline-none focus:ring-1 
+                             bg-white focus:outline-none focus:ring-1 
                              focus:ring-[hsl(var(--primary))] placeholder:text-[hsl(var(--muted-foreground))]"
                 />
               </div>
@@ -235,13 +235,15 @@ export default function ConselhoPage() {
         </div>
 
         <div className="flex-1 bg-[hsl(var(--muted))] p-4 flex flex-col relative overflow-y-auto">
-          <div className="flex flex-col gap-3 mb-24 pr-2">
-            {salvos.length === 0 ? (
-              <div className="text-[hsl(var(--muted-foreground))] text-sm mt-8 px-2">
+          {salvos.length === 0 ? (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <p className="text-[hsl(var(--muted-foreground))] text-sm text-center italic">
                 Nenhuma unidade salva ainda
-              </div>
-            ) : (
-              salvos.map((s, i) => (
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3 mb-24 pr-2">
+              {salvos.map((s, i) => (
                 <div
                   key={i}
                   className="bg-[hsl(var(--card))] rounded-md px-3 py-2 shadow-sm flex justify-between items-center border border-[hsl(var(--border))]"
@@ -262,18 +264,20 @@ export default function ConselhoPage() {
                     </button>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
 
-          <div className="absolute bottom-6 right-6">
-            <button
-              className="bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] text-base px-7 py-3 rounded-md shadow-md font-medium hover:bg-[hsl(var(--secondary))]"
-              onClick={() => router.push("/criar/conselho/representante")}
-            >
-              Próximo passo
-            </button>
-          </div>
+<div className="absolute bottom-6 right-6">
+  <button
+    className="flex items-center gap-2 bg-[hsl(var(--primary))] hover:bg-[hsl(var(--secondary))] text-[hsl(var(--primary-foreground))] text-sm px-4 py-2 rounded-md font-medium shadow-md transition-all"
+    onClick={() => router.push("/criar/conselho/representante")}
+  >
+    Próximo passo <span className="text-base font-semibold">›</span>
+  </button>
+</div>
+
+
         </div>
       </aside>
     </div>
