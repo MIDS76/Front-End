@@ -24,32 +24,26 @@ export default function RepresentantePage() {
   const alunosAtivos = lista.filter((a) => a.role === "Aluno" && a.isActive);
 
   const [selecionados, setSelecionados] = useState<typeof alunosAtivos>([]);
-  const [maxMessage, setMaxMessage] = useState(false);
   const [showLimitMsg, setShowLimitMsg] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // controle da mensagem de limite
   useEffect(() => {
-    if (maxMessage) {
-      setShowLimitMsg(true);
+    if (showLimitMsg) {
       const timer = setTimeout(() => {
         setShowLimitMsg(false);
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [maxMessage]);
+  }, [showLimitMsg]);
 
   function toggleSelecionado(aluno: any) {
     const jaSelecionado = selecionados.some((s) => s.id === aluno.id);
-
     if (jaSelecionado) {
       setSelecionados((prev) => prev.filter((s) => s.id !== aluno.id));
-      setMaxMessage(false);
     } else if (selecionados.length < 2) {
       setSelecionados((prev) => [...prev, aluno]);
-      setMaxMessage(false);
     } else {
-      setMaxMessage(true);
+      setShowLimitMsg(true);
     }
   }
 
@@ -63,50 +57,53 @@ export default function RepresentantePage() {
 
   return (
     <div className="flex min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
-      <main className="flex-1 px-12 pt-8 pb-12 mt-20">
+      <main className="flex-1 px-[3rem] pt-[2rem] pb-[3rem] mt-[5rem]">
         <div className="max-w-5xl mx-auto flex flex-col items-center">
-          {/* CARD CENTRAL (INFORMATIVO) */}
-          <div className="bg-[hsl(var(--card))] rounded-xl shadow-md p-6 border border-[hsl(var(--border))] w-[775px] text-center">
-            <h1 className="text-2xl font-semibold text-[hsl(var(--secondary))]">
-              Seleção de Representantes da Turma
+          {/* CARD CENTRAL */}
+          <div className="bg-white rounded-lg shadow-md border border-[hsl(var(--border))] w-[48.4rem] text-left px-[1.5rem] py-[1rem]">
+            <h1 className="text-2xl font-semibold text-[hsl(var(--foreground))]">
+              Conselho da turma MI 74
             </h1>
-            <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">
-              Escolha até 2 alunos ativos para representarem a turma.
+            <p className="text-xs text-[hsl(var(--muted-foreground))] mt-[0.2rem]">
+              05/2024 até 09/2024
+            </p>
+            <hr className="my-[0.5rem] border-[hsl(var(--border))]" />
+            <p className="text-sm font-medium text-[hsl(var(--foreground))]">
+              Selecione os Representantes de turma
             </p>
           </div>
 
           {/* CARD DE PESQUISA + LISTA */}
-          <div className="bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] shadow-sm w-[775px] h-[480px] p-5 mt-6 flex flex-col">
+          <div className="bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] shadow-sm w-[48.4rem] h-[30rem] p-[1.25rem] mt-[1.5rem] flex flex-col">
             {/* Barra de busca */}
-            <div className="relative mb-4">
-              <FiSearch className="absolute left-3 top-2.5 text-[hsl(var(--muted-foreground))]" />
+            <div className="relative mb-[1rem]">
+              <FiSearch className="absolute left-[0.75rem] top-[0.65rem] text-[hsl(var(--muted-foreground))]" />
               <input
                 type="text"
                 placeholder="Buscar Representante"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-sm border rounded-md border-[hsl(var(--border))]
-                           bg-[hsl(var(--background))] focus:outline-none focus:ring-1
+                className="w-full pl-[2.25rem] pr-[0.75rem] py-[0.5rem] text-sm border rounded-md border-[hsl(var(--border))] 
+                           bg-white focus:outline-none focus:ring-1 
                            focus:ring-[hsl(var(--primary))] placeholder:text-[hsl(var(--muted-foreground))]"
               />
             </div>
 
             {/* Lista */}
-            <div className="flex-1 overflow-y-auto pr-1">
-              <div className="grid gap-2">
+            <div className="flex-1 overflow-y-auto pr-[0.25rem]">
+              <div className="grid gap-[0.5rem]">
                 {alunosFiltrados.length > 0 ? (
                   alunosFiltrados.map((aluno) => (
                     <div
                       key={aluno.id}
-                      className={`flex items-center justify-between border border-[hsl(var(--border))] rounded-md px-4 py-2 transition-colors ${
+                      className={`flex items-center justify-between border border-[hsl(var(--border))] rounded-md px-[1rem] py-[0.5rem] transition-colors ${
                         selecionados.some((s) => s.id === aluno.id)
                           ? "bg-[hsl(var(--muted))] border-[hsl(var(--primary))]"
                           : "hover:bg-[hsl(var(--muted))]"
                       }`}
                     >
-                      {/* Avatar + infos */}
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
+                      <div className="flex items-center gap-[0.75rem]">
+                        <Avatar className="h-[2rem] w-[2rem]">
                           <AvatarImage
                             src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
                               aluno.nome
@@ -138,12 +135,12 @@ export default function RepresentantePage() {
                         type="checkbox"
                         checked={selecionados.some((s) => s.id === aluno.id)}
                         onChange={() => toggleSelecionado(aluno)}
-                        className="w-4 h-4 accent-[hsl(var(--primary))]"
+                        className="w-[1rem] h-[1rem] accent-[hsl(var(--primary))]"
                       />
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-[hsl(var(--muted-foreground))] text-center mt-4">
+                  <p className="text-sm text-[hsl(var(--muted-foreground))] text-center mt-[1rem]">
                     Nenhum aluno encontrado.
                   </p>
                 )}
@@ -154,27 +151,25 @@ export default function RepresentantePage() {
           {/* MENSAGEM DE LIMITE */}
           {showLimitMsg && (
             <p
-              className={`text-sm text-[hsl(var(--destructive))] mt-3 text-right italic font-semibold transition-opacity duration-700 ${
-                showLimitMsg ? "opacity-100" : "opacity-0"
-              } w-[775px]`}
+              className="text-sm text-[hsl(var(--destructive))] mt-[1rem] text-right italic font-semibold transition-opacity duration-700 w-[48.4rem]"
             >
-             Limite de dois representantes atingido
+              Limite de dois representantes atingido
             </p>
           )}
         </div>
       </main>
 
       {/* LOG lateral */}
-      <aside className="relative w-[400px] flex-shrink-0 mt-20 flex flex-col rounded-l-xl overflow-hidden shadow-md">
-        <div className="bg-[hsl(var(--primary))] p-4">
-          <div className="text-[hsl(var(--primary-foreground))] font-semibold flex justify-between items-center mb-1 px-1">
+      <aside className="relative w-[25rem] flex-shrink-0 mt-[5rem] flex flex-col rounded-l-xl overflow-hidden shadow-md">
+        <div className="bg-[hsl(var(--primary))] p-[1rem]">
+          <div className="text-[hsl(var(--primary-foreground))] font-semibold flex justify-between items-center mb-[0.25rem] px-[0.25rem]">
             <span>Representantes</span>
             <span className="text-sm">{selecionados.length}/2</span>
           </div>
         </div>
 
-        <div className="flex-1 bg-[hsl(var(--muted))] p-4 flex flex-col relative overflow-y-auto">
-          <div className="flex flex-col gap-3 mb-24 pr-2">
+        <div className="flex-1 bg-[hsl(var(--muted))] p-[1rem] flex flex-col relative overflow-y-auto">
+          <div className="flex flex-col gap-[0.75rem] mb-[6rem] pr-[0.5rem]">
             {selecionados.length === 0 ? (
               <div className="absolute inset-0 flex items-center justify-center">
                 <p className="text-[hsl(var(--muted-foreground))] text-sm italic">
@@ -185,10 +180,10 @@ export default function RepresentantePage() {
               selecionados.map((s) => (
                 <div
                   key={s.id}
-                  className="bg-[hsl(var(--card))] rounded-md px-3 py-2 shadow-sm flex justify-between items-center border border-[hsl(var(--border))]"
+                  className="bg-[hsl(var(--card))] rounded-md px-[0.75rem] py-[0.5rem] shadow-sm flex justify-between items-center border border-[hsl(var(--border))]"
                 >
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-6 w-6">
+                  <div className="flex items-center gap-[0.5rem]">
+                    <Avatar className="h-[1.5rem] w-[1.5rem]">
                       <AvatarImage
                         src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
                           s.nome
@@ -217,13 +212,12 @@ export default function RepresentantePage() {
             )}
           </div>
 
-          {/* Botão de próximo passo */}
-          <div className="absolute bottom-6 right-6">
+          <div className="absolute bottom-[1.5rem] right-[1.5rem]">
             <button
-              className="bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] text-base px-7 py-3 rounded-md shadow-md font-medium hover:bg-[hsl(var(--secondary))]"
-              onClick={() => router.push("/criar/conselho/final")}
+              className="flex items-center gap-[0.5rem] bg-[hsl(var(--primary))] hover:bg-[hsl(var(--secondary))] text-[hsl(var(--primary-foreground))] text-sm px-[1.25rem] py-[0.5rem] rounded-md font-medium shadow-md transition-all"
+              onClick={() => router.push('')}
             >
-              Próximo passo
+              Próximo passo <span className="text-base font-semibold">›</span>
             </button>
           </div>
         </div>
