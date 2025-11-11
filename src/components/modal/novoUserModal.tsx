@@ -100,10 +100,7 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
               </div>
 
               <div>
-                <label className="text-sm font-medium leading-none">
-                  Tipo de Usuário
-                </label>
-                <div className="mt-2">
+                <div>
                   <Combobox
                     items={USER_ROLES}
                     value={value}
@@ -111,10 +108,10 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
                     placeholder="Selecione um tipo de usuário..."
                     emptyMessage="Nenhum tipo de usuário encontrado."
                     width="100%"
+                    id="tipoUsuario"
+                    label="Tipo de Usuário"
+                    error={errors.tipo}
                   />
-                  {errors.tipo && (
-                    <p className="text-red-500 text-sm mt-1">{errors.tipo}</p>
-                  )}
                 </div>
               </div>
             </Form>

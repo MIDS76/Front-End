@@ -96,12 +96,7 @@ export default function EditUserDialog({
             onChange={(e) => setEmail(e.target.value)}
             error={errors.email}
           />
-          <div className="flex flex-col gap-2 w-full">
-            <Label
-              className="whitespace-nowrap flex items-center font-semibold text-sm"
-            >
-              Status do Usuário
-            </Label>
+          <div>
             <Combobox
               items={ACTIVE}
               value={active}
@@ -109,14 +104,10 @@ export default function EditUserDialog({
               placeholder="Selecione o status"
               emptyMessage="Nenhuma opção encontrada"
               width="100%"
-              className={`${""} ${errors.active
-                  ? "border-red-500 focus-visible:ring-red-500"
-                  : "border-gray-300 focus-visible:ring-gray-400"
-                }`}
+              id="statusUsuario"
+              label="Status do Usuário"
+              error={errors.active}
             />
-            {errors.active && (
-              <p className="text-red-500 text-sm mt-1">{errors.active}</p>
-            )}
           </div>
 
         </div>
