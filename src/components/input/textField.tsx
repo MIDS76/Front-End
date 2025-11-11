@@ -42,8 +42,8 @@ export default function TextField({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
-    onChange?.(e); // repassa pro pai
-  };
+    onChange?.(e); // repassa o evento para o onChange externo, se fornecido
+    };
 
   return (
     <div className="flex flex-col gap-2 w-full">
@@ -79,7 +79,7 @@ export default function TextField({
             type="button"
             variant="ghost"
             size="sm"
-            className="absolute right-2 top-2 hover:bg-transparent"
+            className="absolute right-2 top-1 hover:bg-transparent"
             onClick={() => setShowPassword((prev) => !prev)}
           >
             {showPassword ? (

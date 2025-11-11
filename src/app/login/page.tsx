@@ -116,15 +116,15 @@ export default function Login() {
 
             {/* Mensagem de erro logo abaixo do campo de senha */}
             {error && (
-              <p className="text-destructive text-sm absolute bottom-11 mt-0">
+              <p className="text-destructive text-sm absolute bottom-8 mt-0">
                 {errorMessage}
               </p>
             )}
         
-           <button
+           <button //esqueceu a senha
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="text-xs text-primary hover:underline text-left mt-1 mb-2"
+              className="text-xs text-primary hover:underline text-left mt-6 mb-2"
             >
               Esqueceu sua senha?
             </button>
