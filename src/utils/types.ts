@@ -32,8 +32,10 @@ export interface Usuario {
 
 export const USER_ROLES = [
   { value: "TECNICO_PEDAGOGICO", label: "Técnico Pedagógico" },
+  { value: "SECRETARIA_PEDAGOGICA", label: "Secretaria Pedagógica"},
   { value: "SUPERVISOR", label: "Supervisor" },
   { value: "PROFESSOR", label: "Professor" },
+  { value: "ALUNO", label: "Aluno"},
 
 ] as const;
 
