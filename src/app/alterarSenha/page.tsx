@@ -6,8 +6,9 @@ import Image from "next/image";
 import TextField from "@/components/input/textField";
 import ButtonTT from "@/components/button/ButtonTT";
 import SenhaSucess from "@/components/modal/senhaAlteradaSucesso";
+import { validatePassword, validatePasswordMatch } from "@/utils/formValidation";
 
-export default function AlterarSenha() {
+export default function ResetPassword() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
@@ -27,31 +28,16 @@ export default function AlterarSenha() {
     const newPassword = data.get("newPassword") as string;
     const confirmPass = data.get("confirmPassword") as string;
 
-    const requirements = [
-      { regex: /[a-z]/, message: "letra minúscula" },
-      { regex: /[A-Z]/, message: "letra maiúscula" },
-      { regex: /[0-9]/, message: "número" },
-      { regex: /[!@#$%^&*(),.?\":{}|<>]/, message: "caractere especial" },
-    ];
-
-    const missing = requirements
-      .filter((req) => !req.regex.test(newPassword))
-      .map((req) => req.message);
-
-    if (missing.length > 0) {
-      setError(`A senha deve conter: ${missing.join(", ")}.`);
+    let validationError = validatePassword(newPassword);
+    if (validationError) {
+      setError(validationError);
       setIsLoading(false);
       return;
     }
 
-    if (newPassword.length < 8) {
-      setError("A senha deve ter no mínimo 8 caracteres.");
-      setIsLoading(false);
-      return;
-    }
-
-    if (newPassword !== confirmPass) {
-      setError("As senhas não coincidem.");
+    validationError = validatePasswordMatch(newPassword, confirmPass);
+    if (validationError) {
+      setError(validationError);
       setIsLoading(false);
       return;
     }
@@ -106,8 +92,7 @@ export default function AlterarSenha() {
                   setPassword(e.target.value);
                   handleInputChange();
                 }}
-                required
-                className={error ? "border-red-500" : ""}
+                error={error}
               />
 
               <TextField
@@ -121,13 +106,8 @@ export default function AlterarSenha() {
                   setConfirmPassword(e.target.value);
                   handleInputChange();
                 }}
-                required
-                className={error ? "border-red-500" : ""}
+                error={error}
               />
-
-              {error && (
-                <p className="text-red-500 text-sm text-center">{error}</p>
-              )}
 
               <ButtonTT
                 mode="default"
@@ -142,7 +122,11 @@ export default function AlterarSenha() {
         </div>
       </main>
 
-      <SenhaSucess isOpen={showSuccessModal} onClose={handleCloseSuccessModal} />
+
+      <SenhaSucess
+        isOpen={showSuccessModal}
+        onClose={handleCloseSuccessModal}
+      />
     </>
   );
 }

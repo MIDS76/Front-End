@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import ActionModal from "@/components/modal/actionModal";
 import ButtonTT from "@/components/button/ButtonTT";
 import { toast } from "sonner";
+import { validateRequired } from "@/utils/formValidation";
 
 type CampoFormulario = {
   titulo: string;
@@ -70,7 +71,7 @@ export default function PreConselhoFormulario() {
   const [formulario, setFormulario] = useState<CampoFormulario[]>(secoesIniciais);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [pagina, setPagina] = useState(0);
-  const [camposErro, setCamposErro] = useState<{ [key: string]: boolean }>({});
+  const [camposErro, setCamposErro] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     const salvo = localStorage.getItem("preconselho-formulario");
@@ -92,7 +93,11 @@ export default function PreConselhoFormulario() {
     novoFormulario[pagina] = { ...novoFormulario[pagina], [campo]: valor };
     setFormulario(novoFormulario);
 
-    setCamposErro((prev) => ({ ...prev, [campo]: false }));
+    setCamposErro((prev) => {
+      const novoErro = { ...prev };
+      delete novoErro[campo];
+      return novoErro;
+    });
   };
 
   const camposPreenchidos = (secao: CampoFormulario) => {
@@ -105,13 +110,13 @@ export default function PreConselhoFormulario() {
 
   const handleNext = () => {
     const secaoAtual = formulario[pagina];
-    const novosErros: { [key: string]: boolean } = {};
+    const novosErros: { [key: string]: string } = {};
 
-    if (secaoAtual.positivos.trim() === "") novosErros.positivos = true;
-    if (secaoAtual.melhoria.trim() === "") novosErros.melhoria = true;
-    if (secaoAtual.sugestoes.trim() === "") novosErros.sugestoes = true;
+    novosErros.positivos = validateRequired(secaoAtual.positivos, "pontos positivos");
+    novosErros.melhoria = validateRequired(secaoAtual.melhoria, "melhoria");
+    novosErros.sugestoes = validateRequired(secaoAtual.sugestoes, "sugestões");
 
-    if (Object.keys(novosErros).length > 0) {
+    if (Object.values(novosErros).some((erro) => erro)) {
       setCamposErro(novosErros);
       toast.error("Preencha todos os campos antes de continuar!");
       return;

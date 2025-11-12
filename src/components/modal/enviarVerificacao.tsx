@@ -4,6 +4,7 @@ import { useState } from "react";
 import TextField from "@/components/input/textField";
 import ButtonTT from "@/components/button/ButtonTT";
 import EnvioSuccessModal from "./envioEmailSucesso";
+import { validateEmail } from "@/utils/formValidation";
 
 interface PasswordProps {
   onClose: () => void;
@@ -11,14 +12,23 @@ interface PasswordProps {
 
 export default function PasswordResetModal({ onClose }: PasswordProps) {
   const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    setError("");
+    let validationEmail = validateEmail(email);
+
+    if (validationEmail) {
+      setError(validationEmail);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
-    setMessage("");
 
     await new Promise(resolve => setTimeout(resolve, 2000));
     setIsLoading(false);
@@ -27,7 +37,7 @@ export default function PasswordResetModal({ onClose }: PasswordProps) {
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
-    onClose(); 
+    onClose();
   };
 
   return (
@@ -46,7 +56,7 @@ export default function PasswordResetModal({ onClose }: PasswordProps) {
           <h2 className="text-2xl font-bold text-left mb-6">Esqueceu sua senha?</h2>
 
           <p className="text-left text-gray-600 mb-6 text-sm">
-            Insira o endereço de e-mail que você usa no Portal do Conselho. 
+            Insira o endereço de e-mail que você usa no Portal do Conselho.
             Enviaremos um link por e-mail para redefinir sua senha.
           </p>
 
@@ -58,10 +68,8 @@ export default function PasswordResetModal({ onClose }: PasswordProps) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
+              error={error}
             />
-
-            {message && <p className="text-sm text-center text-green-600">{message}</p>}
 
             <ButtonTT mode="default" type="submit" disabled={isLoading}>
               {isLoading ? "Enviando..." : "Enviar e-mail"}

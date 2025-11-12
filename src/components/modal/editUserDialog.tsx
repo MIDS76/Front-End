@@ -2,9 +2,8 @@ import { ACTIVE, Usuario } from "../../utils/types";
 import { Combobox } from "../ui/combobox";
 import ActionModal from "./actionModal";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import TextField from "../input/textField";
-import { Label } from "@radix-ui/react-dropdown-menu";
+import { showError, validateEmail, validateRequired } from "@/utils/formValidation";
 
 interface EditUserDialogProps {
   usuario: Usuario;
@@ -22,7 +21,7 @@ export default function EditUserDialog({
   const [nome, setNome] = useState(usuario.nome);
   const [email, setEmail] = useState(usuario.email);
   const [active, setActive] = useState(usuario.isActive ? "true" : "false");
-  const [errors, setErrors] = useState<{ nome?: string; email?: string; active?: string }>({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     setNome(usuario.nome);
@@ -30,23 +29,15 @@ export default function EditUserDialog({
     setActive(usuario.isActive ? "true" : "false");
   }, [usuario]);
 
-  const validate = () => {
-    const newErrors: typeof errors = {};
-
-    if (!nome.trim()) newErrors.nome = "O nome é obrigatório.";
-    if (!email.trim()) {
-      newErrors.email = "O e-mail é obrigatório.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "E-mail inválido.";
-    }
-    if (!active.trim()) newErrors.active = "Selecione o status do usuário.";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleUpdateUser = () => {
-    if (validate()) {
+    setErrors({});
+    const newErrors: { [key: string]: string } = {};
+
+    newErrors.nome = validateRequired(nome, "nome");
+    newErrors.email = validateEmail(email);
+    newErrors.active = validateRequired(active, "status do usuário");
+
+    if (Object.values(newErrors).every((error) => error === "")) {
       const updatedUsuario = {
         ...usuario,
         nome,
@@ -57,7 +48,8 @@ export default function EditUserDialog({
       onUpdate(updatedUsuario);
       setOpen(false);
     } else {
-      toast.error("Preencha todos os campos corretamente!");
+      setErrors(newErrors);
+      showError
     }
   }
 
@@ -101,12 +93,7 @@ export default function EditUserDialog({
             onChange={(e) => setEmail(e.target.value)}
             error={errors.email}
           />
-          <div className="flex flex-col gap-2 w-full">
-            <Label
-              className="whitespace-nowrap flex items-center font-semibold text-sm"
-            >
-              Status do Usuário
-            </Label>
+          <div>
             <Combobox
               items={ACTIVE}
               value={active}
@@ -114,15 +101,10 @@ export default function EditUserDialog({
               placeholder="Selecione o status"
               emptyMessage="Nenhuma opção encontrada"
               width="100%"
-              className={`${""} ${
-                errors.active
-                  ? "border-red-500 focus-visible:ring-red-500"
-                  : "border-gray-300 focus-visible:ring-gray-400"
-              }`}
+              id="statusUsuario"
+              label="Status do Usuário"
+              error={errors.active}
             />
-            {errors.active && (
-              <p className="text-red-500 text-sm mt-1">{errors.active}</p>
-            )}
           </div>
 
         </div>
