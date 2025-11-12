@@ -2,7 +2,7 @@ import { DropdownMenu, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuConten
 import { Icon } from "@/components/button/smallButton";
 import ActionModal from "@/components/modal/actionModal";
 import { Usuario } from "@/utils/types";
-import ButtonTT from "./button/ButtonTT";
+import ButtonTT from "../button/ButtonTT";
 
 interface UserActionsProps {
   usuario: Usuario;

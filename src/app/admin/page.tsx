@@ -9,7 +9,7 @@ import useSWR from "swr";
 
 import { Page } from "@/utils/types";
 
-import Paginacao from "@/components/paginacao";
+import Paginacao from "@/components/paginacao/paginacao";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SearchBar from "@/components/input/searchBar";
 import FiltrosDinamicos from "@/components/filtros/FiltrosDinamicos";
