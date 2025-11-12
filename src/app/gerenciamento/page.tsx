@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
 import MedModal from "@/components/modal/medModal";
-import Lista from "@/components/lista";
+import Lista from "@/components/lista/lista";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import turmas from "@/data/turma.json";
 import usuarios from "@/data/usuarios.json";

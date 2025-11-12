@@ -3,7 +3,7 @@ import UserInfo from "./userInfo";
 import UserActions from "./userActions";
 import UserCheckbox from "./usercheckbox";
 import { Conselho, Usuario } from "@/utils/types";
-import AddButton from "./button/addButton";
+import AddButton from "../button/addButton";
 
 interface ListCellProps {
   usuario?: Usuario;

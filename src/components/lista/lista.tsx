@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import EditUserDialog from "./modal/editUserDialog";
+import EditUserDialog from "../modal/editUserDialog";
 import { Conselho, Usuario } from "@/utils/types";
 import ListCell from "./listcell"; 
 
