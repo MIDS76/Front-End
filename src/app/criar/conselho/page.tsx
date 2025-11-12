@@ -8,7 +8,7 @@ import LogLateral from "@/components/sidebar/logLateral";
 export default function ConselhoPage() {
   const router = useRouter();
 
-  const [unidades, setUnidades] = useState<string[]>([
+  const [unidades] = useState<string[]>([
     "Arquitetura de Redes",
     "Desenvolvimento Mobile",
     "Banco de Dados",
@@ -27,7 +27,7 @@ export default function ConselhoPage() {
     "Sistemas Distribuídos",
   ]);
 
-  const [professores, setProfessores] = useState<string[]>([
+  const [professores] = useState<string[]>([
     "Roberto Baumgartel",
     "Matheus Quost",
     "João Pedro Valentim",
@@ -90,6 +90,7 @@ export default function ConselhoPage() {
     setTimeout(() => setShowMessage(false), 2000);
   }
 
+  // 🔧 Corrigido: recebe o nome da unidade e remove corretamente
   function handleRemover(unidade: string) {
     setSalvos((prev) => prev.filter((s) => s.unidade !== unidade));
   }
@@ -98,6 +99,7 @@ export default function ConselhoPage() {
     <div className="flex min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
       <main className="flex-1 px-[3rem] pt-[2rem] pb-[3rem] mt-[5rem]">
         <div className="max-w-[80rem] mx-auto">
+
           {/* Cabeçalho */}
           <div className="bg-[hsl(var(--card))] rounded-xl shadow-md p-[1.5rem] mb-[2rem] border border-[hsl(var(--border))] w-[48.4rem] mx-auto">
             <h1 className="text-2xl font-semibold text-[hsl(var(--secondary))]">
@@ -115,6 +117,7 @@ export default function ConselhoPage() {
 
           {/* Cards centrais */}
           <div className="flex justify-center gap-[3.5rem] mt-[1rem]">
+
             {/* CARD UNIDADES */}
             <div className="bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] shadow-sm w-[22.5rem] h-[30rem] p-[1.25rem] flex flex-col">
               <h3 className="text-sm font-semibold text-[hsl(var(--secondary))] mb-[0.5rem]">
@@ -220,17 +223,16 @@ export default function ConselhoPage() {
         </div>
       </main>
 
-      {/* LOG lateral agora é componente */}
+      {/* LOG lateral */}
       <LogLateral
         titulo="Unidade Curricular"
         subtitulo="Professor"
-        itens={salvos.map((s, i) => ({
-           id: i,
-           unidade: s.unidade,
-            professor: s.professor
-           })
-           )}
-        onRemover={handleRemover}
+        itens={salvos.map((s) => ({
+          id: s.unidade,
+          unidade: s.unidade,
+          professor: s.professor,
+        }))}
+        onRemover={(id) => handleRemover(id)} 
         vazioTexto="Nenhuma unidade salva ainda"
         onProximo={() => router.push("/criar/conselho/representante")}
       />
