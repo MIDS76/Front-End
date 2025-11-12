@@ -7,6 +7,7 @@ import TextField from "../input/textField";
 import { Button } from "../ui/button";
 import Lista from "../lista/lista";
 import { toast } from "sonner";
+import { showError, validateDate, validateRequired } from "@/utils/formValidation";
 
 interface TurmaFormProps {
     title: string;
@@ -31,29 +32,26 @@ export default function TurmaForm({ title, initialData, alunos, onSubmit }: Turm
         dataFim: initialData?.dataFim || "",
     });
 
-    const [errors, setErrors] = useState<{ codigoTurma?: string; nomeCurso?: string; dataInicio?: string; dataFim?: string; listaAlunos?: string }>({});
-
-    const validate = () => {
-        const newErrors: typeof errors = {};
-
-        if (!form.codigoTurma.trim()) newErrors.codigoTurma = "O código da turma é obrigatório.";
-        if (!form.nomeCurso.trim()) newErrors.nomeCurso = "O nome do curso é obrigatório.";
-        if (!form.dataInicio.trim()) newErrors.dataInicio = "Selecione a data de início da turma.";
-        if (!form.dataFim.trim()) newErrors.dataFim = "Selecione a data de fim da turma.";
-        if (alunos.length === 0) newErrors.listaAlunos = "Adicione os alunos à turma.";
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
     const handleSubmit = () => {
-        if (validate()) {
+        setErrors({});
+        const newErrors: { [key: string]: string } = {};
+
+        newErrors.codigoTurma = validateRequired(form.codigoTurma, "código da turma");
+        newErrors.nomeCurso = validateRequired(form.nomeCurso, "nome do Curso");
+        newErrors.dataInicio = validateDate(form.dataInicio);
+        newErrors.dataFim = validateDate(form.dataFim);
+        if (alunos.length === 0) newErrors.listaAlunos = "Adicione os alunos à turma.";
+
+        if (Object.keys(newErrors).length === 0) {
             onSubmit(form, alunos);
             setTimeout(() => {
                 router.back();
             }, 1500);
         } else {
-            toast.error("Preencha todos os campos corretamente!");
+            setErrors(newErrors);
+            showError
         }
     };
 
@@ -80,8 +78,6 @@ export default function TurmaForm({ title, initialData, alunos, onSubmit }: Turm
             toast.error("Nenhum arquivo selecionado.");
         }
     };
-
-    
 
     return (
         <div className="p-6">
@@ -187,10 +183,10 @@ export default function TurmaForm({ title, initialData, alunos, onSubmit }: Turm
                     <h2 className="ml-4 text-2xl font-semibold mb-4 text-card-foreground">
                         Alunos da Turma
                     </h2>
-                    
+
                     {errors.listaAlunos && (
-                            <p className="text-red-500 text-sm mt-2 text-center">{errors.listaAlunos}</p>
-                        )}
+                        <p className="text-red-500 text-sm mt-2 text-center">{errors.listaAlunos}</p>
+                    )}
 
                     <Lista
                         isDialogOpen={isDialogOpen}

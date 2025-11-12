@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Combobox } from "../ui/combobox";
 import { useState, useEffect } from "react";
 import { USER_ROLES } from "@/utils/types";
+import { showError, validateEmail, validateRequired } from "@/utils/formValidation";
 
 interface NovoUserModalProps {
   isOpen: boolean;
@@ -18,26 +19,23 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
   const [value, setValue] = useState<string>("");
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
-  const [errors, setErrors] = useState<{ nome?: string; email?: string; tipo?: string }>({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const validate = () => {
-    const newErrors: typeof errors = {};
-
-    if (!nome.trim()) newErrors.nome = "O nome é obrigatório.";
-    if (!email.trim()) {
-      newErrors.email = "O e-mail é obrigatório.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "E-mail inválido.";
-    }
-    if (!value) newErrors.tipo = "Selecione um tipo de usuário.";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleOpenConfirm = () => {
-    if (validate()) setConfirmOpen(true);
+    setErrors({});
+    const newErrors: { [key: string]: string } = {};
+
+    newErrors.nome = validateRequired(nome, "nome");
+    newErrors.email = validateEmail(email);
+    newErrors.tipo = validateRequired(value, "tipo de usuário");
+
+    if (Object.keys(newErrors).length === 0) {
+      setConfirmOpen(true);
+    }else{
+      setErrors(newErrors);
+      showError
+    }
   };
 
   const handleConfirm = () => {
@@ -53,7 +51,6 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
     }, 300);
   };
 
-  
   useEffect(() => {
     if (!isOpen) {
       setTimeout(() => {
@@ -103,10 +100,7 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
               </div>
 
               <div>
-                <label className="text-sm font-medium leading-none">
-                  Tipo de Usuário
-                </label>
-                <div className="mt-2">
+                <div>
                   <Combobox
                     items={USER_ROLES}
                     value={value}
@@ -114,10 +108,10 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
                     placeholder="Selecione um tipo de usuário..."
                     emptyMessage="Nenhum tipo de usuário encontrado."
                     width="100%"
+                    id="tipoUsuario"
+                    label="Tipo de Usuário"
+                    error={errors.tipo}
                   />
-                  {errors.tipo && (
-                    <p className="text-red-500 text-sm mt-1">{errors.tipo}</p>
-                  )}
                 </div>
               </div>
             </Form>

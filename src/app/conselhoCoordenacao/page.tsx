@@ -13,6 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import InfoCard from "@/components/card/cardTituloTelas";
 import UserInfo from "@/components/lista/userInfo";
 import Lista from "@/components/lista/lista";
+import { showError, validateRequired } from "@/utils/formValidation";
 
 type CampoFormulario = {
   titulo: string;
@@ -92,14 +93,14 @@ export default function ConselhoCoordenacao() {
     const secaoAtual = formulario[pagina] ?? { positivos: "", melhoria: "", sugestoes: "", titulo: "" };
     const erros = {
       titulo: false,
-      positivos: secaoAtual.positivos.trim() === "",
-      melhoria: secaoAtual.melhoria.trim() === "",
-      sugestoes: secaoAtual.sugestoes.trim() === "",
+      positivos: validateRequired(secaoAtual.positivos, "Pontos positivos") !== "",
+      melhoria: validateRequired(secaoAtual.melhoria, "Pontos positivos") !== "",
+      sugestoes: validateRequired(secaoAtual.sugestoes, "Pontos positivos") !== "",
     } as Record<keyof CampoFormulario, boolean>;
     setErrosCampos(erros);
 
     if (erros.positivos || erros.melhoria || erros.sugestoes) {
-      toast.error("Preencha todos os campos antes de continuar!");
+      showError
       return false;
     }
     return true;
@@ -116,7 +117,20 @@ export default function ConselhoCoordenacao() {
     if (!validarCampos()) return;
     toast.success("Conselho concluído e salvo com sucesso!");
     localStorage.removeItem("conselho-formulario");
-    setTimeout(() => router.push("/"), 800);
+
+    const usuarioJson = localStorage.getItem("user");
+
+    if (usuarioJson) {
+      try {
+        const usuario = JSON.parse(usuarioJson);
+
+        if (usuario && usuario.perfil) {
+          setTimeout(() => router.push(`/${usuario.perfil}`), 800);
+        }
+      } catch (error) {
+        toast.error("Erro ao recuperar os dados do usuário.");
+      }
+    }
   };
 
   const alunosFiltrados = usuarios.filter((usuario) =>
