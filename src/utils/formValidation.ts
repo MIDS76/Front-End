@@ -6,7 +6,7 @@ export const validateRequired = (value: string, fieldName: string): string => {
 }
 
 export const validateEmail = (email: string): string => {
-    if (!email.trim()) return "O e-mail é obrigatório.";
+    if (!email || !email.trim()) return "O e-mail é obrigatório.";
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!regex.test(email)) return "E-mail inválido.";
     return "";
