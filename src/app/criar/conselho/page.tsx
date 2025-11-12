@@ -22,7 +22,6 @@ export default function ConselhoPage() {
     "Redes de Computadores",
     "Análise de Sistemas",
     "Computação em Nuvem",
-    "Internet das Coisas",
     "Gestão de Projetos",
     "Sistemas Distribuídos",
   ]);
@@ -62,10 +61,7 @@ export default function ConselhoPage() {
     normalizar(p).includes(normalizar(buscaProfessor))
   );
 
-  const isUcDisabled = (uc: string) => salvos.some((s) => s.unidade === uc);
-
   function toggleUnidade(uc: string) {
-    if (isUcDisabled(uc)) return;
     setSelectedUnidades((prev) =>
       prev.includes(uc) ? prev.filter((p) => p !== uc) : [...prev, uc]
     );
@@ -79,18 +75,16 @@ export default function ConselhoPage() {
       professor: selectedProfessor!,
     }));
 
-    const novosFiltrados = novos.filter(
-      (n) => !salvos.some((s) => s.unidade === n.unidade)
-    );
+    //Ucs salvas e limpar
+    setSalvos((prev) => [...prev, ...novos]);
 
-    setSalvos((prev) => [...prev, ...novosFiltrados]);
+   
     setSelectedUnidades([]);
     setSelectedProfessor(null);
     setShowMessage(true);
     setTimeout(() => setShowMessage(false), 2000);
   }
 
-  // 🔧 Corrigido: recebe o nome da unidade e remove corretamente
   function handleRemover(unidade: string) {
     setSalvos((prev) => prev.filter((s) => s.unidade !== unidade));
   }
@@ -99,7 +93,6 @@ export default function ConselhoPage() {
     <div className="flex min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
       <main className="flex-1 px-[3rem] pt-[2rem] pb-[3rem] mt-[5rem]">
         <div className="max-w-[80rem] mx-auto">
-
           {/* Cabeçalho */}
           <div className="bg-[hsl(var(--card))] rounded-xl shadow-md p-[1.5rem] mb-[2rem] border border-[hsl(var(--border))] w-[48.4rem] mx-auto">
             <h1 className="text-2xl font-semibold text-[hsl(var(--secondary))]">
@@ -117,7 +110,6 @@ export default function ConselhoPage() {
 
           {/* Cards centrais */}
           <div className="flex justify-center gap-[3.5rem] mt-[1rem]">
-
             {/* CARD UNIDADES */}
             <div className="bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] shadow-sm w-[22.5rem] h-[30rem] p-[1.25rem] flex flex-col">
               <h3 className="text-sm font-semibold text-[hsl(var(--secondary))] mb-[0.5rem]">
@@ -142,17 +134,12 @@ export default function ConselhoPage() {
                   {unidadesFiltradas.map((uc) => (
                     <label
                       key={uc}
-                      className={`flex items-center gap-[0.75rem] text-sm ${
-                        isUcDisabled(uc)
-                          ? "text-[hsl(var(--muted-foreground))] line-through select-none"
-                          : "text-[hsl(var(--foreground))]"
-                      }`}
+                      className="flex items-center gap-[0.75rem] text-sm cursor-pointer text-[hsl(var(--foreground))]"
                     >
                       <input
                         type="checkbox"
                         checked={selectedUnidades.includes(uc)}
                         onChange={() => toggleUnidade(uc)}
-                        disabled={isUcDisabled(uc)}
                         className="w-[1rem] h-[1rem] accent-[hsl(var(--primary))]"
                       />
                       <span className="truncate">{uc}</span>
@@ -227,12 +214,14 @@ export default function ConselhoPage() {
       <LogLateral
         titulo="Unidade Curricular"
         subtitulo="Professor"
-        itens={salvos.map((s) => ({
-          id: s.unidade,
+        itens={salvos.map((s, i) => ({
+          id: `${s.unidade}-${s.professor}-${i}`,
           unidade: s.unidade,
           professor: s.professor,
         }))}
-        onRemover={(id) => handleRemover(id)} 
+        onRemover={(id) =>
+          setSalvos((prev) => prev.filter((s, i) => `${s.unidade}-${s.professor}-${i}` !== id))
+        }
         vazioTexto="Nenhuma unidade salva ainda"
         onProximo={() => router.push("/criar/conselho/representante")}
       />
