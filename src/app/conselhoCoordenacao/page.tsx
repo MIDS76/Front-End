@@ -12,6 +12,7 @@ import usuariosData from "@/data/usuarios.json";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import UserInfo from "@/components/userInfo";
 import Lista from "@/components/lista";
+import InfoCard from "@/components/card/cardTituloTelas";
 
 type CampoFormulario = {
   titulo: string;
@@ -140,14 +141,11 @@ export default function ConselhoCoordenacao() {
       <div className="flex w-full max-w-[100rem] justify-center gap-8">
         {/* Primeira div - Lista de alunos */}
         <div className="flex flex-col w-full max-w-[46.875rem] gap-4">
-          <div
-            className="rounded-2xl shadow p-4"
-            style={{ backgroundColor: "hsl(var(--card))", color: "hsl(var(--card-foreground))" }}
-          >
-            <h5 className="text-3xl font-semibold">JGS - AI MIDS 2024/1 INT1</h5>
-            <div className="my-2" style={{ borderBottom: "1px solid hsl(var(--border))" }} />
-            <h5 className="text-3xl font-semibold">WEG - MI 76</h5>
-          </div>
+          <InfoCard
+            titulo="JGS - AI MIDS 2024/1 INT1"
+            descricao="WEG - MI 76"
+          />
+
 
           <div
             className="w-full h-[32rem] rounded-2xl shadow-inner overflow-hidden border"
