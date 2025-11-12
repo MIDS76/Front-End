@@ -166,7 +166,7 @@ export default function RepresentantePage() {
           unidade: s.nome,
           professor: s.email,
         }))}
-        onRemover={(id) => handleRemover(id)}
+        onRemover={(id) => handleRemover(id)} 
         vazioTexto="Nenhum representante selecionado"
         onProximo={() => router.push("/criar/conselho/finalizar")}
       />
