@@ -10,9 +10,9 @@ import { toast } from "sonner";
 import { Usuario } from "@/utils/types";
 import usuariosData from "@/data/usuarios.json";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import UserInfo from "@/components/userInfo";
-import Lista from "@/components/lista";
 import InfoCard from "@/components/card/cardTituloTelas";
+import UserInfo from "@/components/lista/userInfo";
+import Lista from "@/components/lista/lista";
 
 type CampoFormulario = {
   titulo: string;
