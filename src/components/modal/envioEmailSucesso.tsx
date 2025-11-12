@@ -10,7 +10,7 @@ export default function EnvioSuccessModal({ isOpen, onClose }: EnvioSuccessModal
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white px-8 py-12 rounded-xl shadow-2xl max-w-md relative">
+      <div className="bg-white px-8 py-7 rounded-xl shadow-2xl max-w-md relative">
    
         <button
           onClick={onClose}
@@ -31,7 +31,7 @@ export default function EnvioSuccessModal({ isOpen, onClose }: EnvioSuccessModal
 
           <h2 className="text-4xl font-bold text-gray-900 mb-9">E-mail enviado com sucesso!</h2>
           
-          <p className="font-semibold text-xl text-gray-900 mb-4">
+          <p className="font-semibold text-2xl text-gray-900 mb-4">
             O link de redefinição de senha foi enviado
           </p>
           
