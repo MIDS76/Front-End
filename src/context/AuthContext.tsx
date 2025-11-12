@@ -73,6 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const hasPermission = (roles: Perfil[]) => {
     return user ? roles.includes(user.perfil) : false;
   };
+  
 
   return (
     <AuthContext.Provider value={{ user, login, logout, hasPermission, loading }}>

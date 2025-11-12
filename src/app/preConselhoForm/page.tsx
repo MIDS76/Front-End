@@ -6,6 +6,10 @@ import { Label } from "@/components/ui/label";
 import ActionModal from "@/components/modal/actionModal";
 import ButtonTT from "@/components/button/ButtonTT";
 import { toast } from "sonner";
+import usuariosData from "@/data/usuarios.json";
+import InfoCard from "@/components/card/cardTituloTelas";
+import { useRouter } from "next/navigation";
+import { validateRequired } from "@/utils/formValidation";
 
 type CampoFormulario = {
   titulo: string;
@@ -15,47 +19,35 @@ type CampoFormulario = {
   sugestoes: string;
 };
 
+const descricaoPorRole = (role: string): string => {
+  switch (role) {
+    case "Professor":
+      return "Relacionado ao desempenho em sala, didática, relacionamento com os alunos e domínio da matéria.";
+    case "Supervisor":
+      return "Avalie os aspectos relacionados à metodologia de ensino, domínio de conteúdo, clareza nas orientações, postura profissional e qualidade do acompanhamento oferecido pela supervisão.";
+    case "Técnico Pedagógico":
+      return "Relacionado ao apoio à turma, acompanhamento pedagógico e comunicação com os docentes.";
+    case "Secretária Pedagógica":
+      return "Avalie os aspectos relacionados à organização acadêmica, eficiência no atendimento, clareza nas informações, disponibilidade para auxiliar e qualidade no suporte prestado pela Secretaria Pedagógica.";
+    default:
+      return "";
+  }
+};
+
 const secoesIniciais: CampoFormulario[] = [
-  {
-    titulo: "Professor Kristian Erdmann",
-    descricao:
-      "Relacionado ao desempenho em sala, didática, relacionamento com os alunos e domínio da matéria.",
-    positivos: "",
-    melhoria: "",
-    sugestoes: "",
-  },
-  {
-    titulo: "Professor Vinícius Trindade",
-    descricao:
-      "Relacionado ao desempenho em sala, didática, relacionamento com os alunos e domínio da matéria.",
-    positivos: "",
-    melhoria: "",
-    sugestoes: "",
-  },
-  {
-    titulo: "Supervisão",
-    descricao:
-      "Avalie os aspectos relacionados à metodologia de ensino, domínio de conteúdo, clareza nas orientações, postura profissional e qualidade do acompanhamento oferecido pela supervisão",
-    positivos: "",
-    melhoria: "",
-    sugestoes: "",
-  },
-  {
-    titulo: "Coordenadora Juciene",
-    descricao:
-      "Relacionado ao apoio à turma, acompanhamento pedagógico e comunicação com os docentes.",
-    positivos: "",
-    melhoria: "",
-    sugestoes: "",
-  },
-  {
-    titulo: "Secretaria Pedagógica",
-    descricao:
-      "Avalie os aspectos relacionados à organização acadêmica, eficiência no atendimento, clareza nas informações, disponibilidade para auxiliar e qualidade no suporte prestado pela Secretaria Pedagógica",
-    positivos: "",
-    melhoria: "",
-    sugestoes: "",
-  },
+  ...usuariosData
+    .filter((u) => u.role !== "Aluno" && u.isActive)
+    .sort((a, b) => {
+      const ordem = ["Supervisor", "Técnico Pedagógico", "Secretária Pedagógica", "Professor"];
+      return ordem.indexOf(a.role) - ordem.indexOf(b.role);
+    })
+    .map((u) => ({
+      titulo: `${u.role} ${u.nome}`,
+      descricao: descricaoPorRole(u.role),
+      positivos: "",
+      melhoria: "",
+      sugestoes: "",
+    })),
   {
     titulo: "Ambiente de Ensino",
     descricao:
@@ -70,7 +62,7 @@ export default function PreConselhoFormulario() {
   const [formulario, setFormulario] = useState<CampoFormulario[]>(secoesIniciais);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [pagina, setPagina] = useState(0);
-  const [camposErro, setCamposErro] = useState<{ [key: string]: boolean }>({});
+  const [camposErro, setCamposErro] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     const salvo = localStorage.getItem("preconselho-formulario");
@@ -92,7 +84,11 @@ export default function PreConselhoFormulario() {
     novoFormulario[pagina] = { ...novoFormulario[pagina], [campo]: valor };
     setFormulario(novoFormulario);
 
-    setCamposErro((prev) => ({ ...prev, [campo]: false }));
+    setCamposErro((prev) => {
+      const novoErro = { ...prev };
+      delete novoErro[campo];
+      return novoErro;
+    });
   };
 
   const camposPreenchidos = (secao: CampoFormulario) => {
@@ -105,13 +101,13 @@ export default function PreConselhoFormulario() {
 
   const handleNext = () => {
     const secaoAtual = formulario[pagina];
-    const novosErros: { [key: string]: boolean } = {};
+    const novosErros: { [key: string]: string } = {};
 
-    if (secaoAtual.positivos.trim() === "") novosErros.positivos = true;
-    if (secaoAtual.melhoria.trim() === "") novosErros.melhoria = true;
-    if (secaoAtual.sugestoes.trim() === "") novosErros.sugestoes = true;
+    novosErros.positivos = validateRequired(secaoAtual.positivos, "pontos positivos");
+    novosErros.melhoria = validateRequired(secaoAtual.melhoria, "melhoria");
+    novosErros.sugestoes = validateRequired(secaoAtual.sugestoes, "sugestões");
 
-    if (Object.keys(novosErros).length > 0) {
+    if (Object.values(novosErros).some((erro) => erro)) {
       setCamposErro(novosErros);
       toast.error("Preencha todos os campos antes de continuar!");
       return;
@@ -136,89 +132,100 @@ export default function PreConselhoFormulario() {
   const estaCompleta = camposPreenchidos(secaoAtual);
 
   return (
-    <div className="w-full max-w-[calc(100%-464px)] mx-auto py-8">
-      {/*Transformar essa div em um componente*/}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Pré-Conselho</h1>
-        <p className="mt-2 text-base font-bold text-gray-800 mb-4">
-          05/10/2025 até 15/10/2025
-        </p>
-        <div className="border-b border-gray-200 my-2"></div>
-        <p className="font-semibold text-lg text-foreground">{secaoAtual.titulo}</p>
-        <p className="text-sm mt-0.5 text-muted-foreground">{secaoAtual.descricao}</p>
-      </div>
+    <div
+      className="w-full max-w-[90rem] mx-auto overflow-x-hidden"
+      style={{
+        paddingTop: "8rem",
+        paddingBottom: "2rem",
+        overflowX: "hidden",
+        color: "hsl(var(--foreground))",
+      }}
+    >
+      <InfoCard
+        titulo="Pré-Conselho"
+        subtitulo={secaoAtual.titulo}
+        descricao={secaoAtual.descricao}
+        className="max-w-[89rem] mx-auto"
+      />
 
       <div className="mt-11 pl-2 pr-4 space-y-6">
-        <div>
-          <Label className="text-[14px] leading-[20px] font-semibold text-foreground">
-            Pontos positivos
-          </Label>
-          <Textarea
-            placeholder="Insira aqui os pontos positivos..."
-            className={`mt-2 resize-none bg-card ${
-              camposErro.positivos ? "border border-red-500 focus-visible:ring-red-500" : ""
-            }`}
-            value={secaoAtual.positivos}
-            onChange={(e) => handleChange("positivos", e.target.value)}
-          />
-          {camposErro.positivos && (
-            <p className="text-sm text-red-500 mt-1">Este campo é obrigatório!</p>
-          )}
-        </div>
+        {["positivos", "melhoria", "sugestoes"].map((campo) => (
+          <div key={campo} className="flex flex-col gap-2">
+            <Label className="text-sm font-semibold text-primary transition-colors">
+              {campo === "positivos"
+                ? "Pontos positivos"
+                : campo === "melhoria"
+                  ? "Pontos de melhoria"
+                  : "Sugestões"}
+            </Label>
 
-        <div>
-          <Label className="text-[14px] leading-[20px] font-semibold text-foreground">
-            Pontos de melhoria
-          </Label>
-          <Textarea
-            placeholder="Insira aqui os pontos de melhoria..."
-            className={`mt-2 resize-none bg-card ${
-              camposErro.melhoria ? "border border-red-500 focus-visible:ring-red-500" : ""
-            }`}
-            value={secaoAtual.melhoria}
-            onChange={(e) => handleChange("melhoria", e.target.value)}
-          />
-          {camposErro.melhoria && (
-            <p className="text-sm text-red-500 mt-1">Este campo é obrigatório!</p>
-          )}
-        </div>
-
-        <div>
-          <Label className="text-[14px] leading-[20px] font-semibold text-foreground">
-            Sugestões
-          </Label>
-          <Textarea
-            placeholder="Insira aqui as sugestões..."
-            className={`mt-2 resize-none bg-card ${
-              camposErro.sugestoes ? "border border-red-500 focus-visible:ring-red-500" : ""
-            }`}
-            value={secaoAtual.sugestoes}
-            onChange={(e) => handleChange("sugestoes", e.target.value)}
-          />
-          {camposErro.sugestoes && (
-            <p className="text-sm text-red-500 mt-1">Este campo é obrigatório!</p>
-          )}
-        </div>
+            <Textarea
+              placeholder={`Insira aqui os ${campo}...`}
+              className={`mt-1 resize-none rounded-xl border bg-background p-3 text-sm transition-colors focus:border-primary focus:ring-0 outline-none ${camposErro[campo] ? "border-destructive" : "border-border"
+                }`}
+              value={secaoAtual[campo as keyof CampoFormulario] as string}
+              onChange={(e) =>
+                handleChange(campo as keyof CampoFormulario, e.target.value)
+              }
+              style={{
+                minHeight: "5rem",
+              }}
+            />
+            {camposErro[campo] && (
+              <p className="text-destructive text-sm">
+                Este campo é obrigatório!
+              </p>
+            )}
+          </div>
+        ))}
       </div>
+
 
       <div className="flex justify-end pt-8 gap-4 mr-4">
         {pagina > 0 && (
           <ButtonTT
             tooltip="Anterior"
             mode="default"
-            onClick={() => setPagina(pagina - 1)}
-            className="text-[14px] leading-[20px] bg-white text-black border border-gray-300 hover:bg-gray-100 px-8"
+            onClick={() => {
+              const secaoAtual = formulario[pagina];
+              const novosErros: { [key: string]: boolean } = {};
+
+              if (secaoAtual.positivos.trim() === "") novosErros.positivos = true;
+              if (secaoAtual.melhoria.trim() === "") novosErros.melhoria = true;
+              if (secaoAtual.sugestoes.trim() === "") novosErros.sugestoes = true;
+
+              if (Object.keys(novosErros).length > 0) {
+                setCamposErro(novosErros);
+                toast.error("Preencha todos os campos antes de voltar!");
+                return;
+              }
+
+              setCamposErro({});
+              setPagina(pagina - 1);
+            }}
+            className="text-[0.875rem] leading-[1.25rem] px-8"
+            style={{
+              backgroundColor: "hsl(var(--card))",
+              color: "hsl(var(--card-foreground))",
+              border: "1px solid hsl(var(--border))",
+            }}
           >
             Anterior
           </ButtonTT>
         )}
+
 
         {pagina < formulario.length - 1 ? (
           <ButtonTT
             tooltip="Próximo"
             mode="default"
             onClick={handleNext}
-            className="text-[14px] leading-[20px] px-8"
+            className="text-[0.875rem] leading-[1.25rem] px-8"
+            style={{
+              backgroundColor: "hsl(var(--primary))",
+              color: "hsl(var(--primary-foreground))",
+              border: "1px solid hsl(var(--primary))",
+            }}
           >
             Próximo
           </ButtonTT>
@@ -233,7 +240,12 @@ export default function PreConselhoFormulario() {
               }
               setIsConfirmOpen(true);
             }}
-            className="text-[14px] leading-[20px] px-8"
+            className="text-[0.875rem] leading-[1.25rem] px-8"
+            style={{
+              backgroundColor: "hsl(var(--primary))",
+              color: "hsl(var(--primary-foreground))",
+              border: "1px solid hsl(var(--primary))",
+            }}
           >
             Enviar
           </ButtonTT>
@@ -248,6 +260,7 @@ export default function PreConselhoFormulario() {
         actionButtonLabel="Salvar"
         onConfirm={() => {
           handleSalvar();
+          localStorage.removeItem("preconselho-formulario");
           setIsConfirmOpen(false);
         }}
       />
