@@ -80,7 +80,8 @@ export default function ResetPassword() {
           src="/loginbg.jpg"
           alt="Imagem de fundo de uma sala de reunião"
         />
-        <div className="absolute inset-0 bg-black bg-opacity-50 z-0"></div>
+        <div className="absolute inset-0 bg-sky-950/45"></div>
+        <div className="absolute inset-0 bg-opacity-50 z-0"></div>
         <div className="relative z-10 h-full flex items-center justify-center p-4">
           <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md ring-4 ring-black ring-opacity-10">
             <div className="text-left mb-6">
