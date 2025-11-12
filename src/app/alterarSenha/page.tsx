@@ -30,7 +30,7 @@ export default function ResetPassword() {
     const confirmPass = data.get("confirmPassword") as string;
 
     let validationError = validatePassword(newPassword);
-    if(validationError){
+    if (validationError) {
       setError(validationError);
       setIsLoading(false);
       return;
@@ -46,12 +46,12 @@ export default function ResetPassword() {
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
     setIsLoading(false);
-    setShowSuccessModal(true); 
+    setShowSuccessModal(true);
   };
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
-    router.push("/login"); 
+    router.push("/login");
   };
 
   return (
@@ -86,7 +86,6 @@ export default function ResetPassword() {
                   setPassword(e.target.value);
                   handleInputChange();
                 }}
-                required
                 className={error ? "border-red-500" : ""}
               />
 
@@ -101,7 +100,6 @@ export default function ResetPassword() {
                   setConfirmPassword(e.target.value);
                   handleInputChange();
                 }}
-                required
                 className={error ? "border-red-500" : ""}
               />
 
@@ -122,7 +120,7 @@ export default function ResetPassword() {
         </div>
       </main>
 
-     
+
       <SenhaSucess
         isOpen={showSuccessModal}
         onClose={handleCloseSuccessModal}
