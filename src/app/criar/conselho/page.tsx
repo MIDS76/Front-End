@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FiSearch } from "react-icons/fi";
+import LogLateral from "@/components/sidebar/logLateral";
 
 export default function ConselhoPage() {
   const router = useRouter();
@@ -48,7 +49,6 @@ export default function ConselhoPage() {
   const [selectedProfessor, setSelectedProfessor] = useState<string | null>(null);
   const [salvos, setSalvos] = useState<{ unidade: string; professor: string }[]>([]);
   const [showMessage, setShowMessage] = useState(false);
-
   const [buscaProfessor, setBuscaProfessor] = useState("");
   const [buscaUnidade, setBuscaUnidade] = useState("");
 
@@ -86,7 +86,6 @@ export default function ConselhoPage() {
     setSalvos((prev) => [...prev, ...novosFiltrados]);
     setSelectedUnidades([]);
     setSelectedProfessor(null);
-
     setShowMessage(true);
     setTimeout(() => setShowMessage(false), 2000);
   }
@@ -210,7 +209,6 @@ export default function ConselhoPage() {
                   Unidade salva com sucesso!
                 </span>
               )}
-
               <button
                 onClick={handleSalvar}
                 className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--secondary))] text-[hsl(var(--primary-foreground))] px-[1.5rem] py-[0.5rem] rounded-md text-sm font-medium shadow-md"
@@ -222,60 +220,20 @@ export default function ConselhoPage() {
         </div>
       </main>
 
-      {/* LOG lateral */}
-      <aside className="relative w-[25rem] flex-shrink-0 mt-[5rem] flex flex-col rounded-l-xl overflow-hidden shadow-md">
-        <div className="bg-[hsl(var(--primary))] p-[1rem]">
-          <div className="text-[hsl(var(--primary-foreground))] font-semibold flex justify-between items-center mb-[0.25rem] px-[0.25rem]">
-            <span>Unidade Curricular</span>
-            <span className="text-sm">Professor</span>
-          </div>
-        </div>
-
-        <div className="flex-1 bg-[hsl(var(--muted))] p-[1rem] flex flex-col relative overflow-y-auto">
-          {salvos.length === 0 ? (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <p className="text-[hsl(var(--muted-foreground))] text-sm text-center italic">
-                Nenhuma unidade salva ainda
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-[0.75rem] mb-[6rem] pr-[0.5rem]">
-              {salvos.map((s, i) => (
-                <div
-                  key={i}
-                  className="bg-[hsl(var(--card))] rounded-md px-[0.75rem] py-[0.5rem] shadow-sm flex justify-between items-center border border-[hsl(var(--border))]"
-                >
-                  <div className="text-sm text-[hsl(var(--foreground))] w-1/2 truncate">
-                    {s.unidade}
-                  </div>
-                  <div className="flex items-center justify-end gap-[0.5rem] w-1/2 truncate">
-                    <span className="text-sm font-medium text-[hsl(var(--secondary))] truncate">
-                      {s.professor}
-                    </span>
-                    <button
-                      onClick={() => handleRemover(s.unidade)}
-                      className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--destructive))] text-sm font-bold"
-                      title="Remover"
-                    >
-                      ×
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* BOTÃO PRÓXIMO PASSO */}
-          <div className="absolute bottom-[1.5rem] right-[1.5rem]">
-            <button
-              className="flex items-center gap-[0.5rem] bg-[hsl(var(--primary))] hover:bg-[hsl(var(--secondary))] text-[hsl(var(--primary-foreground))] text-sm px-[1.25rem] py-[0.5rem] rounded-md font-medium shadow-md transition-all"
-              onClick={() => router.push('/criar/conselho/representante')}
-            >
-              Próximo passo <span className="text-base font-semibold">›</span>
-            </button>
-          </div>
-        </div>
-      </aside>
+      {/* LOG lateral agora é componente */}
+      <LogLateral
+        titulo="Unidade Curricular"
+        subtitulo="Professor"
+        itens={salvos.map((s, i) => ({
+           id: i,
+           unidade: s.unidade,
+            professor: s.professor
+           })
+           )}
+        onRemover={handleRemover}
+        vazioTexto="Nenhuma unidade salva ainda"
+        onProximo={() => router.push("/criar/conselho/representante")}
+      />
     </div>
   );
 }
