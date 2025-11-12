@@ -18,9 +18,16 @@ import { Input } from "@/components/ui/input";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/context/AuthContext";
 import { Usuario } from "@/utils/types";
+import { toast } from "sonner";
+import TextField from "./input/textField";
+import { showError, validatePassword, validatePasswordMatch, validateRequired } from "@/utils/formValidation";
 
 export function ConfigDialog() {
   const [isOpen, setOpen] = React.useState(false);
+  const [errors, setErrors] = React.useState<{ [key: string]: string }>({});
+  const [oldPassword, setOldPassword] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [confirmPassword, setConfirmPassword] = React.useState("");
   const [primaryColor, setPrimaryColor] = React.useState<string>();
   const [mode, setMode] = React.useState<"light" | "dark">("light");
   const [typography, setTypography] = React.useState<"default" | "alternative">(
@@ -118,13 +125,40 @@ export function ConfigDialog() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [typography]);
 
-  const user: Usuario = {
-    id: 1,
-    nome: "Aluno",
-    email: "aluno@gmail.com",
-    role: "ALUNO",
-    isActive: true
-  };
+
+  const usuario = localStorage.getItem("user");
+  let user = {} as Usuario;
+
+  if (usuario) {
+    try {
+      user = JSON.parse(usuario);
+    } catch (error) {
+      toast.error("Erro ao recuperar os dados do usuário.");
+    }
+  }
+
+  const handleSubmit = () => {
+    setErrors({});
+    const newErrors: { [key: string]: string } = {};
+
+    newErrors.oldPassword = validateRequired(oldPassword, "Senha atual");
+    newErrors.newPassword = validatePassword(password);
+    newErrors.confirmPassword = validateRequired(confirmPassword, "Nova senha");
+    newErrors.igualPassword = validatePasswordMatch(password, confirmPassword);
+
+    if (Object.keys(newErrors).length === 0) {
+      toast.success("Senha alterada com sucesso!");
+    } else {
+      setErrors(newErrors);
+      showError
+    }
+  }
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      setErrors({});
+    }
+  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
@@ -167,9 +201,9 @@ export function ConfigDialog() {
                     <div className="flex flex-wrap md:flex-nowrap items-end justify-center gap-6">
                       <div className="w-32 md:w-auto order-first md:order-last overflow-hidden rounded-full shadow-md mx-auto xs:mx-0">
                         <Avatar className="h-32 w-32">
-                          <AvatarImage src={""} alt={user.nome} />
+                          <AvatarImage src={""} alt={user?.nome} />
                           <AvatarFallback>
-                            {user.nome.substring(0, 2).toUpperCase()}
+                            {user?.nome.substring(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                       </div>
@@ -179,7 +213,7 @@ export function ConfigDialog() {
                           <Label htmlFor="name">Nome</Label>
                           <Input
                             id="name"
-                            defaultValue={user.nome}
+                            defaultValue={user?.nome}
                             readOnly
                             className="bg-card"
                           />
@@ -190,7 +224,7 @@ export function ConfigDialog() {
                           <Input
                             id="email"
                             type="email"
-                            defaultValue={user.email}
+                            defaultValue={user?.email}
                             readOnly
                             className="bg-card"
                           />
@@ -200,27 +234,40 @@ export function ConfigDialog() {
 
                     <div className="mt-6 space-y-2">
                       <Label>Alterar senha</Label>
-                      <Input
-                        type="password"
+                      <TextField
+                        id="oldPassword"
+                        name="oldPassword"
+                        label=""
                         placeholder="Insira a senha atual"
-                        className="bg-card"
-                      />
-                      <Input
                         type="password"
+                        onChange={(e) => setOldPassword(e.target.value)}
+                        error={errors.oldPassword}
+                      />
+                      <TextField
+                        id="newPassword"
+                        name="newPassword"
+                        label=""
                         placeholder="Insira a nova senha"
-                        className="bg-card"
-                      />
-                      <Input
                         type="password"
-                        placeholder="Confirme a nova senha"
-                        className="bg-card"
+                        onChange={(e) => setPassword(e.target.value)}
+                        error={errors.newPassword}
                       />
-
+                      <TextField
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        label=""
+                        placeholder="Confirme a nova senha"
+                        type="password"
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        error={errors.confirmPassword || errors.igualPassword}
+                      />
                       <div className="flex justify-end pt-2">
                         <ButtonTT
                           mode="default"
                           tooltip="none"
                           variant={"secondary"}
+                          type="submit"
+                          onClick={() => handleSubmit()}
                         >
                           Alterar senha
                         </ButtonTT>
@@ -247,7 +294,7 @@ export function ConfigDialog() {
                             className={cn(
                               "flex h-10 w-10 items-center justify-center rounded-md p-0",
                               mode === "light" &&
-                                "bg-primary text-secondary-foreground hover:bg-primary/90"
+                              "bg-primary text-secondary-foreground hover:bg-primary/90"
                             )}
                             onClick={() => {
                               setMode("light");
@@ -264,7 +311,7 @@ export function ConfigDialog() {
                             className={cn(
                               "flex h-10 w-10 items-center justify-center rounded-md p-0",
                               mode === "dark" &&
-                                "bg-primary text-secondary-foreground hover:bg-primary/90"
+                              "bg-primary text-secondary-foreground hover:bg-primary/90"
                             )}
                             onClick={() => {
                               setMode("dark");
@@ -303,7 +350,7 @@ export function ConfigDialog() {
                             className={cn(
                               "flex h-10 w-10 items-center justify-center rounded-md p-0 font-sans",
                               typography === "default" &&
-                                "bg-primary text-secondary-foreground hover:bg-primary/90"
+                              "bg-primary text-secondary-foreground hover:bg-primary/90"
                             )}
                             onClick={() => {
                               setTypography("default");
@@ -331,7 +378,7 @@ export function ConfigDialog() {
                             className={cn(
                               "flex h-10 w-10 items-center justify-center rounded-md p-0 font-serif ",
                               typography === "alternative" &&
-                                "bg-primary text-secondary-foreground hover:bg-primary/90"
+                              "bg-primary text-secondary-foreground hover:bg-primary/90"
                             )}
                             onClick={() => {
                               setTypography("alternative");
@@ -368,7 +415,7 @@ export function ConfigDialog() {
                               className={cn(
                                 "h-10 w-10 rounded-md",
                                 fontSize === size.value &&
-                                  "bg-primary text-secondary-foreground hover:bg-primary/90"
+                                "bg-primary text-secondary-foreground hover:bg-primary/90"
                               )}
                               onClick={() => setFontSize(size.value)}
                             >

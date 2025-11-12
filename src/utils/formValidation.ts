@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 
 export const validateRequired = (value: string, fieldName: string): string => {
-    if (!value.trim()) return `O ${fieldName} é obrigatório.`;
+    if (!value.trim()) return `${fieldName} é obrigatório.`;
     return "";
 }
 
