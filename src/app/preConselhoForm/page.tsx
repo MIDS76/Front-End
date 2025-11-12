@@ -167,7 +167,7 @@ export default function PreConselhoFormulario() {
             onChange={(e) => handleChange("positivos", e.target.value)}
           />
           {camposErro.positivos && (
-            <p className="text-sm text-red-500 mt-1">{camposErro.positivos}</p>
+            <p className="text-sm text-red-500 mt-1">Este campo é obrigatório!</p>
           )}
         </div>
 
@@ -184,7 +184,7 @@ export default function PreConselhoFormulario() {
             onChange={(e) => handleChange("melhoria", e.target.value)}
           />
           {camposErro.melhoria && (
-            <p className="text-sm text-red-500 mt-1">{camposErro.melhoria}</p>
+            <p className="text-sm text-red-500 mt-1">Este campo é obrigatório!</p>
           )}
         </div>
 
@@ -201,7 +201,7 @@ export default function PreConselhoFormulario() {
             onChange={(e) => handleChange("sugestoes", e.target.value)}
           />
           {camposErro.sugestoes && (
-            <p className="text-sm text-red-500 mt-1">{camposErro.sugestoes}</p>
+            <p className="text-sm text-red-500 mt-1">Este campo é obrigatório!</p>
           )}
         </div>
       </div>
