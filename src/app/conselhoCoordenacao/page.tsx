@@ -118,7 +118,6 @@ export default function ConselhoCoordenacao() {
     toast.success("Conselho concluído e salvo com sucesso!");
     localStorage.removeItem("conselho-formulario");
 
-
     const usuarioJson = localStorage.getItem("user");
 
     if (usuarioJson) {

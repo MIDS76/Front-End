@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import ButtonTT from "./button/ButtonTT";
+import ButtonTT from "../button/ButtonTT";
 import { Sun, Moon, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,7 @@ import { useTheme } from "next-themes";
 import { useAuth } from "@/context/AuthContext";
 import { Usuario } from "@/utils/types";
 import { toast } from "sonner";
-import TextField from "./input/textField";
+import TextField from "../input/textField";
 import { showError, validatePassword, validatePasswordMatch, validateRequired } from "@/utils/formValidation";
 
 export function ConfigDialog() {
@@ -126,16 +126,18 @@ export function ConfigDialog() {
   }, [typography]);
 
 
-  const usuario = localStorage.getItem("user");
-  let user = {} as Usuario;
+  const [user, setUser] = React.useState<Usuario | null>(null);
 
-  if (usuario) {
-    try {
-      user = JSON.parse(usuario);
-    } catch (error) {
-      toast.error("Erro ao recuperar os dados do usuário.");
+  React.useEffect(() => {
+    const usuario = localStorage.getItem("user");
+    if (usuario) {
+      try {
+        setUser(JSON.parse(usuario));
+      } catch (error) {
+        toast.error("Erro ao recuperar os dados do usuário.");
+      }
     }
-  }
+  }, []);
 
   const handleSubmit = () => {
     setErrors({});
