@@ -7,12 +7,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import useSWR from "swr";
 
 
-import { Page } from "@/utils/types";
-
-import Paginacao from "@/components/paginacao";
+import { Page, Turma } from "@/utils/types";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SearchBar from "@/components/input/searchBar";
 import FiltrosDinamicos from "@/components/filtros/FiltrosDinamicos";
+import Paginacao from "@/components/paginacao/paginacao";
 
 export default function LandingPage() {
   const [dataAleatoria] = useState(() => {
