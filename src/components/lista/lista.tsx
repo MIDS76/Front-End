@@ -1,23 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import EditUserDialog from "./modal/editUserDialog";
-import { Conselho } from "@/utils/types";
-import { Usuario } from "@/utils/types";
-import { ListCell } from "./listcell";
+import EditUserDialog from "../modal/editUserDialog";
+import { Conselho, Usuario } from "@/utils/types";
+import ListCell from "./listcell"; 
 
 interface ListaProps {
   className?: string;
   usuarios: Usuario[];
-  tipo: "checkbox"
-  | "edit"
-  | "conselho"
-  | "limpa";
+  tipo: "checkbox" | "edit" | "conselho" | "limpa";
   loading?: boolean;
   conselho?: Conselho;
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setSearchQuery?: React.Dispatch<React.SetStateAction<string>>;
+  onSelect?: (usuario: Usuario) => void;
+  usuarioSelecionado?: Usuario | null;
 }
 
 export default function Lista({
@@ -26,11 +24,17 @@ export default function Lista({
   tipo,
   conselho,
   isDialogOpen,
-  setIsDialogOpen
+  setIsDialogOpen,
+  onSelect,
+  usuarioSelecionado,
 }: ListaProps) {
   const [selectedUsuarios, setSelectedUsuarios] = useState<Usuario[]>([]);
   const [editingUser, setEditingUser] = useState<Usuario>({} as Usuario);
   const [updatedUsuarios, setUpdatedUsuarios] = useState<Usuario[]>(usuarios);
+
+  useEffect(() => {
+    setUpdatedUsuarios(usuarios);
+  }, [usuarios]);
 
   const toggleUsuario = (usuario: Usuario) => {
     setSelectedUsuarios((prev) =>
@@ -49,22 +53,35 @@ export default function Lista({
   };
 
   return (
-    <section className="flex flex-col items-stretch justify-start w-full gap-4 ">
+    <section className="flex flex-col items-stretch justify-start w-full gap-4">
       <ScrollArea className={cn(className, "flex flex-col")}>
-        {updatedUsuarios?.map((usuario, index) => (
-          <ListCell
-            isDialogOpen={isDialogOpen}
-            setIsDialogOpen={setIsDialogOpen}
-            key={index}
-            usuario={usuario}
-            conselho={conselho!}
-            toggleSelected={() => toggleUsuario(usuario)}
-            tipo={tipo}
-            setEditingUser={setEditingUser}
-            copy
-          />
-        ))}
+        {updatedUsuarios && updatedUsuarios.length > 0 ? (
+          updatedUsuarios.map((usuario, index) => (
+            <ListCell
+              key={usuario.id ?? index}
+              usuario={usuario}
+              conselho={conselho}
+              tipo={tipo}
+              toggleSelected={() => toggleUsuario(usuario)}
+              setEditingUser={setEditingUser}
+              isDialogOpen={isDialogOpen}
+              setIsDialogOpen={setIsDialogOpen}
+              copy
+              onClick={() => {
+                if (tipo === "limpa" && onSelect) {
+                  onSelect(usuario);
+                }
+              }}
+              ativo={!!(tipo === "limpa" && usuarioSelecionado && usuarioSelecionado.id === usuario.id)}
+            />
+          ))
+        ) : (
+          <p className="text-center text-sm text-muted-foreground py-4">
+            Nenhum usuário encontrado.
+          </p>
+        )}
       </ScrollArea>
+
       {tipo === "edit" && (
         <EditUserDialog
           usuario={editingUser!}

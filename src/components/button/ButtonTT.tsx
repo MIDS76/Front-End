@@ -17,8 +17,10 @@ export interface ButtonTTProps extends ButtonProps {
   mode?: "micro" | "small" | "default" | "text-icon";
   tooltip?: string;
   children?: React.ReactNode;
+  text?: string;
   iconSide?: "left" | "right";
   className?: string;
+  label?: string;
 }
 
 function TooltipPortal({ children }: { children: React.ReactNode }) {

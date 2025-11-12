@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import TextField from "../input/textField";
 import { Button } from "../ui/button";
-import Lista from "../lista";
+import Lista from "../lista/lista";
 import { toast } from "sonner";
 
 interface TurmaFormProps {

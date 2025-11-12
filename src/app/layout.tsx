@@ -5,7 +5,7 @@ import "./globals.css";
 import Header from "@/components/header/header";
 import { Toaster } from "sonner";
 import { WebSocketProvider } from "@/context/WebSocketContext";
-import { Tema } from "@/components/tema";
+import { Tema } from "@/components/tema/tema";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { AuthProvider } from "@/context/AuthContext";
