@@ -45,8 +45,15 @@ export default function RepresentantePage() {
     }
   }
 
-  function handleRemover(id: number) {
-    setSelecionados((prev) => prev.filter((s) => s.id !== id));
+  // 🔧 Corrigido — igual ao Conselho: recebe o ID e remove corretamente
+  function handleRemover(idOuNome: string) {
+    setSelecionados((prev) =>
+      prev.filter(
+        (s) =>
+          s.id?.toString() !== idOuNome &&
+          s.nome !== idOuNome
+      )
+    );
   }
 
   const alunosFiltrados = alunosAtivos.filter((a) =>
@@ -75,7 +82,7 @@ export default function RepresentantePage() {
 
           {/* CARD CENTRAL */}
           <div className="bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] shadow-sm w-[48.4rem] h-[30rem] p-[1.25rem] flex flex-col">
-            {/* Campo de busca (mesmo estilo do conselho) */}
+            {/* Campo de busca */}
             <div className="relative mb-[1rem]">
               <FiSearch className="absolute left-[0.75rem] top-[0.65rem] text-[hsl(var(--muted-foreground))]" />
               <input
@@ -157,7 +164,7 @@ export default function RepresentantePage() {
         </div>
       </main>
 
-      {/* Log lateral reutilizável */}
+      {/* Log lateral */}
       <LogLateral
         titulo="Representante"
         subtitulo="Email"
@@ -166,7 +173,7 @@ export default function RepresentantePage() {
           unidade: s.nome,
           professor: s.email,
         }))}
-        onRemover={(id) => handleRemover(id)} 
+        onRemover={handleRemover}
         vazioTexto="Nenhum representante selecionado"
         onProximo={() => router.push("/criar/conselho/finalizar")}
       />
