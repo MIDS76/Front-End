@@ -10,7 +10,7 @@ export default function EnvioSuccessModal({ isOpen, onClose }: EnvioSuccessModal
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white px-8 py-12 rounded-xl shadow-2xl max-w-md relative">
+      <div className="bg-white px-8 py-7 rounded-xl shadow-2xl max-w-md relative">
    
         <button
           onClick={onClose}
@@ -29,26 +29,26 @@ export default function EnvioSuccessModal({ isOpen, onClose }: EnvioSuccessModal
             </svg>
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">E-mail enviado com sucesso!</h2>
+          <h2 className="text-4xl font-bold text-gray-900 mb-9">E-mail enviado com sucesso!</h2>
           
-          <p className="font-semibold text-gray-900 mb-4">
+          <p className="font-semibold text-2xl text-gray-900 mb-4">
             O link de redefinição de senha foi enviado
           </p>
           
-          <p className="text-gray-600 mb-6 text-sm">
+          <p className="text-gray-600 mb-6 ">
             Enviamos agora um e-mail com um link que você pode usar para redefinir sua senha. Pode levar alguns minutos até que chegue a sua caixa de entrada.
           </p>
 
        
-          <hr className="my-6 border-gray-300" />
+          <hr className="my-7 border-gray-400" />
 
         
-          <div className="text-left bg-gray-50 p-4 rounded-lg mb-6">
-            <p className="font-semibold text-gray-900 mb-2">Não está recebendo um e-mail?</p>
-            <p className="text-gray-600 text-sm mb-2">
+          <div className="text-left p-4 rounded-lg">
+            <p className="font-semibold text-2xl text-gray-800 mb-2">Não está recebendo um e-mail?</p>
+            <p className="text-gray-600 text-1xs mb-3">
               Caso tenha aguardado mais de 5 minutos e ainda não tenha recebido o e-mail, siga as instruções abaixo:
             </p>
-            <ul className="text-gray-600 text-sm list-disc pl-5 space-y-1">
+            <ul className="text-gray-800 text-sm list-disc pl-5 space-y-1">
               <li>Verifique suas pastas de spam/lixo eletrônico.</li>
               <li>Entre em contato com o administrador da rede e peça para adicionar <strong>site.com</strong> como um domínio permitido no seu servidor de e-mail.</li>
             </ul>

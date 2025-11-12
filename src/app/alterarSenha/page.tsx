@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import TextField from "@/components/input/textField";
-import Form from "next/form";
 import ButtonTT from "@/components/button/ButtonTT";
 import SenhaSucess from "@/components/modal/senhaAlteradaSucesso";
 import { validatePassword, validatePasswordMatch } from "@/utils/formValidation";
@@ -14,7 +13,7 @@ export default function ResetPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showSuccessModal, setShowSuccessModal] = useState(false); // state do modal
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const router = useRouter();
 
@@ -64,15 +63,22 @@ export default function ResetPassword() {
           src="/loginbg.jpg"
           alt="Imagem de fundo de uma sala de reunião"
         />
-        <div className="absolute inset-0 bg-black bg-opacity-50 z-0"></div>
+        <div className="absolute inset-0 bg-sky-950/45"></div>
+
         <div className="relative z-10 h-full flex items-center justify-center p-4">
           <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md ring-4 ring-black ring-opacity-10">
             <div className="text-left mb-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Alterar Senha</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Alterar Senha
+              </h1>
             </div>
 
-            <Form
-              action={handleResetPassword}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const data = new FormData(e.currentTarget);
+                handleResetPassword(data);
+              }}
               className="flex flex-col gap-4 w-full"
             >
               <TextField
@@ -111,7 +117,7 @@ export default function ResetPassword() {
               >
                 {isLoading ? "Salvando..." : "Salvar Senha"}
               </ButtonTT>
-            </Form>
+            </form>
           </div>
         </div>
       </main>

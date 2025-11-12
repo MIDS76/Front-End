@@ -1,7 +1,9 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button"; // usa o botão padrão do sistema
 
 const SenhaSucessoModal: React.FC<{
   isOpen: boolean;
@@ -12,20 +14,38 @@ const SenhaSucessoModal: React.FC<{
   if (!isOpen) return null;
 
   const handleClick = () => {
-    onClose(); 
-    router.push("/login"); 
+    onClose();
+    router.push("/login");
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl p-8 w-full max-w-sm shadow-lg flex flex-col items-center text-center w-15 ">
-        <h2 className="text-2xl font-bold mb-4">Senha alterada com <br/>sucesso!</h2>
-        <button
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden">
+      {/* Fundo com imagem e overlay */}
+      <main className="absolute inset-0 h-full w-full overflow-hidden">
+        <Image
+          className="absolute inset-0 w-full h-full object-cover"
+          width={1920}
+          height={1080}
+          src="/loginbg.jpg"
+          alt="Imagem de fundo de uma sala de reunião"
+        />
+        
+     <div className="absolute inset-0 bg-sky-950/45"></div>
+        <div className="absolute inset-0 "></div>
+      </main>
+
+          {/* Conteúdo do modal */}
+          <div className="relative z- bg-white rounded-xl p-12 w-full max-w-sm shadow-lg flex flex-col items-center text-center">
+        <h2 className="text-3xl font-bold text-gray-900 mb-8">
+          Senha alterada com sucesso!
+        </h2>
+
+        <Button
           onClick={handleClick}
-          className="mt-6 bg-teal-900 hover:bg-teal-900 text-white font-medium py-2 px-4 rounded-lg w-15 h-20"
+          className="w-full max-w-xs text-sm font-semibold"
         >
           Voltar para a página de login
-        </button>
+        </Button>
       </div>
     </div>
   );
