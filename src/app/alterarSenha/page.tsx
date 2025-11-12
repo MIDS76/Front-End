@@ -86,7 +86,7 @@ export default function ResetPassword() {
                   setPassword(e.target.value);
                   handleInputChange();
                 }}
-                className={error ? "border-red-500" : ""}
+                error={error}
               />
 
               <TextField
@@ -100,12 +100,8 @@ export default function ResetPassword() {
                   setConfirmPassword(e.target.value);
                   handleInputChange();
                 }}
-                className={error ? "border-red-500" : ""}
+                error={error}
               />
-
-              {error && (
-                <p className="text-red-500 text-sm text-center">{error}</p>
-              )}
 
               <ButtonTT
                 mode="default"
