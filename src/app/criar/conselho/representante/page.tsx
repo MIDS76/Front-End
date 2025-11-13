@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { FiSearch } from "react-icons/fi";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import LogLateral from "@/components/sidebar/logLateral";
+import ButtonTT from "@/components/button/ButtonTT";
+import { toast } from "sonner";
 
 export default function RepresentantePage() {
   const router = useRouter();
@@ -42,10 +44,10 @@ export default function RepresentantePage() {
       setSelecionados((prev) => [...prev, aluno]);
     } else {
       setShowLimitMsg(true);
+      toast.error("Limite de dois representantes atingido.");
     }
   }
 
-  // 🔧 Corrigido — igual ao Conselho: recebe o ID e remove corretamente
   function handleRemover(idOuNome: string) {
     setSelecionados((prev) =>
       prev.filter(
@@ -54,6 +56,19 @@ export default function RepresentantePage() {
           s.nome !== idOuNome
       )
     );
+  }
+
+  // 🔹 Validação de erro padronizada antes de ir pra próxima tela
+  function handleProximo() {
+    if (selecionados.length === 0) {
+      toast.error("Selecione dois representantes antes de prosseguir.");
+      return;
+    }
+    if (selecionados.length < 2) {
+      toast.error("É necessário selecionar dois representantes.");
+      return;
+    }
+    router.push("/criar/conselho/finalizar");
   }
 
   const alunosFiltrados = alunosAtivos.filter((a) =>
@@ -65,7 +80,7 @@ export default function RepresentantePage() {
       {/* CONTEÚDO PRINCIPAL */}
       <main className="flex-1 px-[3rem] pt-[2rem] pb-[3rem] mt-[5rem]">
         <div className="max-w-[80rem] mx-auto flex flex-col items-center">
-          {/* CARD CABEÇALHO */}
+          {/* CABEÇALHO */}
           <div className="bg-[hsl(var(--card))] rounded-xl shadow-md p-[1.5rem] mb-[2rem] border border-[hsl(var(--border))] w-[48.4rem]">
             <h1 className="text-2xl font-semibold text-[hsl(var(--secondary))]">
               Conselho da turma MI 74
@@ -80,7 +95,7 @@ export default function RepresentantePage() {
             </div>
           </div>
 
-          {/* CARD CENTRAL */}
+          {/* LISTA */}
           <div className="bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] shadow-sm w-[48.4rem] h-[30rem] p-[1.25rem] flex flex-col">
             {/* Campo de busca */}
             <div className="relative mb-[1rem]">
@@ -103,18 +118,12 @@ export default function RepresentantePage() {
                   alunosFiltrados.map((aluno) => (
                     <div
                       key={aluno.id}
-                      className={`flex items-center justify-between border border-[hsl(var(--border))] rounded-md px-[1rem] py-[0.5rem] transition-colors ${
-                        selecionados.some((s) => s.id === aluno.id)
-                          ? "bg-[hsl(var(--muted))] border-[hsl(var(--primary))]"
-                          : "hover:bg-[hsl(var(--muted))]"
-                      }`}
+                      className={`flex items-center justify-between border border-[hsl(var(--border))] rounded-md px-[1rem] py-[0.5rem] transition-colors ${selecionados.some((s) => s.id === aluno.id) ? "bg-[hsl(var(--muted))] border-[hsl(var(--primary))]" : "hover:bg-[hsl(var(--muted))]" }`}
                     >
                       <div className="flex items-center gap-[0.75rem]">
                         <Avatar className="h-[2rem] w-[2rem]">
                           <AvatarImage
-                            src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
-                              aluno.nome
-                            )}`}
+                            src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(aluno.nome)}`}
                             alt={aluno.nome}
                           />
                           <AvatarFallback>
@@ -123,13 +132,7 @@ export default function RepresentantePage() {
                         </Avatar>
 
                         <div className="flex flex-col text-sm">
-                          <span
-                            className={`font-medium ${
-                              selecionados.some((s) => s.id === aluno.id)
-                                ? "text-[hsl(var(--primary))]"
-                                : "text-[hsl(var(--foreground))]"
-                            }`}
-                          >
+                          <span className={`font-medium ${selecionados.some((s) => s.id === aluno.id) ? "text-[hsl(var(--primary))]" : "text-[hsl(var(--foreground))]"}`}>
                             {aluno.nome}
                           </span>
                           <span className="text-[hsl(var(--muted-foreground))] text-xs">
@@ -155,19 +158,22 @@ export default function RepresentantePage() {
             </div>
           </div>
 
-          {/* Mensagem de limite */}
-          {showLimitMsg && (
-            <p className="text-sm text-[hsl(var(--destructive))] mt-[1rem] text-right italic font-semibold w-[48.4rem]">
-              Limite de dois representantes atingido
-            </p>
-          )}
+          {/* Botão Anterior alinhado abaixo da lista */}
+          <div className="w-[48.4rem] flex justify-start mt-[1rem]">
+            <ButtonTT
+              mode="default"
+              onClick={() => router.push("/criar/conselho")}
+              className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--secondary))] text-[hsl(var(--primary-foreground))] px-[1.25rem] py-[0.5rem] rounded-md text-sm font-medium shadow-md transition-all"
+            >
+              Anterior
+            </ButtonTT>
+          </div>
         </div>
       </main>
 
       {/* Log lateral */}
       <LogLateral
         titulo="Representante"
-        subtitulo="Email"
         itens={selecionados.map((s) => ({
           id: s.id,
           unidade: s.nome,
@@ -175,7 +181,7 @@ export default function RepresentantePage() {
         }))}
         onRemover={handleRemover}
         vazioTexto="Nenhum representante selecionado"
-        onProximo={() => router.push("/criar/conselho/finalizar")}
+        onProximo={handleProximo}
       />
     </div>
   );
