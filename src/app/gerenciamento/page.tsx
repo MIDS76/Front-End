@@ -5,19 +5,19 @@ import { useEffect } from "react";
 import MedModal from "@/components/modal/medModal";
 import Lista from "@/components/lista/lista";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import turmas from "@/data/turma.json";
 import usuarios from "@/data/usuarios.json";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SearchBar from "@/components/input/searchBar";
 import { useRouter } from "next/navigation";
+import { buscarTurmas } from "@/api/turmas";
 
 
-export default function GerenciamentoUsersTurmas() {
+export default async function GerenciamentoUsersTurmas() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const turmasArray = turmas;
+  const turmasArray = await buscarTurmas();
   const usuariosArray = usuarios;
 
   useEffect(() => {
@@ -57,8 +57,8 @@ export default function GerenciamentoUsersTurmas() {
                 {turmasArray?.map((classItem, index) => (
                   <MedModal
                     key={index}
-                    courseCode={classItem.codigoTurma}
-                    courseName={classItem.nomeCurso}
+                    courseCode={classItem.nome}
+                    courseName={classItem.curso}
                     onClick={() => handleTurmaClick(classItem.id)}
                     simple
                   />

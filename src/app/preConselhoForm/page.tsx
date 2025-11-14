@@ -188,11 +188,11 @@ export default function PreConselhoFormulario() {
             mode="default"
             onClick={() => {
               const secaoAtual = formulario[pagina];
-              const novosErros: { [key: string]: boolean } = {};
+              const novosErros: { [key: string]: string } = {};
 
-              if (secaoAtual.positivos.trim() === "") novosErros.positivos = true;
-              if (secaoAtual.melhoria.trim() === "") novosErros.melhoria = true;
-              if (secaoAtual.sugestoes.trim() === "") novosErros.sugestoes = true;
+              novosErros.positivos = validateRequired(secaoAtual.positivos, "pontos positivos");
+              novosErros.melhoria = validateRequired(secaoAtual.melhoria, "melhoria");
+              novosErros.sugestoes = validateRequired(secaoAtual.sugestoes, "sugestões");
 
               if (Object.keys(novosErros).length > 0) {
                 setCamposErro(novosErros);

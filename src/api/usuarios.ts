@@ -2,7 +2,7 @@ import api from "@/utils/axios";
 import { Usuario } from "@/utils/types";
 import { AxiosError } from "axios";
 
-export const buscar = async () => {
+export const buscarAlunos = async () => {
     const controller = new AbortController();
 
     try {
@@ -13,6 +13,26 @@ export const buscar = async () => {
     } catch (err) {
         if (err instanceof AxiosError) {
             console.log(err.response?.status);
+        }
+    }
+}
+
+export const criarUsuario = async (data: Usuario) => {
+    const controller = new AbortController();
+
+    const usuario = {
+        nome: data.nome,
+        email: data.email
+    };
+
+    try {
+        const response = await api.post(`/auth/cadastrar/${data.role}`, usuario, { signal: controller.signal });
+        console.log(response);
+        return response.data;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.log(err.response?.status);
+            console.log(err.response?.data);
         }
     }
 }

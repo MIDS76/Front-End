@@ -8,7 +8,8 @@ import { toast } from "sonner";
 import { Combobox } from "../ui/combobox";
 import { useState, useEffect } from "react";
 import { USER_ROLES } from "@/utils/types";
-import { showError, validateEmail, validateRequired } from "@/utils/formValidation";
+import { hasErrors, showError, validateEmail, validateRequired } from "@/utils/formValidation";
+import { criarUsuario } from "@/api/usuarios";
 
 interface NovoUserModalProps {
   isOpen: boolean;
@@ -30,25 +31,33 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
     newErrors.email = validateEmail(email);
     newErrors.tipo = validateRequired(value, "tipo de usuário");
 
-    if (Object.keys(newErrors).length === 0) {
+    if (!hasErrors(newErrors)) {
       setConfirmOpen(true);
-    }else{
+      console.log("abrir confirm");
+    } else {
       setErrors(newErrors);
-      showError
+      showError();
+      console.log(newErrors);
     }
   };
 
-  const handleConfirm = () => {
-    toast.success("Usuário criado com sucesso!");
-    setConfirmOpen(false);
-    setTimeout(() => {
-      setOpen(false);
-     
-      setNome("");
-      setEmail("");
-      setValue("");
-      setErrors({});
-    }, 300);
+  const handleConfirm = async () => {
+    const novoUsuario = await criarUsuario({ nome: nome, email: email, role: value });
+
+    if (novoUsuario) {
+      toast.success("Usuário criado com sucesso!");
+      setConfirmOpen(false);
+      setTimeout(() => {
+        setOpen(false);
+
+        setNome("");
+        setEmail("");
+        setValue("");
+        setErrors({});
+      }, 300);
+    } else {
+      toast.error("Erro ao criar o usuário. Tente novamente.");
+    }
   };
 
   useEffect(() => {
@@ -74,7 +83,7 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
         onConfirm={handleOpenConfirm}
         conteudo={
           <div className="space-y-4 max-w-md mx-auto">
-            <Form action={() => {}} className="flex flex-col gap-4">
+            <Form action={() => { }} className="flex flex-col gap-4">
               <div>
                 <TextField
                   label="Nome"

@@ -6,14 +6,12 @@ import usuarios from "@/data/usuarios.json";
 import turmas from "@/data/turma.json";
 import { useParams} from "next/navigation";
 import TurmaForm from "@/components/turma/TurmaForm";
-import { useRouter } from "next/navigation";
 
 export default function GereciarTurma() {
   const usuariosArray = usuarios;
   const turmasArray = turmas;
   const { id } = useParams();
 
-  const router = useRouter();
   const alunos = usuariosArray.filter((user) => user.role === "Aluno");
   const turmaId = Number(id);
   const turma = turmasArray.find((t) => t.id === turmaId);
