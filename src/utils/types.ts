@@ -27,7 +27,7 @@ export interface Usuario {
   nome: string;
   email: string;
   role: string;
-  isActive?: boolean;
+  isActive: boolean;
 }
 
 export const USER_ROLES = [

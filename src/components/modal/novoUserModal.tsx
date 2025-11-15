@@ -42,22 +42,25 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
   };
 
   const handleConfirm = async () => {
-    const novoUsuario = await criarUsuario({ nome: nome, email: email, role: value });
+    try {
+      const novoUsuario = await criarUsuario({ nome: nome, email: email, role: value });
 
-    if (novoUsuario) {
-      toast.success("Usuário criado com sucesso!");
-      setConfirmOpen(false);
-      setTimeout(() => {
-        setOpen(false);
+      if (novoUsuario && novoUsuario.id) {
+          toast.success("Usuário criado com sucesso!");
+          setConfirmOpen(false);
+          setTimeout(() => {
+              setOpen(false);
 
-        setNome("");
-        setEmail("");
-        setValue("");
-        setErrors({});
-      }, 300);
-    } else {
+              setNome("");
+              setEmail("");
+              setValue("");
+              setErrors({});
+          }, 300);
+      }
+  } catch (error) {
+      console.error("Erro ao criar o usuário:", error);
       toast.error("Erro ao criar o usuário. Tente novamente.");
-    }
+  }
   };
 
   useEffect(() => {
