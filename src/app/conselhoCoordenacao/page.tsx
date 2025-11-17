@@ -202,7 +202,7 @@ export default function ConselhoCoordenacao() {
                   nome={usuarioSelecionado.nome}
                   email={usuarioSelecionado.email}
                   copy={false}
-                  active={usuarioSelecionado.isActive ? true : false}
+                  active={usuarioSelecionado.ativo ? true : false}
                 />
               </div>
             )}
