@@ -27,15 +27,14 @@ export interface Usuario {
   nome: string;
   email: string;
   role: string;
-  isActive: boolean;
+  isActive?: boolean;
 }
 
 export const USER_ROLES = [
   { value: "pedagogico", label: "Técnico Pedagógico" },
   { value: "weg", label: "WEG" },
   { value: "supervisor", label: "Supervisor" },
-  { value: "professor", label: "Professor" },
-  { value: "alunos", label: "Aluno"},
+  { value: "professor", label: "Professor" }
 
 ] as const;
 
