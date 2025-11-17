@@ -109,6 +109,36 @@ export const unidadeCurricular = async () => {
     }
 }
 
+// criar unidade curricular
+export const criarUnidadeCurricular = async (nome: string) => {
+    const controller = new AbortController();
+
+    try {
+        const response = await api.post(`/unidadeCurricular/criar`, nome, { signal: controller.signal });
+        return response.data;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.log(err.response?.status);
+            console.log(err.response?.data);
+        }
+    }
+}
+
+// criar lista de unidade curricular
+export const criarUnidadeCurricularLista = async (lista: string[]) => {
+    const controller = new AbortController();
+
+    try {
+        const response = await api.post(`/unidadeCurricular/criarLista`, lista, { signal: controller.signal });
+        return response.data;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.log(err.response?.status);
+            console.log(err.response?.data);
+        }
+    }
+}
+
 // listar na hora de criar um conselho
 export const professores = async () => {
     const controller = new AbortController();

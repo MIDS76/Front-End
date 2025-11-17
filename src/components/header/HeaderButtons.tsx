@@ -1,9 +1,7 @@
 "use client";
 
 import CreateButton from "./buttons/createButton";
-import DashboardButton from "./buttons/DashboardButton";
 import NotificationButton from "./buttons/NotificationButton";
-import ChatButton from "./buttons/ChatButton";
 import ConfigurationButton from "./buttons/ConfigurationButton";
 
 interface HeaderButtonsProps {
@@ -13,9 +11,9 @@ interface HeaderButtonsProps {
 
 export default function HeaderButtons({ role, sidebar }: HeaderButtonsProps) {
   const baseButtons = {
-    aluno: [<ChatButton key="chat" />, <NotificationButton key="notifications" />, <ConfigurationButton key="config" />],
-    admin: [<CreateButton key="create" />, <ChatButton key="chat" />, <NotificationButton key="notifs" />, <ConfigurationButton key="config" />],
-    pedagogico: [<CreateButton key="create" />, <DashboardButton key="dashboard" />, <ChatButton key="chat" />, <NotificationButton key="notifs" />, <ConfigurationButton key="config" />],
+    aluno: [<NotificationButton key="notifications" />, <ConfigurationButton key="config" />],
+    admin: [<CreateButton key="create" />, <NotificationButton key="notifs" />, <ConfigurationButton key="config" />],
+    pedagogico: [<CreateButton key="create" />, <NotificationButton key="notifs" />, <ConfigurationButton key="config" />],
   };
 
   return (

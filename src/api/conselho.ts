@@ -3,28 +3,23 @@ import { AxiosError } from "axios";
 
 const controller = new AbortController();
 
-// busca todos os conselhos criados
-export const buscarConselho = async () => {
-    try {
-        const response = await api.get("/conselhos/listar", { signal: controller.signal });
-
-        return response.data;
-    } catch (err) {
-        if (err instanceof AxiosError) {
-            console.log(err.response?.status);
-        }
-    }
+export interface Conselho {
+    id?: number;
+    idTurma: number;
+    nomeTurma?: string;
+    idRepresentante1: number;
+    nomeRepresentante1?: string;
+    idRepresentante2: number;
+    nomeRepresentante2?: string;
+    idPedagogico: number;
+    nomePedagogico?: string;
+    dataInicio: string;
+    dataFim: string;
+    etapas?: string;
 }
 
 // utilizar quando for criar um pré-conselho
-export const criarConselho = async (conselho: {
-    idTurma: number;
-    dataInicio: string;
-    dataFim?: string;
-    idRepresentante1: number;
-    idRepresentante2: number;
-    idPedagogico: number;
-}) => {
+export const criarConselho = async (conselho: Conselho) => {
     const controller = new AbortController();
 
     try {
@@ -39,7 +34,7 @@ export const criarConselho = async (conselho: {
 }
 
 // quando o pedagogico estiver preenchendo o conselho
-export const conselhoPedagogico = async (feedbackTurma: {
+export const conselhoTurma = async (feedbackTurma: {
     idConselho: number;
     idPedagogico: number;
     pontosPositivos: string;
