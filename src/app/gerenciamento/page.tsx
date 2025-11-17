@@ -32,6 +32,8 @@ export default function GerenciamentoUsersTurmas() {
     fetchData();
   }, []);
 
+  console.log(usuarios);
+
   useEffect(() => {
     return () => {
       document.title = "Gerenciamento - Portal do Conselho";
