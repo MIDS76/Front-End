@@ -18,13 +18,12 @@ export const buscarUsuarios = async () => {
 export const criarUsuario = async (data: Usuario) => {
     const controller = new AbortController();
 
-    const usuario = {
-        nome: data.nome,
-        email: data.email
-    };
-
     try {
-        const response = await api.post(`/auth/cadastrar/${data.role}`, usuario, { signal: controller.signal });
+        const response = await api.post(`/auth/cadastrar/${data.role}`, {
+            nome: data.nome,
+            email: data.email
+        },
+            { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
@@ -32,4 +31,8 @@ export const criarUsuario = async (data: Usuario) => {
             console.log(err.response?.data);
         }
     }
+}
+
+export const editarUsuario = async (data: Usuario) => {
+    
 }
