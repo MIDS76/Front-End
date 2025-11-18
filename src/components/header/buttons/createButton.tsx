@@ -71,7 +71,8 @@ export default function CreateButton() {
         </DropdownMenuItem>
         <DropdownMenuItem
           className="cursor-pointer hover:bg-accent text-base"
-          onClick={() => open("/criar/conselho", "_self")}
+          onClick={() => open("/criar/conselho/turma", "_self")}
+
         >
           <IoDocumentText />
           <span>Criar conselho</span>
