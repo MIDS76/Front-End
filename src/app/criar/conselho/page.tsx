@@ -70,7 +70,6 @@ export default function ConselhoPage() {
     );
   }
 
-  // ✅ Carrega os dados do localStorage
   useEffect(() => {
     const carregarDados = () => {
       const dadosSalvos = localStorage.getItem("conselhoSalvos");
@@ -88,10 +87,10 @@ export default function ConselhoPage() {
     return () => window.removeEventListener("focus", carregarDados);
   }, []);
 
-  // 🧠 Mantém sincronizado com o localStorage
   useEffect(() => {
-    localStorage.setItem("conselhoSalvos", JSON.stringify(salvos));
-  }, [salvos]);
+    if (salvos.length > 0) {
+      localStorage.setItem("conselhoSalvos", JSON.stringify(salvos));
+    }  }, [salvos]);
 
   function handleSalvar() {
     const novosErros: { professor?: boolean; unidade?: boolean } = {};
@@ -118,7 +117,6 @@ export default function ConselhoPage() {
     setSelectedUnidades([]);
     setSelectedProfessor(null);
 
-    // ✅ Mostra toast verde no canto inferior direito
     toast.success("Unidade(s) e professor adicionados com sucesso!");
   }
 
@@ -130,8 +128,12 @@ export default function ConselhoPage() {
 
   function handleProximoPasso() {
     localStorage.setItem("conselhoSalvos", JSON.stringify(salvos));
-    router.push("/criar/conselho/representante");
+  
+    setTimeout(() => {
+      router.push("/criar/conselho/representante");
+    }, 10);
   }
+  
 
   return (
     <div className="flex min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
@@ -256,7 +258,7 @@ export default function ConselhoPage() {
           unidade: s.unidade,
           professor: s.professor,
         }))}
-        onRemover={(id) => handleRemover(id.split("-")[0])}
+        onRemover={handleRemover}
         vazioTexto="Nenhuma unidade salva ainda"
         onProximo={handleProximoPasso}
       />

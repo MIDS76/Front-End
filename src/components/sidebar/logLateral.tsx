@@ -77,7 +77,7 @@ export default function LogLateral({
                   )}
                   <button
                     onClick={() =>
-                      onRemover(item.id?.toString() || item.unidade)
+                      onRemover(item.unidade)
                     }
                     className="text-[hsl(var(--muted-foreground))] text-sm font-bold"
                     title="Remover"
