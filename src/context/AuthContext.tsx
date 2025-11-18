@@ -9,7 +9,6 @@ interface User {
   nome: string;
   email: string;
   perfil: Perfil;
-
   token: string;
 }
 
@@ -38,9 +37,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (email: string, password: string): Promise<User | null> => {
     const fakeUsers = [
-      { email: "aluno@email.com", password: "aluno123", perfil: "aluno"},
-      { email: "pedagogico@email.com", password: "pedagogico123", perfil: "pedagogico"},
-      { email: "admin@email.com", password: "admin123", perfil: "admin"},
+      { email: "aluno@email.com", password: "aluno123", perfil: "aluno" },
+      { email: "pedagogico@email.com", password: "pedagogico123", perfil: "pedagogico" },
+      { email: "admin@email.com", password: "admin123", perfil: "admin" },
     ];
 
     const found = fakeUsers.find(
@@ -73,7 +72,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const hasPermission = (roles: Perfil[]) => {
     return user ? roles.includes(user.perfil) : false;
   };
-  
+
 
   return (
     <AuthContext.Provider value={{ user, login, logout, hasPermission, loading }}>
