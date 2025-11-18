@@ -12,13 +12,13 @@ interface ListCellProps {
   children?: React.ReactNode;
   toggleSelected: (id: number | undefined) => void;
   tipo:
-    | "checkbox"
-    | "edit"
-    | "add"
-    | "star"
-    | "excluir"
-    | "conselho"
-    | "limpa";
+  | "checkbox"
+  | "edit"
+  | "add"
+  | "star"
+  | "excluir"
+  | "conselho"
+  | "limpa";
   onClick?: () => void;
   loading?: boolean;
   removeUser?: () => void;
@@ -58,11 +58,10 @@ export default function ListCell({
     "flex items-center justify-between py-2 px-3 rounded-md shadow mb-2 last:mb-0 transition-colors";
   const tipoClasses =
     tipo === "limpa"
-      ? `cursor-pointer ${
-          ativo
-            ? "bg-[hsl(var(--primary)/0.15)] border border-[hsl(var(--primary))]"
-            : "hover:bg-[hsl(var(--muted))] bg-card"
-        }`
+      ? `cursor-pointer ${ativo
+        ? "bg-[hsl(var(--primary)/0.15)] border border-[hsl(var(--primary))]"
+        : "hover:bg-[hsl(var(--muted))] bg-card"
+      }`
       : "bg-card";
 
   return (
@@ -109,8 +108,12 @@ export default function ListCell({
       )}
 
       {tipo === "checkbox" && (
-        <UserCheckbox usuario={usuario} toggleSelected={toggleSelected} />
+        <UserCheckbox
+          usuario={usuario}
+          toggleSelected={toggleSelected}
+        />
       )}
+
 
       {tipo === "add" && (
         <AddButton

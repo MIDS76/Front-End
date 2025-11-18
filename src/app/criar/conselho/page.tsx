@@ -148,9 +148,8 @@ export default function ConselhoPage() {
           <div className="flex justify-center gap-[3.5rem] mt-[1rem]">
             {/* PROFESSORES */}
             <div
-              className={`bg-[hsl(var(--card))] rounded-xl border shadow-sm w-[22.5rem] h-[30rem] p-[1.25rem] flex flex-col ${
-                erros.professor ? "border-destructive" : "border-[hsl(var(--border))]"
-              }`}
+              className={`bg-[hsl(var(--card))] rounded-xl border shadow-sm w-[22.5rem] h-[30rem] p-[1.25rem] flex flex-col ${erros.professor ? "border-destructive" : "border-[hsl(var(--border))]"
+                }`}
             >
               <h3 className="text-sm font-semibold text-[hsl(var(--secondary))] mb-[0.5rem]">
                 Selecione os professores
@@ -194,9 +193,8 @@ export default function ConselhoPage() {
 
             {/* UNIDADES */}
             <div
-              className={`bg-[hsl(var(--card))] rounded-xl border shadow-sm w-[22.5rem] h-[30rem] p-[1.25rem] flex flex-col ${
-                erros.unidade ? "border-destructive" : "border-[hsl(var(--border))]"
-              }`}
+              className={`bg-[hsl(var(--card))] rounded-xl border shadow-sm w-[22.5rem] h-[30rem] p-[1.25rem] flex flex-col ${erros.unidade ? "border-destructive" : "border-[hsl(var(--border))]"
+                }`}
             >
               <h3 className="text-sm font-semibold text-[hsl(var(--secondary))] mb-[0.5rem]">
                 Selecione as unidades curriculares
