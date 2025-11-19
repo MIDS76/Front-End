@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import turmasData from "@/data/turma.json";
 import { Turma } from "@/utils/types";
 import MedModal from "@/components/modal/medModal";
 import SearchBar from "@/components/input/searchBar";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import ListaConselhos from "@/components/modal/listaConselhos"; // Adicione este import
+import ListaConselhos from "@/components/modal/listaConselhos"; 
 import Paginacao from "@/components/paginacao/paginacao";
 
 export default function PedagogicoPage() {
@@ -25,9 +25,54 @@ export default function PedagogicoPage() {
   const [sideModalOpen, setSideModalOpen] = useState(false);
   const [selectedTurma, setSelectedTurma] = useState({} as Turma);
 
-  // ✅ Converte o objeto para array com Object.values()
+  // Estado para verificar a largura da tela
+  const [screenWidth, setScreenWidth] = useState(0);
+
+  // Ref para o modal
+  const modalRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    const turmasPorPagina = 12;
+    const updateScreenWidth = () => setScreenWidth(window.innerWidth);
+    updateScreenWidth();
+    window.addEventListener("resize", updateScreenWidth);
+
+    return () => {
+      window.removeEventListener("resize", updateScreenWidth);
+    };
+  }, []);
+
+  // useEffect para fechar o modal ao clicar fora dele
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        setSideModalOpen(false);
+      }
+    };
+
+    if (sideModalOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [sideModalOpen]);
+  
+  useEffect(() => {
+    // Função para calcular turmas por página baseado na largura da tela e estado do modal
+    const getTurmasPorPagina = () => {
+      if (sideModalOpen) {
+        if (screenWidth <= 1024) return 4; 
+        if (screenWidth <= 1366) return 6; 
+        return 12; 
+      } else {
+        if (screenWidth <= 1024) return 8; 
+        if (screenWidth <= 1366) return 9; 
+        return 12;
+      }
+    };
+
+    const turmasPorPagina = getTurmasPorPagina();
 
     // Converte o objeto turmasData em um array
     const turmasArray = Object.values(turmasData);
@@ -45,7 +90,19 @@ export default function PedagogicoPage() {
     const inicio = paginaAtual * turmasPorPagina;
     const fim = inicio + turmasPorPagina;
     setFilteredTurmas(filtradas.slice(inicio, fim));
-  }, [searchQuery, paginaAtual]);
+  }, [searchQuery, paginaAtual, screenWidth, sideModalOpen]); 
+
+  const handleOpenModal = (turma: Turma) => {
+    if (selectedTurma.id === turma.id && sideModalOpen) {
+      setSideModalOpen(false);
+      setTimeout(() => {
+        setSideModalOpen(true);
+      }, 300); 
+    } else {
+      setSelectedTurma(turma);
+      setSideModalOpen(true);
+    }
+  };
 
   return (
     <ProtectedRoute>
@@ -53,14 +110,16 @@ export default function PedagogicoPage() {
         <div className="flex flex-row flex-auto">
           <section className="w-full max-h-full md:w-3/5 xl:w-3/4 h-full flex flex-col items-start p-4 pt-24 gap-y-4">
             <SearchBar
-              className="w-full xl:w-3/5 2xl:w-2/5 px-4"
+              texto="Todos os Conselhos"
+              className="w-full xl:w-3/5 2xl:w-2/5"
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               filter
               filtrosMostrar={{ aluno: false, turma: true, conselho: false }}
             />
 
-            <div className="w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 px-4">
+            {/* Grid de Turmas com responsividade */}
+            <div className={` mt-6 w-full desktop:w-[75%] grid gap-4 px-6 ${sideModalOpen && screenWidth <= 1366 ? 'tablet:grid-cols-1 tablet:w-[50%] laptop:grid-cols-2 laptop:w-[49%]' : 'tablet:grid-cols-2  laptop:grid-cols-4 '}`}>
               <ListaTurmas />
             </div>
 
@@ -68,16 +127,17 @@ export default function PedagogicoPage() {
               paginaAtual={paginaAtual}
               setPaginaAtual={setPaginaAtual}
               totalPages={totalPages}
+              
             />
           </section>
 
-          {/* Aqui é onde fazemos a substituição do ConselhosModal pelo ListaConselhos */}
+          <div ref={modalRef}>
             <ListaConselhos
               turma={selectedTurma}
               estaAberto={sideModalOpen}
               aoFechar={() => setSideModalOpen(false)}
             />
-
+          </div>
         </div>
       </main>
     </ProtectedRoute>
@@ -86,7 +146,7 @@ export default function PedagogicoPage() {
   function ListaTurmas() {
     if (!filteredTurmas.length)
       return (
-        <MedModal loading courseCode="..." courseName="..." onClick={() => { }}>
+        <MedModal loading courseCode="..." courseName="..." onClick={() => { }} >
           Nenhuma turma encontrada
         </MedModal>
       );
@@ -96,18 +156,7 @@ export default function PedagogicoPage() {
         key={index}
         courseCode={turma.codigoTurma}
         courseName={turma.nomeCurso}
-        onClick={() => {
-          if (sideModalOpen && selectedTurma.id !== turma.id) {
-            setSideModalOpen(false);
-            setTimeout(() => {
-              setSideModalOpen(true);
-              setSelectedTurma(turma);
-            }, 300);
-          } else {
-            setSideModalOpen(true);
-            setSelectedTurma(turma);
-          }
-        }}
+        onClick={() => handleOpenModal(turma)}
       >
         <b>Último conselho:</b> {dataAleatoria}
       </MedModal>

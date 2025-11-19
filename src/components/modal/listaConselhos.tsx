@@ -88,21 +88,21 @@ export default function ListaConselhos({
     <>
       <aside
         className={cn(
-          "absolute right-0 top-[4.5rem] z-40 flex flex-col w-full sm:w-[30rem]",
+          "fixed top-[4.5rem] right-0 z-40 flex flex-col w-[30rem] sm:w-[35rem]",
           "transform transition-transform duration-300 ease-in-out",
           estaAberto ? "translate-x-0" : "translate-x-full",
-          "h-[calc(100vh-4.5rem)]"
+          "h-full"
         )}
       >
-        <div className="flex-1 flex flex-col h-full shadow-xl bg-card border-l">
-          {/* Conteúdo principal */}
-          <div className="flex-1 overflow-auto p-6 bg-background">
+        <div className="flex flex-col h-full shadow-xl bg-card border-l">
+          {/* Conteúdo principal (Cards de Conselho) */}
+          <div className="flex-1 overflow-auto  px-5 pt-10   bg-background ">
             {conselhos.length > 0 ? (
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-wrap justify-center pt-6 gap-6">
                 {conselhos.map((conselho, idx) => (
                   <Card
                     key={conselho.id ?? idx}
-                    className="rounded-lg shadow-md overflow-hidden cursor-pointer border"
+                    className="rounded-[0.5rem] shadow-md overflow-hidden cursor-pointer w-[70%] border"
                   >
                     {/* header */}
                     <div className="bg-primary text-primary-foreground px-4 py-3 flex justify-between items-start">
@@ -143,11 +143,11 @@ export default function ListaConselhos({
             )}
           </div>
 
-          {/* Rodapé - Updated button onClick */}
-          <div className="p-6 bg-card">
+          {/* Rodapé - Botão para criar novo conselho */}
+          <div className="p-6 bg-card mb-16"> {/* Fixando o footer na parte inferior */}
             <div className="flex justify-center">
               <ButtonTT
-                className="text-primary-foreground px-6 py-3 rounded-md text-base font-medium"
+                className="text-primary-foreground rounded-md text-base font-medium"
                 onClick={() => setModalAberto(true)}
                 mode="default"
                 tooltip="Criar novo conselho para esta turma"
@@ -160,7 +160,7 @@ export default function ListaConselhos({
         </div>
       </aside>
 
-      {/* Add confirmation modal */}
+      {/* Modal de confirmação para criar um novo conselho */}
       <ConfirmarConselhoModal
         open={modalAberto}
         onClose={() => setModalAberto(false)}
