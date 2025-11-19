@@ -1,38 +1,163 @@
-{
-    "usuario1": {
+[
+    {
         "id": 1,
         "nome": "Raquel",
         "email": "raquel@gmail.com",
-        "role": "Aluno"
+        "role": "Aluno",
+        "isActive": true
     },
-    "usuario2": {
+    {
         "id": 2,
-        "nome": "Raquel",
-        "email": "raquel@gmail.com",
-        "role": "Professor"
+        "nome": "Juscelino",
+        "email": "juscelino@gmail.com",
+        "role": "Professor",
+        "isActive": true
     },
-    "usuario3": {
+    {
         "id": 3,
-        "nome": "Raquel",
-        "email": "raquel@gmail.com",
-        "role": "Aluno"
+        "nome": "Isabeli",
+        "email": "isabeli@gmail.com",
+        "role": "Aluno",
+        "isActive": false
     },
-    "usuario4": {
+    {
         "id": 4,
-        "nome": "Raquel",
-        "email": "raquel@gmail.com",
-        "role": "Aluno"
+        "nome": "Julia Macena",
+        "email": "julia_macena@gmail.com",
+        "role": "Aluno",
+        "isActive": true
     },
-    "usuario5": {
+    {
         "id": 5,
-        "nome": "Raquel",
-        "email": "raquel@gmail.com",
-        "role": "Professor"
+        "nome": "Geovanna",
+        "email": "geovanna@gmail.com",
+        "role": "Professor",
+        "isActive": true
     },
-    "usuario6": {
+    {
         "id": 6,
-        "nome": "Raquel",
-        "email": "raquel@gmail.com",
-        "role": "Aluno"
+        "nome": "Julia Gabrieli",
+        "email": "julia_gabrieli@gmail.com",
+        "role": "Aluno",
+        "isActive": true
+    },
+    {
+        "id":7,
+        "nome":"Lavinia",
+        "email":"lavinia@gmail.com",
+        "role":"Aluno",
+        "isActive":true
+    },
+    {
+        "id":8,
+        "nome":"Kael",
+        "email":"kael@gmail.com",
+        "role":"Aluno",
+        "isActive":true
+    },
+    {
+        "id":9,
+        "nome":"Vitor",
+        "email":"vitor@gmail.com",
+        "role":"Aluno",
+        "isActive":true
+    },
+    {
+        "id":10,
+        "nome":"Hellen",
+        "email":"hellen@gmail.com",
+        "role":"Aluno",
+        "isActive":true
+    },
+    {
+        "id":11,
+        "nome":"Henrique",
+        "email":"henrique@gmail.com",
+        "role":"Aluno",
+        "isActive":true
+    },
+    {
+        "id":12,
+        "nome":"Maria",
+        "email":"maria@gmail.com",
+        "role":"Aluno",
+        "isActive":true
+    },
+    {
+        "id":13,
+        "nome":"Kristian",
+        "email":"maria@gmail.com",
+        "role":"Professor",
+        "isActive":true
+    },
+    {
+        "id":14,
+        "nome":"Eliane",
+        "email":"eliane@gmail.com",
+        "role":"Professor",
+        "isActive":true
+    },
+    {
+        "id":15,
+        "nome":"Valentim",
+        "email":"valentim@gmail.com",
+        "role":"Professor",
+        "isActive":true
+    },
+    {
+        "id":16,
+        "nome":"Bruno",
+        "email":"brunno@gmail.com",
+        "role":"Professor",
+        "isActive":true
+    },
+    {
+        "id":17,
+        "nome":"Willer",
+        "email":"willer@gmail.com",
+        "role":"Professor",
+        "isActive":true
+    },
+    {
+        "id":18,
+        "nome":"Rebeca",
+        "email":"rebequinha@gmail.com",
+        "role":"Técnico Pedagógico",
+        "isActive":true
+    },
+    {
+        "id":19,
+        "nome":"Amanda",
+        "email":"amanda@gmail.com",
+        "role":"Técnico Pedagógico",
+        "isActive":true
+    },
+    {
+        "id":20,
+        "nome":"Cristiane",
+        "email":"cris@gmail.com",
+        "role":"Técnico Pedagógico",
+        "isActive":true
+    },
+    {
+        "id":21,
+        "nome":"Liana",
+        "email":"lili@gmail.com",
+        "role":"Secretária Pedagógica",
+        "isActive":true
+    },
+    {
+        "id":22,
+        "nome":"Andrei",
+        "email":"drei@gmail.com",
+        "role":"Supervisor",
+        "isActive":true
+    },
+    {
+        "id":23,
+        "nome":"Tissi",
+        "email":"tissi@gmail.com",
+        "role":"Supervisor",
+        "isActive":true
     }
-}
+]

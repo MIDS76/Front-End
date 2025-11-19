@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { TextClickCopy, Usuario } from "../lista";
 import ButtonTT from "@/components/button/ButtonTT";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Mensagem, SalaChat } from "@/app/chat/page";
 import { toast } from "sonner";
 import { useRef } from "react";
+import { Usuario } from "@/utils/types";
+import { TextClickCopy } from "../lista/textcopy";
 
 interface ChatProps {
   contact: Usuario;
