@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import Form from "next/form";
 import TextField from "../input/textField";
-import ActionModalForm from "./actionModalForm";
+import ActionModal from "./actionModal";
+import ConfirmacaoNovoUser from "./confirmacaoNovoUser";
 import { toast } from "sonner";
 import { Combobox } from "../ui/combobox";
+import { useState, useEffect } from "react";
 import { USER_ROLES } from "@/utils/types";
+import { showError, validateEmail, validateRequired } from "@/utils/formValidation";
 
 interface NovoUserModalProps {
   isOpen: boolean;
@@ -13,114 +16,117 @@ interface NovoUserModalProps {
 }
 
 export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
-  const [tipoUsuario, setTipoUsuario] = useState<string>("");
+  const [value, setValue] = useState<string>("");
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const handleSubmit = async (formData: FormData) => {
-    const nome = (formData.get("nome") as string)?.trim();
-    const email = (formData.get("email") as string)?.trim();
-    const tipo = tipoUsuario;
-    const turma = (formData.get("turma") as string)?.trim();
+  const handleOpenConfirm = () => {
+    setErrors({});
+    const newErrors: { [key: string]: string } = {};
 
-    // 🔍 Validação básica
-    if (!nome || !email || !tipo) {
-      toast.error("Por favor, preencha todos os campos obrigatórios!");
-      return; // impede fechamento
+    newErrors.nome = validateRequired(nome, "nome");
+    newErrors.email = validateEmail(email);
+    newErrors.tipo = validateRequired(value, "tipo de usuário");
+
+    if (Object.keys(newErrors).length === 0) {
+      setConfirmOpen(true);
+    }else{
+      setErrors(newErrors);
+      showError
     }
-
-    // 🔍 Validação de e-mail
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      toast.error("E-mail inválido!");
-      return;
-    }
-
-    // Gera senha aleatória
-    const senhaGerada = Math.random().toString(36).slice(-8);
-
-    // Simula requisição (poderá substituir pela API real depois)
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    const novoUsuario = {
-      nome,
-      email,
-      tipo,
-      senha: senhaGerada,
-      turma: tipo === "aluno" ? turma : null,
-    };
-
-    console.log("Usuário cadastrado:", novoUsuario);
-
-    toast.success(
-      `Usuário ${nome} criado com sucesso! Senha gerada: ${senhaGerada}`
-    );
-
-    // Fecha o modal somente se o cadastro for válido
-    setTimeout(() => setOpen(false), 1200);
   };
 
+  const handleConfirm = () => {
+    toast.success("Usuário criado com sucesso!");
+    setConfirmOpen(false);
+    setTimeout(() => {
+      setOpen(false);
+     
+      setNome("");
+      setEmail("");
+      setValue("");
+      setErrors({});
+    }, 300);
+  };
+
+  useEffect(() => {
+    if (!isOpen) {
+      setTimeout(() => {
+        setNome("");
+        setEmail("");
+        setValue("");
+        setErrors({});
+        setConfirmOpen(false);
+      }, 200);
+    }
+  }, [isOpen]);
+
   return (
-    <ActionModalForm
-      isOpen={isOpen}
-      setOpen={setOpen}
-      title="Novo Usuário"
-      description="Insira as informações do novo usuário"
-      onClose={() => setOpen(false)}
-      onSubmit={handleSubmit}
-      actionButtonLabel="Confirmar"
-      conteudo={
-        <div className="space-y-4 max-w-md mx-auto mt-2">
-          <div>
-            <TextField
-              label="Nome"
-              placeholder="Insira o nome do novo usuário"
-              type="text"
-              id="nome"
-              name="nome"
-              required
-            />
-          </div>
+    <>
+      <ActionModal
+        isOpen={isOpen}
+        setOpen={setOpen}
+        title="Novo Usuário"
+        description="Insira as informações do novo usuário"
+        onClose={() => setOpen(false)}
+        onConfirm={handleOpenConfirm}
+        conteudo={
+          <div className="space-y-4 max-w-md mx-auto">
+            <Form action={() => {}} className="flex flex-col gap-4">
+              <div>
+                <TextField
+                  label="Nome"
+                  placeholder="Insira o nome do novo usuário"
+                  type="text"
+                  id="nome"
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  error={errors.nome}
+                />
+              </div>
 
-          <div>
-            <TextField
-              label="E-mail"
-              placeholder="Insira o e-mail do novo usuário"
-              type="email"
-              id="email"
-              name="email"
-              required
-            />
-          </div>
+              <div>
+                <TextField
+                  label="E-mail"
+                  placeholder="Insira o e-mail do novo usuário"
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  error={errors.email}
+                />
+              </div>
 
-          <div>
-            <label className="text-sm font-medium">
-              Tipo de Usuário <span className="text-red-500">*</span>
-            </label>
-            <div className="mt-2">
-              <Combobox
-                items={USER_ROLES}
-                value={tipoUsuario}
-                onChange={setTipoUsuario}
-                placeholder="Selecione um tipo de usuário..."
-                emptyMessage="Nenhum tipo de usuário encontrado."
-                width="100%"
-              />
-            </div>
+              <div>
+                <div>
+                  <Combobox
+                    items={USER_ROLES}
+                    value={value}
+                    onChange={setValue}
+                    placeholder="Selecione um tipo de usuário..."
+                    emptyMessage="Nenhum tipo de usuário encontrado."
+                    width="100%"
+                    id="tipoUsuario"
+                    label="Tipo de Usuário"
+                    error={errors.tipo}
+                  />
+                </div>
+              </div>
+            </Form>
           </div>
+        }
+      />
 
-          {tipoUsuario === "aluno" && (
-            <div>
-              <TextField
-                label="Turma"
-                placeholder="Insira a turma do aluno"
-                type="text"
-                id="turma"
-                name="turma"
-                required
-              />
-            </div>
-          )}
-        </div>
-      }
-    />
+      <ConfirmacaoNovoUser
+        isOpen={confirmOpen}
+        setOpen={setConfirmOpen}
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirmOpen(false)}
+        title="Confirmar criação"
+        message={`Deseja criar o usuário "${nome}" com o e-mail "${email}" e tipo "${value}"?`}
+      />
+    </>
   );
 }

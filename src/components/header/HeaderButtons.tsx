@@ -1,3 +1,5 @@
+"use client";
+
 import CreateButton from "./buttons/createButton";
 import DashboardButton from "./buttons/DashboardButton";
 import NotificationButton from "./buttons/NotificationButton";
@@ -17,7 +19,7 @@ export default function HeaderButtons({ role, sidebar }: HeaderButtonsProps) {
   };
 
   return (
-    <nav className={sidebar ? "flex flex-col gap-6 items-center justify-center" : "ml-auto hidden md:flex gap-6 items-center"}>
+    <nav className={sidebar ? "flex flex-col gap-6 items-center justify-center" : "ml-auto hidden laptop:flex gap-6 items-center"}>
       {baseButtons[role].map(button => button)}
     </nav>
   );
