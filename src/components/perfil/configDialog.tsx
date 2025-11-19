@@ -21,7 +21,6 @@ import { Usuario } from "@/utils/types";
 import { toast } from "sonner";
 import TextField from "../input/textField";
 import { showError, validatePassword, validatePasswordMatch, validateRequired } from "@/utils/formValidation";
-import { logout } from "@/app/actions/auth";
 
 export function ConfigDialog() {
   const [isOpen, setOpen] = React.useState(false);
@@ -58,6 +57,7 @@ export function ConfigDialog() {
   }
 
   const { setTheme } = useTheme();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
     logout();

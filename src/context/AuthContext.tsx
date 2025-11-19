@@ -59,11 +59,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         setUser({
           email: session.email,
-          role: session.perfil,
+          role: session.role,
           token: session.token,
         });
 
-        return user;
+        return session;
       } else {
         toast.message("Erro ao fazer login. Tente novamente.");
         return null;
