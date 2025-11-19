@@ -17,6 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Label } from "@radix-ui/react-dropdown-menu";
 
 export type ComboboxItem = {
   value: string;
@@ -31,6 +32,9 @@ export interface ComboboxProps {
   emptyMessage?: string;
   className?: string;
   width?: string;
+  label?: string;
+  error?: string;
+  id: string;
 }
 
 export function Combobox({
@@ -41,6 +45,9 @@ export function Combobox({
   emptyMessage = "No item found.",
   className,
   width,
+  label,
+  error,
+  id,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
@@ -71,61 +78,76 @@ export function Combobox({
   const buttonStyle = width ? { width } : undefined;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          ref={buttonRef}
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn(
-            "justify-between",
-            "text-muted-foreground font-normal",
-            className
-          )}
-          style={buttonStyle}
+    <div className="flex flex-col gap-2 w-full">
+      {label && (
+        <label
+          className={`whitespace-nowrap flex items-center font-semibold ${error ? "text-red-600" : ""}`}
+          htmlFor={id}
         >
-          {selectedItem ? selectedItem.label : placeholder}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        className="p-0"
-        style={{
-          width: buttonWidth ? `${buttonWidth}px` : undefined,
-          pointerEvents: "all",
-        }}
-        align="start"
-        sideOffset={5}
-      >
-        <Command>
-          <CommandList>
-            <CommandEmpty>{emptyMessage}</CommandEmpty>
-            <CommandGroup>
-              {normalizedItems.map((item) => (
-                <CommandItem
-                  className="cursor-pointer"
-                  key={item.value}
-                  value={item.value}
-                  onSelect={(currentValue) => {
-                    onChange(currentValue === value ? "" : currentValue);
-                    setOpen(false);
-                  }}
-                >
-                  {item.label}
-                  <Check
-                    className={cn(
-                      "ml-auto",
-                      value === item.value ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+          {label}
+        </label>
+      )}
+
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            type="button"
+            ref={buttonRef}
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className={cn(
+              "justify-between",
+              "text-muted-foreground font-normal",
+              `${className || ""} ${error
+                ? "border-red-500 focus-visible:ring-red-500"
+                : "border-gray-300 focus-visible:ring-gray-400"
+              }`
+            )}
+            style={buttonStyle}
+          >
+            {selectedItem ? selectedItem.label : placeholder}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          className="p-0"
+          style={{
+            width: buttonWidth ? `${buttonWidth}px` : undefined,
+            pointerEvents: "all",
+          }}
+          align="start"
+          sideOffset={5}
+        >
+          <Command>
+            <CommandList>
+              <CommandEmpty>{emptyMessage}</CommandEmpty>
+              <CommandGroup>
+                {normalizedItems.map((item) => (
+                  <CommandItem
+                    className="cursor-pointer"
+                    key={item.value}
+                    value={item.value}
+                    onSelect={(currentValue) => {
+                      onChange(currentValue === value ? "" : currentValue);
+                      setOpen(false);
+                    }}
+                  >
+                    {item.label}
+                    <Check
+                      className={cn(
+                        "ml-auto",
+                        value === item.value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+    </div>
   );
 }

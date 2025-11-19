@@ -8,100 +8,113 @@ import ButtonTT from "@/components/button/ButtonTT";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import PasswordResetModal from "@/components/modal/enviarVerificacao";
+import { showError, validateEmail, validateRequired } from "@/utils/formValidation";
 
 export default function Login() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [error, setError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const { login } = useAuth();
   const router = useRouter();
 
   const handleLogin = async (data: FormData) => {
-    setError(false);
-    setErrorMessage("");
+    setErrors({});
 
-    const email = data.get("login") as string;
+    const email = data.get("email") as string;
     const password = data.get("password") as string;
 
-    if (!email || !password) {
-      setError(true);
-      setErrorMessage("Preencha todos os campos.");
+    const newErrors: { [key: string]: string } = {};
+
+    newErrors.senha = validateRequired(password, "senha");
+    newErrors.email = validateEmail(email);
+
+    if (newErrors.senha || newErrors.email) {
+      setErrors(newErrors);
+      showError();
       return;
     }
 
-    const success = await login(email, password);
+    const loggedUser = await login(email, password);
 
-    if (success) {
-      router.push("/"); 
+    if (loggedUser) {
+      router.push(`/${loggedUser.perfil}`);
     } else {
-      setError(true);
-      setErrorMessage("Login ou senha incorretos.");
+      newErrors.final = "E-mail ou senha incorretos.";
+      setErrors(newErrors);
+      return;
     }
   };
 
   return (
-    <main className="relative h-screen w-full overflow-hidden">
-      <Image
-        className="absolute inset-0 w-full h-full object-cover"
-        width={1920}
-        height={1080}
-        src={"/loginbg.jpg"}
-        alt="Imagem de fundo de uma sala de reunião"
-      />
+    <main className="relative min-h-screen w-full overflow-hidden flex flex-col">
 
-      <div className="relative z-10 h-full flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md">
-          <div className="text-center mb-6">
-            <h1 className="font-title text-3xl font-bold text-gray-800">
-              Portal do Conselho
+      <div className="relative flex-1 flex items-center justify-center">
+        <Image
+          className="absolute inset-0 w-full h-full object-cover"
+          width={1920}
+          height={1080}
+          src="/loginbg.jpg"
+          alt="Imagem de fundo de uma sala de reunião"
+        />
+
+        <div className="absolute inset-0 bg-sky-950/45"></div>
+        <div className="relative z-10 bg-white p-8 rounded-2xl shadow-xl w-full max-w-md" style={{ paddingTop: '3rem', paddingBottom: '3rem' }}>
+          <div className="text-left mb-8">
+            <h1 className="text-4xl font-bold text-gray-900 mb-3">
+              Bem-Vindo
             </h1>
+            <p className="text-sm text-left mb-6 ">
+              A sua Plataforma Completa para Atividades Profissionais
+            </p>
           </div>
 
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold">Bem - Vindo</h2>
-              <p className="text-muted-foreground text-sm">
-                A sua Plataforma Completa para Atividades Profissionais
-              </p>
+          <Form action={handleLogin} className="flex flex-col gap-3">
+
+            <div className="flex flex-col gap-1">
+              <TextField
+                id="email"
+                name="email"
+                label="E-mail"
+                placeholder="Insira seu e-mail institucional"
+                type="text"
+                error={errors.email}
+              />
             </div>
 
-            <Form action={handleLogin} className="flex flex-col gap-4 w-full">
+
+            <div className="flex flex-col gap-1 relative">
+              <label
+                htmlFor="password"
+                className="text-sm font-semibold text-gray-800"
+              >
+              </label>
               <TextField
-                name="login"
-                label="Login"
-                placeholder="Insira seu login"
-                type="text"
-                id="login"
-                className={error ? "border-destructive" : ""}
-              />
-              <TextField
+                id="password"
                 name="password"
                 label="Senha"
                 placeholder="Insira sua senha"
                 type="password"
-                id="password"
-                className={error ? "border-destructive" : ""}
+                error={errors.senha}
               />
-              {error && (
-                <p className="text-destructive text-sm text-center">
-                  {errorMessage}
+
+              {errors && (
+                <p className="text-destructive absolute bottom-8 text-red-500 text-sm mt-0">
+                  {errors.final}
                 </p>
               )}
 
-              <ButtonTT mode="default" tooltip="Fazer login" type="submit">
-                Login
-              </ButtonTT>
-            </Form>
-
-            <div className="text-center mt-4">
-              <button
+              <button //esqueceu a senha
+                type="button"
                 onClick={() => setIsModalOpen(true)}
-                className="text-sm text-primary hover:underline"
+                className="text-xs text-primary hover:underline text-left mt-6 mb-2"
               >
                 Esqueceu sua senha?
               </button>
             </div>
-          </div>
+
+            <ButtonTT mode="default" tooltip="Fazer login" type="submit">
+              Login
+            </ButtonTT>
+          </Form>
         </div>
       </div>
 

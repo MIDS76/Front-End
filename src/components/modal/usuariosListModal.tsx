@@ -6,7 +6,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import Lista, { Usuario } from "../lista";
+import Lista, { Usuario } from "../lista/lista";
 import { useState } from "react";
 import ButtonTT from "../button/ButtonTT";
 
