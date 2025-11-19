@@ -1,6 +1,7 @@
 "use client";
-
+import ButtonTT from "@/components/button/ButtonTT";
 import { FiX } from "react-icons/fi";
+import { toast } from "sonner";
 
 interface LogLateralProps {
   titulo: string;
@@ -19,13 +20,34 @@ export default function LogLateral({
   vazioTexto,
   onProximo,
 }: LogLateralProps) {
+  const handleProximoClick = () => {
+    if (itens.length === 0) {
+      toast.error("Adicione os requisitos antes de prosseguir!", {
+        duration: 3000,
+        style: {
+          background: "hsl(var(--destructive))",
+          color: "hsl(var(--destructive-foreground))",
+          border: "1px solid hsl(var(--destructive))",
+          fontWeight: 500,
+        },
+      });
+      return;
+    }
+
+    onProximo();
+  };
+
   return (
     <aside className="relative w-[25rem] flex-shrink-0 mt-[5rem] flex flex-col rounded-l-xl overflow-hidden shadow-md">
       {/* Cabeçalho */}
       <div className="bg-[hsl(var(--primary))] p-[1rem]">
         <div className="text-[hsl(var(--primary-foreground))] font-semibold flex justify-between items-center mb-[0.25rem] px-[0.25rem]">
           <span>{titulo}</span>
-          {subtitulo && <span className="text-sm">{subtitulo}</span>}
+          {subtitulo && (
+            <span className="text-[hsl(var(--primary-foreground))] font-semibold">
+              {subtitulo}
+            </span>
+          )}
         </div>
       </div>
 
@@ -54,8 +76,10 @@ export default function LogLateral({
                     </span>
                   )}
                   <button
-                    onClick={() => onRemover(item.id?.toString() || item.unidade)}
-                    className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--destructive))] text-sm font-bold"
+                    onClick={() =>
+                      onRemover(item.unidade)
+                    }
+                    className="text-[hsl(var(--muted-foreground))] text-sm font-bold"
                     title="Remover"
                   >
                     <FiX />
@@ -68,12 +92,13 @@ export default function LogLateral({
 
         {/* Botão próximo */}
         <div className="absolute bottom-[1.5rem] right-[1.5rem]">
-          <button
+          <ButtonTT
+            mode="default"
+            onClick={handleProximoClick}
             className="flex items-center gap-[0.5rem] bg-[hsl(var(--primary))] hover:bg-[hsl(var(--secondary))] text-[hsl(var(--primary-foreground))] text-sm px-[1.25rem] py-[0.5rem] rounded-md font-medium shadow-md transition-all"
-            onClick={onProximo}
           >
             Próximo passo <span className="text-base font-semibold">›</span>
-          </button>
+          </ButtonTT>
         </div>
       </div>
     </aside>
