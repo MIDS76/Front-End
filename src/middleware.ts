@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
   const isProtectedRoute = protectedRoutes.includes(path)
 
-  if (isProtectedRoute && !cookie.token) {
+  if (isProtectedRoute && !cookie?.token) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
