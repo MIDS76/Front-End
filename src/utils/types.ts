@@ -47,6 +47,8 @@ export type UserRoles = (typeof USER_ROLES)[number]["value"];
 
 export type UserRoleLabels = (typeof USER_ROLES)[number]["label"];
 
+export type Role = "aluno" | "admin" | "pedagogico";
+
 export const etapas = [
   "Pré conselho",
   "Reunião",

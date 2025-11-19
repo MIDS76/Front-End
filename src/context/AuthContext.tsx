@@ -2,13 +2,15 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+import { apiLogin } from "@/api/login";
+import { toast } from "sonner";
 
-type Perfil = "aluno" | "pedagogico" | "admin";
+type Role = "aluno" | "pedagogico" | "admin" | "weg" | "supervisor";
 
 interface User {
-  nome: string;
   email: string;
-  perfil: Perfil;
+  role: Role;
   token: string;
 }
 
@@ -16,7 +18,7 @@ interface AuthContextProps {
   user: User | null;
   login: (email: string, password: string) => Promise<User | null>;
   logout: () => void;
-  hasPermission: (roles: Perfil[]) => boolean;
+  hasPermission: (roles: Role[]) => boolean;
   loading: boolean;
 }
 
@@ -28,49 +30,58 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    const verify = async () => {
+      const cookie = Cookies.get('session');
+      const session = cookie ? JSON.parse(cookie) : null;
+
+      if (session) {
+        setUser({
+          email: session.email,
+          role: session.role,
+          token: session.token,
+        });
+      }
+      setLoading(false);
+    };
+
+    verify();
   }, []);
 
   const login = async (email: string, password: string): Promise<User | null> => {
-    const fakeUsers = [
-      { email: "aluno@email.com", password: "aluno123", perfil: "aluno" },
-      { email: "pedagogico@email.com", password: "pedagogico123", perfil: "pedagogico" },
-      { email: "admin@email.com", password: "admin123", perfil: "admin" },
-    ];
+    try {
+      const session = await apiLogin(email, password);
 
-    const found = fakeUsers.find(
-      (u) => u.email === email && u.password === password
-    );
+      if (session && session.token) {
+        Cookies.set('session', JSON.stringify(session), {
+          expires: 7,
+          path: '/',
+        });
 
-    if (!found) return null;
+        setUser({
+          email: session.email,
+          role: session.perfil,
+          token: session.token,
+        });
 
-    document.cookie = "isLoggedIn=true; path=/";
-
-    const loggedUser: User = {
-      nome: found.email.split("@")[0],
-      email: found.email,
-      perfil: found.perfil as Perfil,
-      token: crypto.randomUUID(),
-    };
-
-    localStorage.setItem("user", JSON.stringify(loggedUser));
-    setUser(loggedUser);
-    return loggedUser;
+        return user;
+      } else {
+        toast.message("Erro ao fazer login. Tente novamente.");
+        return null;
+      }
+    } catch (error) {
+      toast.message("Erro ao fazer login. Tente novamente.");
+      return null;
+    }
   };
 
   const logout = () => {
-    localStorage.removeItem("user");
-    document.cookie = "isLoggedIn=false; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    Cookies.remove('session');
     setUser(null);
     router.push("/login");
   };
 
-  const hasPermission = (roles: Perfil[]) => {
-    return user ? roles.includes(user.perfil) : false;
+  const hasPermission = (roles: Role[]) => {
+    return user ? roles.includes(user.role) : false;
   };
 
 

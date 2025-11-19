@@ -3,9 +3,10 @@
 import CreateButton from "./buttons/createButton";
 import NotificationButton from "./buttons/NotificationButton";
 import ConfigurationButton from "./buttons/ConfigurationButton";
+import { Role } from "@/utils/types";
 
 interface HeaderButtonsProps {
-    role: "aluno" | "admin" | "pedagogico";
+    role: Role;
     sidebar?: boolean;
 }
 

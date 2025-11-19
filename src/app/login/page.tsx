@@ -8,12 +8,13 @@ import ButtonTT from "@/components/button/ButtonTT";
 import { useState } from "react";
 import PasswordResetModal from "@/components/modal/enviarVerificacao";
 import { showError, validateEmail, validateRequired } from "@/utils/formValidation";
-import { login } from "../actions/auth";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Login() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleLogin = async (data: FormData) => {
     setErrors({});

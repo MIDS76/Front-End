@@ -1,7 +1,6 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifySession } from "./app/actions/session";
+import { cookies } from "next/headers";
 
 const protectedRoutes = [
   "/",
@@ -17,12 +16,13 @@ const protectedRoutes = [
 ];
 
 export async function middleware(request: NextRequest) {
-  const cookie = await verifySession();
+  const cookieStore = await cookies();
+  const session = cookieStore.get('session');
 
   const path = request.nextUrl.pathname
   const isProtectedRoute = protectedRoutes.includes(path)
 
-  if (isProtectedRoute && !cookie?.token) {
+  if (isProtectedRoute && !session?.value) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
