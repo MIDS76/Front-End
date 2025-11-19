@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { FiSearch } from "react-icons/fi";
-import { Filter } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Header from "@/components/header/header";
-import { Button } from "@/components/ui/button";
+import LogLateral from "@/components/sidebar/logLateral";
+import MedModal from "@/components/modal/medModal";
 import { useRouter } from "next/navigation";
 
 export default function SelecionarTurmaPreConselho() {
@@ -23,108 +23,104 @@ export default function SelecionarTurmaPreConselho() {
     { sigla: "ET 75", nome: "Eletroeletrônica Industrial" },
   ];
 
-  // ⭐ Estado tipado automaticamente pelo array
   const [selected, setSelected] = useState<typeof turmas[number] | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const turmasFiltradas = turmas.filter((t) =>
+    t.sigla.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    t.nome.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  function handleRemover() {
+    setSelected(null);
+  }
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-zinc-100 w-full">
+      <div className="min-h-screen bg-zinc-100 w-full flex flex-col">
         <Header />
 
-        <div className="flex gap-4 w-full px-6 py-6 tablet:px-10 laptop:px-16 desktop:px-32">
+        <div className="flex w-full gap-6 px-6 mt-20 pb-10">
 
-          {/* LEFT AREA */}
-          <div className="w-full">
-            <div className="bg-white rounded-2xl shadow-sm p-6 tablet:p-8">
-              <h1 className="text-xl tablet:text-2xl laptop:text-3xl font-semibold text-zinc-800">
-                Turma para o Pré-Conselho
-              </h1>
-              <p className="text-sm tablet:text-base text-zinc-600 mt-2">
-                Selecione a turma para o pré-conselho
-              </p>
-              <div className="w-full h-px bg-zinc-200 mt-4" />
-            </div>
+          {/* ------ COLUNA CENTRAL ------ */}
+          <main className="flex-1 flex justify-center">
+            <div className="flex flex-col items-center w-[48.4rem]">
 
-            {/* Search + Cards */}
-            <div className="bg-white rounded-2xl shadow-sm p-4 tablet:p-6 mt-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center bg-zinc-100 rounded-xl px-4 py-2 w-full">
-                  <FiSearch className="text-zinc-500 text-lg" />
+              {/* CARD CABEÇALHO */}
+              <div className="bg-white rounded-xl shadow-md p-6 border w-full">
+                <h1 className="text-2xl font-semibold text-zinc-800">
+                  Turma para o Pré-Conselho
+                </h1>
+                <p className="text-sm text-zinc-600 mt-1">
+                  Selecione a turma desejada
+                </p>
+                <div className="border-t mt-3" />
+              </div>
+
+              {/* CARD CENTRAL */}
+              <div className="bg-white rounded-xl border shadow-sm w-full h-[30rem] p-4 mt-6 flex flex-col">
+
+                {/* BUSCA */}
+                <div className="relative mb-3">
+                  <FiSearch className="absolute left-3 top-2.5 text-zinc-500" />
                   <input
                     type="text"
-                    placeholder="Procure por uma turma"
-                    className="bg-transparent outline-none ml-3 text-sm w-full"
+                    placeholder="Buscar turma"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-3 py-2 text-sm border rounded-md bg-white outline-none focus:ring-1 focus:ring-teal-600"
                   />
                 </div>
 
-                <button className="p-3 bg-zinc-200 rounded-xl hover:bg-zinc-300 transition">
-                  <Filter size={18} />
-                </button>
-              </div>
+                {/* LISTA SCROLL */}
+                <div className="flex-1 overflow-y-auto pr-1">
 
-              {/* CARDS GRID */}
-              <div className="grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-3 gap-4">
-                {turmas.map((t, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setSelected(t)}
-                    className={`rounded-xl shadow-sm text-left p-4 transition border
-                      ${
-                        selected?.sigla === t.sigla
-                          ? "bg-teal-700 text-white border-teal-800"
-                          : "bg-teal-600 text-white/90 border-transparent"
-                      }`}
-                  >
-                    <h3 className="text-lg font-bold">{t.sigla}</h3>
-                    <p className="text-sm">{t.nome}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+                  <div className="grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-2 gap-4">
+                    {turmasFiltradas.map((t) => (
+                      <MedModal
+                        key={t.sigla}
+                        courseCode={t.sigla}
+                        courseName={t.nome}
+                        onClick={() => setSelected(t)}
+                        className={
+                          selected?.sigla === t.sigla
+                            ? "border-2 border-teal-700"
+                            : "border border-transparent"
+                        }
+                      >
+                        <p>Selecione para visualizar no painel lateral</p>
+                      </MedModal>
+                    ))}
+                  </div>
 
-          {/* RIGHT SIDEBAR */}
-          <div className="hidden tablet:flex flex-col bg-zinc-200 w-72 rounded-2xl p-4 shadow-sm">
-            <h2 className="text-lg font-semibold text-zinc-700 mb-4">Turma</h2>
-
-            {selected ? (
-              <div className="flex justify-between bg-white rounded-xl p-3 shadow-sm items-center">
-                <div>
-                  <p className="font-semibold">{selected.sigla}</p>
-                  <p className="text-xs text-zinc-500">{selected.nome}</p>
                 </div>
-                <button
-                  onClick={() => setSelected(null)}
-                  className="text-sm text-red-500 font-bold"
-                >
-                  ×
-                </button>
               </div>
-            ) : (
-              <p className="text-sm text-zinc-600 italic">
-                Nenhuma turma selecionada
-              </p>
-            )}
-
-            <div className="mt-auto w-full">
-              <Button
-                className="w-full mt-6 py-5 text-sm tablet:text-base"
-                onClick={() => {
-                  if (!selected) return;
-
-                 
-                  localStorage.setItem(
-                    "turmaSelecionada",
-                    JSON.stringify(selected)
-                  );
-
-                  router.push("/criar/conselho");
-                }}
-              >
-                Próximo passo ›
-              </Button>
             </div>
-          </div>
+          </main>
+
+          {/* ------ LOG LATERAL ------ */}
+          <LogLateral
+            titulo="Turma"
+            subtitulo="Informações"
+            itens={
+              selected
+                ? [
+                    {
+                      id: selected.sigla,
+                      unidade: selected.sigla,
+                      professor: selected.nome,
+                    },
+                  ]
+                : []
+            }
+            onRemover={handleRemover}
+            vazioTexto="Nenhuma turma selecionada"
+            onProximo={() => {
+              if (!selected) return;
+              localStorage.setItem("turmaSelecionada", JSON.stringify(selected));
+              router.push("/criar/conselho");
+            }}
+          />
         </div>
       </div>
     </ProtectedRoute>

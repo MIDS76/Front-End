@@ -11,9 +11,9 @@ export default {
     extend: {
      
       screens: {
-        tablet: "1024px",   // => Para telas maiores que 1024px (tablet e acima): tablet:text-lg
-        laptop: "1366px",   // => Para telas maiores que 1366px (laptop e acima): laptop:text-xl
-        desktop: "1920px",  // => Para telas maiores que 1920px (desktop e acima): desktop:text-2xl
+        sm: "1024px",   // => Para telas maiores que 1024px (tablet e acima): tablet:text-lg
+        md: "1366px",   // => Para telas maiores que 1366px (laptop e acima): laptop:text-xl
+        lg: "1920px",  // => Para telas maiores que 1920px (desktop e acima): desktop:text-2xl
       },
 
       colors: {
