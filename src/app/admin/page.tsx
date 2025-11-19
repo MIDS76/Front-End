@@ -4,15 +4,14 @@ import MedModal from "@/components/modal/medModal";
 import { useEffect, useState } from "react";
 import ConselhosModal from "@/components/modal/conselhosModal";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import useSWR from "swr"
-import { Page, Turma } from "@/utils/types";
+import { Turma } from "@/utils/types";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SearchBar from "@/components/input/searchBar";
 import Paginacao from "@/components/paginacao/paginacao";
 import { buscarTurmas } from "@/api/turmas";
-import { toast } from "sonner";
 
 export default function LandingPage() {
+  
   const [dataAleatoria] = useState(() => {
     const hoje = new Date();
     const diasAleatorios = Math.floor(Math.random() * 90);

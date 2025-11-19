@@ -6,14 +6,13 @@ import TextField from "@/components/input/textField";
 import Form from "next/form";
 import ButtonTT from "@/components/button/ButtonTT";
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
 import PasswordResetModal from "@/components/modal/enviarVerificacao";
 import { showError, validateEmail, validateRequired } from "@/utils/formValidation";
+import { login } from "../actions/auth";
 
 export default function Login() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const { login } = useAuth();
   const router = useRouter();
 
   const handleLogin = async (data: FormData) => {
@@ -33,10 +32,11 @@ export default function Login() {
       return;
     }
 
-    const loggedUser = await login(email, password);
+    const session = await login(email, password);
+    console.log("Resposta da API:", session);
 
-    if (loggedUser) {
-      router.push(`/${loggedUser.perfil}`);
+    if (session) {
+      router.push(`/${(session.role).toLowerCase()}`);
     } else {
       newErrors.final = "E-mail ou senha incorretos.";
       setErrors(newErrors);
