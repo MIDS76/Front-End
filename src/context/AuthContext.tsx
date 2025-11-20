@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (session) {
         setUser({
           email: session.email,
-          role: session.role,
+          role: session.role.toLowerCase(),
           token: session.token,
         });
       }
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         setUser({
           email: session.email,
-          role: session.role,
+          role: session.role.toLowerCase(),
           token: session.token,
         });
 

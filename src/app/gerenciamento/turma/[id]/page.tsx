@@ -6,6 +6,8 @@ import usuarios from "@/data/usuarios.json";
 import turmas from "@/data/turma.json";
 import { useParams} from "next/navigation";
 import TurmaForm from "@/components/turma/TurmaForm";
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "@/app/access-denied";
 
 export default function GereciarTurma() {
   const usuariosArray = usuarios;
@@ -15,6 +17,12 @@ export default function GereciarTurma() {
   const alunos = usuariosArray.filter((user) => user.role === "Aluno");
   const turmaId = Number(id);
   const turma = turmasArray.find((t) => t.id === turmaId);
+
+  const { user } = useAuth();
+  
+  if (user?.role !== "pedagogico" && user?.role !== "admin") {
+    return AccessDeniedPage();
+  }
 
   return (
     <ProtectedRoute>

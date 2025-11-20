@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { FiSearch } from "react-icons/fi";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import LogLateral from "@/components/sidebar/logLateral";
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "@/app/access-denied";
 
 export default function RepresentantePage() {
   const router = useRouter();
@@ -59,6 +61,12 @@ export default function RepresentantePage() {
   const alunosFiltrados = alunosAtivos.filter((a) =>
     a.nome.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const { user } = useAuth();
+  
+  if (user?.role !== "pedagogico" && user?.role !== "admin") {
+    return AccessDeniedPage();
+  }
 
   return (
     <div className="flex min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">

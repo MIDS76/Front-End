@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FiSearch } from "react-icons/fi";
 import LogLateral from "@/components/sidebar/logLateral";
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "@/app/access-denied";
 
 export default function ConselhoPage() {
   const router = useRouter();
@@ -87,6 +89,12 @@ export default function ConselhoPage() {
 
   function handleRemover(unidade: string) {
     setSalvos((prev) => prev.filter((s) => s.unidade !== unidade));
+  }
+
+  const { user } = useAuth();
+  
+  if (user?.role !== "pedagogico" && user?.role !== "admin") {
+    return AccessDeniedPage();
   }
 
   return (

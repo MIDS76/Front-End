@@ -11,6 +11,8 @@ import { useRouter } from "next/navigation";
 import { buscarTurmas } from "@/api/turmas";
 import { Turma, Usuario } from "@/utils/types";
 import { buscarUsuarios } from "@/api/usuarios";
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "../access-denied";
 
 
 export default function GerenciamentoUsersTurmas() {
@@ -45,6 +47,12 @@ export default function GerenciamentoUsersTurmas() {
   const handleTurmaClick = (id: number) => {
     router.push(`/gerenciamento/turma/${id}`);
   };
+
+  const { user } = useAuth();
+  
+  if (user?.role !== "pedagogico" && user?.role !== "admin") {
+    return AccessDeniedPage();
+  }
 
   return (
     <>

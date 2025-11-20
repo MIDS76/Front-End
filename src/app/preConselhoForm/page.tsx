@@ -10,6 +10,8 @@ import usuariosData from "@/data/usuarios.json";
 import InfoCard from "@/components/card/cardTituloTelas";
 import { useRouter } from "next/navigation";
 import { validateRequired } from "@/utils/formValidation";
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "../access-denied";
 
 type CampoFormulario = {
   titulo: string;
@@ -131,6 +133,12 @@ export default function PreConselhoFormulario() {
   const secaoAtual = formulario[pagina];
   const estaCompleta = camposPreenchidos(secaoAtual);
 
+  const { user } = useAuth();
+  
+  if (user?.role !== "aluno") {
+    return AccessDeniedPage();
+  }
+
   return (
     <div
       className="w-full max-w-[90rem] mx-auto overflow-x-hidden"
@@ -179,7 +187,7 @@ export default function PreConselhoFormulario() {
           </div>
         ))}
       </div>
-
+      
 
       <div className="flex justify-end pt-8 gap-4 mr-4">
         {pagina > 0 && (

@@ -14,6 +14,8 @@ import InfoCard from "@/components/card/cardTituloTelas";
 import UserInfo from "@/components/lista/userInfo";
 import Lista from "@/components/lista/lista";
 import { showError, validateRequired } from "@/utils/formValidation";
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "../access-denied";
 
 type CampoFormulario = {
   titulo: string;
@@ -146,6 +148,12 @@ export default function ConselhoCoordenacao() {
   );
 
   const campos: (keyof CampoFormulario)[] = ["positivos", "melhoria", "sugestoes"];
+
+  const { user } = useAuth();
+  
+  if (user?.role !== "pedagogico" && user?.role !== "admin") {
+    return AccessDeniedPage();
+  }
 
   return (
     <div

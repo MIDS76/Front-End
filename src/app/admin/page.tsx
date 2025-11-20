@@ -1,7 +1,7 @@
 "use client";
 
 import MedModal from "@/components/modal/medModal";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import ConselhosModal from "@/components/modal/conselhosModal";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Turma } from "@/utils/types";
@@ -9,9 +9,11 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import SearchBar from "@/components/input/searchBar";
 import Paginacao from "@/components/paginacao/paginacao";
 import { buscarTurmas } from "@/api/turmas";
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "../access-denied";
 
 export default function LandingPage() {
-  
+
   const [dataAleatoria] = useState(() => {
     const hoje = new Date();
     const diasAleatorios = Math.floor(Math.random() * 90);
@@ -28,13 +30,14 @@ export default function LandingPage() {
   const [selectedTurma, setSelectedTurma] = useState({} as Turma);
 
   const [data, setData] = useState<Turma[]>([]);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
-        const response = await buscarTurmas();
-        setData(response ?? []);
-        setFilteredTurmas(response ?? []);
-        setTotalPages(2);
+      const response = await buscarTurmas();
+      setData(response ?? []);
+      setFilteredTurmas(response ?? []);
+      setTotalPages(2);
     };
 
     fetchData();
@@ -56,6 +59,10 @@ export default function LandingPage() {
 
     setFilteredTurmas(filtradas);
   }, [searchQuery, data]);
+
+  if (user?.role !== "admin") {
+    return AccessDeniedPage();
+  }
 
   return (
     <ProtectedRoute>

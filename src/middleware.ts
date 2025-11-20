@@ -15,6 +15,14 @@ const protectedRoutes = [
   "/preConselhoForm"
 ];
 
+const routePermissions = {
+  admin: ["/admin", "/conselhoCoordenacao", "/criar", "/gerenciamento"],
+  aluno: ["/aluno", "/preConselhoForm"],
+  pedagogico: ["/pedagogico", "/conselhoCoordenacao", "/criar", "/gerenciamento"],
+  weg: ["/weg"],
+  supervisor: ["/supervisor"]
+};
+
 export async function middleware(request: NextRequest) {
   const cookieStore = await cookies();
   const session = cookieStore.get('session');
