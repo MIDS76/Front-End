@@ -113,7 +113,7 @@ export default function RepresentantePage() {
     <div className="flex min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
 
       {/* CONTEÚDO PRINCIPAL */}
-      <main className="flex-1 px-[3rem] pt-[2rem] pb-[3rem] mt-[5rem]">
+      <main className="flex-1 px-[0.1rem] pt-[0.1rem] pb-[11rem] mt-[9rem]">
         <div className="max-w-[80rem] mx-auto flex flex-col items-center">
 
           {/* CABEÇALHO */}
@@ -121,14 +121,14 @@ export default function RepresentantePage() {
             <InfoCard
               titulo="Conselho da Turma MI 76"
               descricao="Selecione os representantes da turma"
-              className="w-[48.5rem] mb-6"
+              className="w-[35.5rem] mb-6"
             />
           </div>
 
           {/* LISTA DE REPRESENTANTES */}
           <div
             className="bg-[hsl(var(--background))] rounded-xl border-2 border-[hsl(var(--border))] shadow-sm 
-            w-[48.4rem] p-[1.25rem] flex flex-col gap-3"
+            w-[35.4rem] p-[1.25rem] flex flex-col gap-3"
             style={{
               height: "30rem",
               overflowY: "auto",

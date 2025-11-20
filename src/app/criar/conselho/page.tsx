@@ -90,7 +90,8 @@ export default function ConselhoPage() {
   useEffect(() => {
     if (salvos.length > 0) {
       localStorage.setItem("conselhoSalvos", JSON.stringify(salvos));
-    }  }, [salvos]);
+    }
+  }, [salvos]);
 
   function handleSalvar() {
     const novosErros: { professor?: boolean; unidade?: boolean } = {};
@@ -128,35 +129,34 @@ export default function ConselhoPage() {
 
   function handleProximoPasso() {
     localStorage.setItem("conselhoSalvos", JSON.stringify(salvos));
-  
+
     setTimeout(() => {
       router.push("/criar/conselho/representante");
     }, 10);
   }
-  
 
   return (
     <div className="flex min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
-      <main className="flex-1 px-[3rem] pt-[2rem] pb-[3rem] mt-[5rem]">
-        <div className="max-w-[80rem] mx-auto">
+      <main className="flex-1 px-20 pt-4 pb-4 mt-[5rem]">
+        <div className="max-w-[30rem] mx-auto">
           <div className="flex justify-center mt-[1.5rem]">
             <InfoCard
               titulo="Conselho da Turma MI 76"
               descricao="Selecione os professores de cada unidade curricular"
-              className="w-[48.5rem]"
+              className="w-full sm:w-[48.5rem]"
             />
           </div>
 
-          <div className="flex justify-center gap-[3.5rem] mt-[1rem]">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-[3.5rem] mt-6 sm:mt-[1rem]">
             {/* PROFESSORES */}
             <div
-              className={`bg-[hsl(var(--card))] rounded-xl border shadow-sm w-[22.5rem] h-[30rem] p-[1.25rem] flex flex-col ${erros.professor ? "border-destructive" : "border-[hsl(var(--border))]"
-                }`}
+              className={`bg-[hsl(var(--card))] rounded-xl border shadow-sm w-full sm:w-[22.5rem] h-[30rem] p-[1.25rem] flex flex-col ${
+                erros.professor ? "border-destructive" : "border-[hsl(var(--border))]"
+              }`}
             >
               <h3 className="text-sm font-semibold text-[hsl(var(--secondary))] mb-[0.5rem]">
                 Selecione os professores
               </h3>
-
               <div className="relative mb-[0.75rem]">
                 <FiSearch className="absolute left-[0.75rem] top-[0.625rem] text-[hsl(var(--muted-foreground))]" />
                 <input
@@ -188,15 +188,14 @@ export default function ConselhoPage() {
                   ))}
                 </div>
               </div>
-              {erros.professor && (
-                <p className="text-destructive text-sm mt-2">Selecione um professor!</p>
-              )}
+              {erros.professor && <p className="text-destructive text-sm mt-2">Selecione um professor!</p>}
             </div>
 
             {/* UNIDADES */}
             <div
-              className={`bg-[hsl(var(--card))] rounded-xl border shadow-sm w-[22.5rem] h-[30rem] p-[1.25rem] flex flex-col ${erros.unidade ? "border-destructive" : "border-[hsl(var(--border))]"
-                }`}
+              className={`bg-[hsl(var(--card))] rounded-xl border shadow-sm w-full sm:w-[22.5rem] h-[30rem] p-[1.25rem] flex flex-col ${
+                erros.unidade ? "border-destructive" : "border-[hsl(var(--border))]"
+              }`}
             >
               <h3 className="text-sm font-semibold text-[hsl(var(--secondary))] mb-[0.5rem]">
                 Selecione as unidades curriculares
@@ -231,14 +230,12 @@ export default function ConselhoPage() {
                   ))}
                 </div>
               </div>
-              {erros.unidade && (
-                <p className="text-destructive text-sm mt-2">Selecione ao menos uma unidade!</p>
-              )}
+              {erros.unidade && <p className="text-destructive text-sm mt-2">Selecione ao menos uma unidade!</p>}
             </div>
           </div>
 
           {/* BOTÃO SALVAR */}
-          <div className="flex justify-end mt-[1rem] w-[48.4rem] mx-auto">
+          <div className="flex justify-end mt-[1rem] w-full mx-auto">
             <ButtonTT
               mode="default"
               onClick={handleSalvar}
