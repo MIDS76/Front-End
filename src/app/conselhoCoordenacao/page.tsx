@@ -213,7 +213,7 @@ export default function ConselhoCoordenacao() {
                 return (
                   <div key={campo}>
                     <Label className="text-sm font-semibold" style={{ color: "hsl(var(--card-foreground))" }}>
-                      {campo === "positivos" ? "Pontos positivos" : campo === "melhoria" ? "Pontos de melhoria" : "Sugestões"}
+                      {campo === "positivos" ? "Pontos positivos" : campo === "melhoria" ? "Pontos de melhoria" : "Sugestões de melhorias"}
                     </Label>
                     <Textarea
                       placeholder={`Insira aqui os ${campo}...`}
@@ -266,7 +266,7 @@ export default function ConselhoCoordenacao() {
                 disabled={pagina === formulario.length - 1}
                 className="text-sm px-8"
                 style={{
-                  backgroundColor: "hsl(var(--card))",
+                  backgroundColor: "#d2dbdc", // Botei cor de fundo no botão
                   color: "hsl(var(--foreground))",
                   border: "1px solid hsl(var(--border))",
                   opacity: pagina === formulario.length - 1 ? 0.5 : 1,
@@ -281,7 +281,7 @@ export default function ConselhoCoordenacao() {
               tooltip="Concluir"
               mode="default"
               disabled={!todosPreenchidos}
-              onClick={() => setIsConfirmOpen(true)}
+              onClick={() => router.push('/feedbackTurma')}
               className="text-sm px-8"
               style={{
                 backgroundColor: "hsl(var(--primary))",
