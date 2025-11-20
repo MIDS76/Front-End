@@ -1,12 +1,9 @@
 "use client";
 
-import { Usuario } from "@/utils/types";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import TextField from "../input/textField";
 import { Button } from "../ui/button";
-import Lista from "../lista/lista";
-import { toast } from "sonner";
 import { showError, validateDate, validateRequired } from "@/utils/formValidation";
 
 interface TurmaFormProps {
@@ -17,12 +14,15 @@ interface TurmaFormProps {
         dataInicio: string;
         dataFim: string;
     };
-    alunos: Usuario[];
-    onSubmit: (form: { codigoTurma: string; nomeCurso: string; dataInicio: string; dataFim: string },
-        alunos: Usuario[]) => void;
+    onSubmit: (form: {
+        codigoTurma: string;
+        nomeCurso: string;
+        dataInicio: string;
+        dataFim: string;
+    }) => void;
 }
 
-export default function TurmaForm({ title, initialData, alunos, onSubmit }: TurmaFormProps) {
+export default function TurmaForm({ title, initialData, onSubmit }: TurmaFormProps) {
     const router = useRouter();
 
     const [form, setForm] = useState({
@@ -42,57 +42,28 @@ export default function TurmaForm({ title, initialData, alunos, onSubmit }: Turm
         newErrors.nomeCurso = validateRequired(form.nomeCurso, "nome do Curso");
         newErrors.dataInicio = validateDate(form.dataInicio);
         newErrors.dataFim = validateDate(form.dataFim);
-        if (alunos.length === 0) newErrors.listaAlunos = "Adicione os alunos à turma.";
 
-        if (Object.keys(newErrors).length === 0) {
-            onSubmit(form, alunos);
-            setTimeout(() => {
-                router.back();
-            }, 1500);
+        if (Object.values(newErrors).every((e) => !e)) {
+            onSubmit(form);
+            setTimeout(() => router.back(), 1500);
         } else {
             setErrors(newErrors);
-            showError
+            showError;
         }
     };
-
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     const handleChange = (field: string, value: string) => {
         setForm((prev) => ({ ...prev, [field]: value }));
     };
 
-    const [file, setFile] = useState<File | null>(null);
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFile = e.target.files ? e.target.files[0] : null;
-        if (selectedFile) {
-            setFile(selectedFile);
-            toast.success("Arquivo selecionado com sucesso!");
-        }
-    };
-
-    const handleFileUpload = () => {
-        if (file) {
-            toast.success("Planilha importada com sucesso!");
-        } else {
-            toast.error("Nenhum arquivo selecionado.");
-        }
-    };
-
     return (
-        <div className="p-6">
             <div className="flex flex-col md:flex-row gap-4">
                 <div className="w-full md:w-1/2 flex flex-col items-start">
-                    <div className="p-6 pb-0 w-full mt-16 h-full flex flex-col">
+                    <div className="pb-0 w-full mt-6 h-full flex flex-col">
                         <h2 className="text-2xl font-semibold mb-4 text-card-foreground">
                             {title}
                         </h2>
-                        <div className="bg-muted rounded-lg mb-4 p-4">
-                            <h3 className="font-medium text-card-foreground">Resumo</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Alunos Ativos: <b>{alunos.length}</b>
-                            </p>
-                        </div>
+
                         <div className="mb-4">
                             <TextField
                                 label="Nome"
@@ -105,6 +76,7 @@ export default function TurmaForm({ title, initialData, alunos, onSubmit }: Turm
                                 error={errors.codigoTurma}
                             />
                         </div>
+
                         <div className="mb-4">
                             <TextField
                                 value={form.nomeCurso}
@@ -116,6 +88,7 @@ export default function TurmaForm({ title, initialData, alunos, onSubmit }: Turm
                                 error={errors.nomeCurso}
                             />
                         </div>
+
                         <div className="mb-4">
                             <TextField
                                 value={form.dataInicio}
@@ -127,6 +100,7 @@ export default function TurmaForm({ title, initialData, alunos, onSubmit }: Turm
                                 error={errors.dataInicio}
                             />
                         </div>
+
                         <div className="mb-4">
                             <TextField
                                 value={form.dataFim}
@@ -138,68 +112,16 @@ export default function TurmaForm({ title, initialData, alunos, onSubmit }: Turm
                                 error={errors.dataFim}
                             />
                         </div>
+
                         <div className="flex justify-start gap-2 mt-auto">
-                            <Button
-                                variant="outline"
-                                onClick={() => {
-                                    router.back();
-                                }}
-                            >
+                            <Button variant="outline" onClick={() => router.back()}>
                                 Cancelar
                             </Button>
-                            <Button
-                                onClick={() => {
-                                    handleSubmit();
-                                }}
-                            >
-                                Salvar
-                            </Button>
+
+                            <Button onClick={handleSubmit}>Salvar</Button>
                         </div>
                     </div>
                 </div>
-
-                <div className="w-full md:w-3/5 px-4 mt-8">
-                    <div className="flex mb-4 ml-4 rounded-md overflow-hidden">
-                        {title === "Criar Turma" && (
-                            <div className="mt-6">
-                                <label className="text-sm font-semibold text-gray-800">Importar Planilha</label>
-                                <input
-                                    type="file"
-                                    accept=".csv, .xlsx"
-                                    className="block w-full mt-2 text-sm text-gray-800"
-                                    onChange={handleFileChange}
-                                />
-                                <Button
-                                    variant="outline"
-                                    className="mt-4"
-                                    onClick={handleFileUpload}
-                                >
-                                    Importar
-                                </Button>
-                            </div>
-                        )}
-                    </div>
-
-                    <h2 className="ml-4 text-2xl font-semibold mb-4 text-card-foreground">
-                        Alunos da Turma
-                    </h2>
-
-                    {errors.listaAlunos && (
-                        <p className="text-red-500 text-sm mt-2 text-center">{errors.listaAlunos}</p>
-                    )}
-
-                    <Lista
-                        isDialogOpen={isDialogOpen}
-                        setIsDialogOpen={setIsDialogOpen}
-                        usuarios={alunos}
-                        tipo={title === "Criar Turma" ? "limpa" : "edit"}
-                    />
-                    <div
-                        className="rounded-md shadow-sm overflow-y-auto pr-2"
-                        style={{ maxHeight: "60vh" }}
-                    ></div>
-                </div>
             </div>
-        </div>
     );
 }
