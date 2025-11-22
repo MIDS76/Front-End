@@ -19,10 +19,21 @@ export default function ModalFecharAfora({ isOpen, setOpen }: ImportarCSVProps) 
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-100"
+      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
       onClick={closeModal}
     >
-      <ImportarCSV isOpen={true} setOpen={setOpen} onImported={() => setOpen(false)} />
+      <div className="bg-white rounded-2xl p-8 shadow-md w-[36rem] max-w-full">
+        <ImportarCSV
+          isOpen={true} 
+          setOpen={setOpen} 
+          width="32rem"    
+          height="32rem"   
+          onImported={() => {
+            console.log("CSV importado");
+            setOpen(false); 
+          }} 
+        />
+      </div>
     </div>
   );
 }
