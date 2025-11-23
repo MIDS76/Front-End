@@ -37,6 +37,9 @@ export default function LogLateral({
     onProximo();
   };
 
+  console.log("Vendo o que o log recebeu: ");
+  console.log(itens);
+
   return (
     <aside className="relative w-[25rem] flex-shrink-0 mt-[5rem] flex flex-col rounded-l-xl overflow-hidden shadow-md">
       {/* Cabeçalho */}

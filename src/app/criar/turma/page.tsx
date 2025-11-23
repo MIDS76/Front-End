@@ -6,8 +6,19 @@ import TurmaForm from "@/components/turma/TurmaForm";
 import InfoCard from "@/components/card/cardTituloTelas";
 import LogLateral from "@/components/sidebar/logLateral";
 import ImportarCSV from "@/components/modal/importarCSV";
+import { useState } from "react";
 
 export default function CriarTurma() {
+  const [alunos, setAlunos] = useState<any[]>([]);
+
+  function handleRemover(idOuNome: string) {
+    setAlunos((prev) =>
+      prev.filter(
+        (s) => s.id !== idOuNome && s.nome !== idOuNome
+      )
+    );
+  }
+
   return (
     <ProtectedRoute>
       <div
@@ -39,7 +50,7 @@ export default function CriarTurma() {
               <InfoCard
                 titulo="Criar nova turma"
                 subtitulo="Resumo"
-                descricao="Alunos ativos: 0"
+                descricao={`Alunos ativos: ${alunos.length}`}
               />
             </div>
 
@@ -48,6 +59,10 @@ export default function CriarTurma() {
               <TurmaForm
                 title="Criar Turma"
                 onSubmit={() => {
+                  if(alunos.length === 0) {
+                    toast.error("Adicione alunos à turma antes de criar!");
+                    return;
+                  }
                   toast.success("Turma criada com sucesso!");
                 }}
               />
@@ -70,8 +85,9 @@ export default function CriarTurma() {
               setOpen={() => {}}
               width="36rem"
               height="34rem"
-              onImported={() => {
-                toast.success("Lista de alunos importado com sucesso!");
+              onImported={(listaAlunos) => {
+                setAlunos(listaAlunos);
+                toast.success("Lista de alunos importada!");
               }}
             />
           </div>
@@ -79,10 +95,14 @@ export default function CriarTurma() {
 
         {/* LOG LATERAL */}
         <LogLateral
-          titulo="Listar Todos"
-          itens={[]}
+          titulo="Alunos"
+          itens={alunos.map((a) => ({
+          id: a.matricula,
+          unidade: a.nome,
+          professor: a.email,
+        }))}
           vazioTexto="Nenhum aluno selecionado"
-          onRemover={() => {}}
+          onRemover={handleRemover}
           onProximo={() => {}}
         />
       </div>
