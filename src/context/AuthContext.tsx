@@ -12,6 +12,7 @@ interface User {
   email: string;
   role: Role;
   token: string;
+  primeiroAcesso: boolean;
 }
 
 interface AuthContextProps {
@@ -39,6 +40,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           email: session.email,
           role: session.role.toLowerCase(),
           token: session.token,
+          primeiroAcesso: session.primeiroAcesso
         });
       }
       setLoading(false);
@@ -61,6 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           email: session.email,
           role: session.role.toLowerCase(),
           token: session.token,
+          primeiroAcesso: session.primeiroAcesso
         });
 
         return session;
