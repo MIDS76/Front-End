@@ -8,6 +8,8 @@ import LogLateral from "@/components/sidebar/logLateral";
 import { useRouter } from "next/navigation";
 import SearchBar from "@/components/input/searchBar";
 
+import MedModal from "@/components/modal/medModal";
+import { toast } from "sonner";
 
 export default function SelecionarTurmaPreConselho() {
   const router = useRouter();
@@ -47,7 +49,7 @@ export default function SelecionarTurmaPreConselho() {
 
   function handleProximo() {
     if (!selected) {
-      setErroSelecao("Você precisa selecionar uma turma antes de continuar.");
+      toast.error("Você precisa selecionar uma turma antes de continuar.");
       return;
     }
 
@@ -64,9 +66,8 @@ export default function SelecionarTurmaPreConselho() {
           {/* CENTRO */}
           <main className="flex-1 flex justify-center px-10">
             <div className="flex flex-col items-center w-full max-w-[60rem]">
-
               {/* CABEÇALHO */}
-              <div className="bg-[hsl(var(--card))] rounded-xl shadow-md p-6 border border-[hsl(var(--border))] w-full">
+              <div className="bg-[hsl(var(--card))] rounded-xl shadow-md p-6 border border-[hsl(var(--border))] w-full mt-7">
                 <h1 className="text-2xl font-semibold text-[hsl(var(--foreground))]">
                   Turma para o Pré-Conselho
                 </h1>
@@ -80,74 +81,59 @@ export default function SelecionarTurmaPreConselho() {
 
               {/* GRID + BUSCA */}
               <div className="bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] shadow-sm w-full h-[34rem] p-5 mt-6 flex flex-col">
+                {/* BUSCA */}
+                <div className="w-full mb-4 flex items-center gap-4 flex-wrap">
+                  <SearchBar
+                    className="flex-1 min-w-[250px]"
+                    searchQuery={searchTerm}
+                    setSearchQuery={setSearchTerm}
+                    filter
+                    filtrosMostrar={{
+                      aluno: false,
+                      turma: true,
+                      conselho: false,
+                    }}
+                  />
+                </div>
 
-                {/* BUSCA + FILTRO */}
-<div className="w-full mb-4 flex items-center gap-4 flex-wrap">
-
-{/* SearchBar (encaixa e expande) */}
-<SearchBar
-  className="flex-1 min-w-[250px]"
-  searchQuery={searchTerm}
-  setSearchQuery={setSearchTerm}
-  filter
-  filtrosMostrar={{ aluno: false, turma: true, conselho: false }}
-/>
-
-</div>
-
-
-                {/* GRID */}
+                {/* GRID — AGORA COM MedModal */}
                 <div className="flex-1 overflow-y-auto pr-2">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-
                     {turmasFiltradas.map((t) => {
                       const isSelected = selected?.sigla === t.sigla;
 
                       return (
-                        <div
+                        <MedModal
                           key={t.sigla}
+                          courseCode={t.sigla}
+                          courseName={t.nome}
                           onClick={() => {
                             setSelected(t);
                             setErroSelecao("");
                           }}
                           className={`
-                            cursor-pointer rounded-xl overflow-hidden shadow-md border
-                            transition-all duration-300
+                            transition-all duration-300 cursor-pointer
                             ${
                               isSelected
-                                ? "border-[hsl(var(--primary))] scale-[1.02]"
-                                : "border-transparent hover:scale-[1.01]"
+                                ? "border-2 border-[hsl(var(--primary))] scale-[1.02]"
+                                : "hover:scale-[1.01]"
                             }
                           `}
                         >
-
-                          {/* Topo */}
-                          <div
-                            className={`
-                              p-4 transition-colors duration-300
-                              ${isSelected ? "bg-[#0E2A32]" : "bg-[#2F6B73]"}
-                              text-white
-                            `}
-                          >
-                            <h2 className="text-xl font-semibold">{t.sigla}</h2>
-                            <p className="text-sm opacity-90">{t.nome}</p>
-                          </div>
-
-                          {/* Status */}
-                          <div className="bg-white p-4">
-                            <p className="text-sm font-semibold text-gray-700">
-                              Status: Não iniciado
-                            </p>
-                          </div>
-
-                        </div>
+                          <p className="font-medium text-sm">
+                            Status:{" "}
+                            <span className="text-muted-foreground">
+                              Não iniciado
+                            </span>
+                          </p>
+                        </MedModal>
                       );
                     })}
                   </div>
                 </div>
               </div>
 
-              {/* MENSAGEM DE ERRO */}
+              {/* ERRO */}
               {erroSelecao && (
                 <p className="text-red-600 text-sm mt-3 font-medium">
                   {erroSelecao}
@@ -158,6 +144,7 @@ export default function SelecionarTurmaPreConselho() {
 
           {/* LATERAL */}
           <LogLateral
+            className="h-[calc(100vh-5rem)]"
             titulo="Turma"
             itens={
               selected
