@@ -90,7 +90,7 @@ export default function ImportarCSV({ isOpen, setOpen, onImported, width, height
         <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 px-6">
           <span className="text-7xl mb-4 leading-none" style={{ color: "#93a7b0" }}>+</span>
           <span className="text-base leading-relaxed max-w-xs">
-            Arraste os arquivos CSV com a lista de Unidades Curriculares para importar os dados.
+            Arraste os arquivos CSV para importar os dados.
           </span>
         </div>
       </label>
