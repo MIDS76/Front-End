@@ -105,32 +105,51 @@ export default function SelecionarTurmaPreConselho() {
 
                 {/* GRID */}
                 <div className="flex-1 overflow-y-auto pr-2">
-                  <div className="grid grid-cols-3 gap-4">
-                    {turmasFiltradas.map((t) => (
-                      <div
-                        key={t.sigla}
-                        onClick={() => {
-                          setSelected(t);
-                          setErroSelecao(""); // limpar erro ao selecionar
-                        }}
-                        className={`
-                          cursor-pointer rounded-lg shadow 
-                          bg-[#2F6B73] text-white p-4 border 
-                          ${
-                            selected?.sigla === t.sigla
-                              ? "border-[hsl(var(--primary))] border-2"
-                              : "border-transparent"
-                          }
-                        `}
-                      >
-                        <h2 className="text-lg font-semibold">{t.sigla}</h2>
-                        <p className="text-sm opacity-90">{t.nome}</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
-                        <div className="bg-white text-black mt-4 p-1 rounded text-xs font-medium">
-                          Status: Não iniciado
+                    {turmasFiltradas.map((t) => {
+                      const isSelected = selected?.sigla === t.sigla;
+
+                      return (
+                        <div
+                          key={t.sigla}
+                          onClick={() => {
+                            setSelected(t);
+                            setErroSelecao("");
+                          }}
+                          className={`
+                            cursor-pointer rounded-xl overflow-hidden shadow-md border
+                            transition-all duration-300
+                            ${
+                              isSelected
+                                ? "border-[hsl(var(--primary))] scale-[1.02]"
+                                : "border-transparent hover:scale-[1.01]"
+                            }
+                          `}
+                        >
+
+                          {/* Topo */}
+                          <div
+                            className={`
+                              p-4 transition-colors duration-300
+                              ${isSelected ? "bg-[#0E2A32]" : "bg-[#2F6B73]"}
+                              text-white
+                            `}
+                          >
+                            <h2 className="text-xl font-semibold">{t.sigla}</h2>
+                            <p className="text-sm opacity-90">{t.nome}</p>
+                          </div>
+
+                          {/* Status */}
+                          <div className="bg-white p-4">
+                            <p className="text-sm font-semibold text-gray-700">
+                              Status: Não iniciado
+                            </p>
+                          </div>
+
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -141,7 +160,6 @@ export default function SelecionarTurmaPreConselho() {
                   {erroSelecao}
                 </p>
               )}
-
             </div>
           </main>
 
