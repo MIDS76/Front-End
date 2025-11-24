@@ -108,8 +108,14 @@ export default function ListCell({
       )}
 
       {tipo === "checkbox" && (
-        <UserCheckbox usuario={usuario} toggleSelected={toggleSelected} />
+        <UserCheckbox
+          usuario={usuario}
+          toggleSelected={toggleSelected}
+          isChecked={isUserAlreadySelected}
+        />
       )}
+
+
 
       {tipo === "add" && (
         <AddButton
