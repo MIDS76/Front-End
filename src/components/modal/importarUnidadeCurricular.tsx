@@ -22,7 +22,6 @@ export default function ModalFecharAfora({ isOpen, setOpen }: ImportarCSVProps) 
         console.log(unidades);
         toast.success("Lista de Unidades curriculares importada com sucesso!");
         setOpen(false);
-
       } catch (err) {
         toast.error("Erro ao salvar lista de Unidades curriculares.");
       }
