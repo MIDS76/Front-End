@@ -41,6 +41,9 @@ export default function LogLateral({
     onProximo();
   };
 
+  console.log("Vendo o que o log recebeu: ");
+  console.log(itens);
+
   return (
     <aside
   className="

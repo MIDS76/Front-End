@@ -3,11 +3,17 @@
 import { toast } from "sonner";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import TurmaForm from "@/components/turma/TurmaForm";
+import { Usuario } from "@/utils/types";
+import { useRouter } from "next/navigation";
 import InfoCard from "@/components/card/cardTituloTelas";
-import LogLateral from "@/components/sidebar/logLateral";
 import ImportarCSV from "@/components/modal/importarCSV";
+import LogLateral from "@/components/sidebar/logLateral";
 
 export default function CriarTurma() {
+
+  const router = useRouter();
+  const alunos: Usuario[] = [];
+  
   return (
     <ProtectedRoute>
       <div className="flex min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
