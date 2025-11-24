@@ -6,6 +6,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Header from "@/components/header/header";
 import LogLateral from "@/components/sidebar/logLateral";
 import { useRouter } from "next/navigation";
+import SearchBar from "@/components/input/searchBar";
+
 
 export default function SelecionarTurmaPreConselho() {
   const router = useRouter();
@@ -79,29 +81,20 @@ export default function SelecionarTurmaPreConselho() {
               {/* GRID + BUSCA */}
               <div className="bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] shadow-sm w-full h-[34rem] p-5 mt-6 flex flex-col">
 
-                {/* BUSCA */}
-                <div className="relative w-full mb-4">
-                  <FiSearch className="absolute left-4 top-2.5 text-gray-500" />
+                {/* BUSCA + FILTRO */}
+<div className="w-full mb-4 flex items-center gap-4 flex-wrap">
 
-                  <input
-                    type="text"
-                    placeholder="Buscar Unidade Curricular"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="
-                      w-full
-                      pl-10 pr-4 py-2.5
-                      bg-white
-                      rounded-xl
-                      border border-gray-300
-                      text-sm
-                      text-gray-700
-                      placeholder:text-gray-500
-                      focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]
-                      transition
-                    "
-                  />
-                </div>
+{/* SearchBar (encaixa e expande) */}
+<SearchBar
+  className="flex-1 min-w-[250px]"
+  searchQuery={searchTerm}
+  setSearchQuery={setSearchTerm}
+  filter
+  filtrosMostrar={{ aluno: false, turma: true, conselho: false }}
+/>
+
+</div>
+
 
                 {/* GRID */}
                 <div className="flex-1 overflow-y-auto pr-2">

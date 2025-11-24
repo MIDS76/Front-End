@@ -20,7 +20,8 @@ export default function LogLateral({
   onProximo,
 }: LogLateralProps) {
   return (
-    <aside className="relative w-[25rem] flex-shrink-0 mt-[5rem] flex flex-col rounded-l-xl overflow-hidden shadow-md">
+    <aside className="relative w-[25rem] flex-shrink-0 h-[calc(100vh-5rem)] flex flex-col rounded-l-xl overflow-hidden shadow-md">
+
       {/* Cabeçalho */}
       <div className="bg-[hsl(var(--primary))] p-[1rem]">
         <div className="text-[hsl(var(--primary-foreground))] font-semibold flex justify-between items-center mb-[0.25rem] px-[0.25rem]">
