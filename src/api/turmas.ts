@@ -24,7 +24,6 @@ export const buscarTurmas = async () => {
 }
 
 export const criarTurma = async (data: Turma) => {
-
     try {
         const response = await api.post(`/turmas/criar`, data, { signal: controller.signal });
         return response.data;

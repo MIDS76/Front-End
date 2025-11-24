@@ -7,17 +7,52 @@ import InfoCard from "@/components/card/cardTituloTelas";
 import LogLateral from "@/components/sidebar/logLateral";
 import ImportarCSV from "@/components/modal/importarCSV";
 import { useState } from "react";
+import { Aluno, associarAlunosTurma, criarAlunos, criarTurma } from "@/api/turmas";
+import { Turma } from "@/utils/types";
 
 export default function CriarTurma() {
-  const [alunos, setAlunos] = useState<any[]>([]);
+  const [alunos, setAlunos] = useState<Aluno[]>([]);
+  const [turmaData, setTurmaData] = useState<Turma>({
+    nome: "",
+    curso: "",
+    dataInicio: "",
+    dataFinal: "",
+  });
 
   function handleRemover(idOuNome: string) {
     setAlunos((prev) =>
       prev.filter(
-        (s) => s.id !== idOuNome && s.nome !== idOuNome
+        (s) => s.matricula !== idOuNome && s.nome !== idOuNome
       )
     );
   }
+
+  const handleSubmit = async (form: Turma) => {
+    setTurmaData(form);
+    if (alunos.length === 0) {
+      toast.error("Adicione alunos à turma antes de criar!");
+      return;
+    }
+
+    try {
+      // Cria a turma e aguarda a resposta
+      const turma = await criarTurma(turmaData);
+      console.log("Turma criada:", turma);
+  
+      if (turma) {
+        console.log("Criando alunos:", alunos);
+  
+        // Criação dos alunos ocorre apenas após a turma ser criada
+        const alunosCriados = await criarAlunos(alunos);  // Aguarda a criação dos alunos
+  
+      } else {
+        toast.error("Erro ao criar a turma.");
+      }
+    } catch (err) {
+      console.error("Erro ao criar turma ou alunos:", err);
+      toast.error("Erro ao criar a turma ou os alunos.");
+    }
+  };
 
   return (
     <ProtectedRoute>
@@ -58,13 +93,7 @@ export default function CriarTurma() {
             <div className="w-full laptop:w-[46rem] desktop:w-[46rem]">
               <TurmaForm
                 title="Criar Turma"
-                onSubmit={() => {
-                  if(alunos.length === 0) {
-                    toast.error("Adicione alunos à turma antes de criar!");
-                    return;
-                  }
-                  toast.success("Turma criada com sucesso!");
-                }}
+                onSubmit={handleSubmit}
               />
             </div>
           </div>
@@ -82,11 +111,11 @@ export default function CriarTurma() {
           >
             <ImportarCSV
               isOpen={true}
-              setOpen={() => {}}
+              setOpen={() => { }}
               width="36rem"
               height="34rem"
               onImported={(listaAlunos) => {
-                if(listaAlunos.length !== 0) {
+                if (listaAlunos.length > 0) {
                   setAlunos(listaAlunos);
                   toast.success("Lista de alunos importada!");
                 }
@@ -99,13 +128,13 @@ export default function CriarTurma() {
         <LogLateral
           titulo="Alunos"
           itens={alunos.map((a) => ({
-          id: a.matricula,
-          unidade: a.nome,
-          professor: a.email,
-        }))}
+            id: a.matricula,
+            unidade: a.nome,
+            professor: a.email,
+          }))}
           vazioTexto="Nenhum aluno selecionado"
           onRemover={handleRemover}
-          onProximo={() => {}}
+          onProximo={() => { }}
         />
       </div>
     </ProtectedRoute>
