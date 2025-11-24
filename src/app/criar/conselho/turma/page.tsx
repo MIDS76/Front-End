@@ -67,7 +67,7 @@ export default function SelecionarTurmaPreConselho() {
           <main className="flex-1 flex justify-center px-10">
             <div className="flex flex-col items-center w-full max-w-[60rem]">
               {/* CABEÇALHO */}
-              <div className="bg-[hsl(var(--card))] rounded-xl shadow-md p-6 border border-[hsl(var(--border))] w-full mt-7">
+              <div className="bg-[hsl(var(--card))] rounded-xl shadow-md p-6 border border-[hsl(var(--border))] w-full mt-8">
                 <h1 className="text-2xl font-semibold text-[hsl(var(--foreground))]">
                   Turma para o Pré-Conselho
                 </h1>
