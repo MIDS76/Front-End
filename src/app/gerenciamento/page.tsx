@@ -5,24 +5,40 @@ import { useEffect } from "react";
 import MedModal from "@/components/modal/medModal";
 import Lista from "@/components/lista/lista";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import turmas from "@/data/turma.json";
-import usuarios from "@/data/usuarios.json";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SearchBar from "@/components/input/searchBar";
 import { useRouter } from "next/navigation";
+import { buscarTurmas } from "@/api/turmas";
+import { Turma, Usuario } from "@/utils/types";
+import { buscarUsuarios } from "@/api/usuarios";
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "../access-denied";
 
 
 export default function GerenciamentoUsersTurmas() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [turmas, setTurmas] = useState<Turma[]>([]);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
 
-  const turmasArray = turmas;
-  const usuariosArray = usuarios;
+  useEffect(() => {
+    const fetchData = async () => {
+      const turmasArray = await buscarTurmas();
+      setTurmas(turmasArray || []);
+
+      const usuariosArray = await buscarUsuarios();
+      setUsuarios(usuariosArray || []);
+    }
+
+    fetchData();
+  }, []);
+
+  console.log(usuarios);
 
   useEffect(() => {
     return () => {
-      document.title = "Gerenciamento - ConselhEXPERT";
+      document.title = "Gerenciamento - Portal do Conselho";
     };
   }, []);
 
@@ -31,7 +47,13 @@ export default function GerenciamentoUsersTurmas() {
   const handleTurmaClick = (id: number) => {
     router.push(`/gerenciamento/turma/${id}`);
   };
+
+  const { user } = useAuth();
   
+  if (user?.role !== "pedagogico" && user?.role !== "admin") {
+    return AccessDeniedPage();
+  }
+
   return (
     <>
       <ProtectedRoute>
@@ -54,11 +76,11 @@ export default function GerenciamentoUsersTurmas() {
 
             <ScrollArea className="w-full h-[600px] mt-5 md:w-[450px] md:m-auto">
               <div className="grid grid-cols-1 gap-6 px-4">
-                {turmasArray?.map((classItem, index) => (
+                {turmas?.map((classItem, index) => (
                   <MedModal
                     key={index}
-                    courseCode={classItem.codigoTurma}
-                    courseName={classItem.nomeCurso}
+                    courseCode={classItem.nome}
+                    courseName={classItem.curso}
                     onClick={() => handleTurmaClick(classItem.id)}
                     simple
                   />
@@ -87,7 +109,7 @@ export default function GerenciamentoUsersTurmas() {
                 isDialogOpen={isDialogOpen}
                 setIsDialogOpen={setIsDialogOpen}
                 tipo="edit"
-                usuarios={usuariosArray}
+                usuarios={usuarios}
                 className="px-4"
               />
             </div>

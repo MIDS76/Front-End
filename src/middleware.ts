@@ -1,10 +1,36 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { cookies } from "next/headers";
 
-export function middleware(request: NextRequest) {
-  const isLoggedIn = request.cookies.get("isLoggedIn");
+const protectedRoutes = [
+  "/",
+  "/admin",
+  "/aluno",
+  "/chat",
+  "/conselhoCoordenacao",
+  "/criar",
+  "/dashboard",
+  "/gerenciamento",
+  "/pedagogico",
+  "/preConselhoForm"
+];
 
-  if (!isLoggedIn || isLoggedIn.value !== "true") {
+const routePermissions = {
+  admin: ["/admin", "/conselhoCoordenacao", "/criar", "/gerenciamento"],
+  aluno: ["/aluno", "/preConselhoForm"],
+  pedagogico: ["/pedagogico", "/conselhoCoordenacao", "/criar", "/gerenciamento"],
+  weg: ["/weg"],
+  supervisor: ["/supervisor"]
+};
+
+export async function middleware(request: NextRequest) {
+  const cookieStore = await cookies();
+  const session = cookieStore.get('session');
+
+  const path = request.nextUrl.pathname
+  const isProtectedRoute = protectedRoutes.includes(path)
+
+  if (isProtectedRoute && !session?.value) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
@@ -13,7 +39,15 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!login|alterarSenha|api/public|_next/static|_next/image|favicon.ico).*)",
+    "/:path*",
+    "/admin/:path*",
+    "/aluno/:path*",
+    "/chat/:path*",
+    "/conselhoCoordenacao/:path*",
+    "/criar/:path*",
+    "/dashboard/:path*",
+    "/gerenciamento/:path*",
+    "/pedagogico/:path*",
+    "/preConselhoForm/:path*"
   ],
 };
-

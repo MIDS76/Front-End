@@ -57,13 +57,10 @@ export function ConfigDialog() {
   }
 
   const { setTheme } = useTheme();
-
-  const auth = useAuth();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-    // api.post("http://localhost:8099/auth/logout");
-    auth.logout();
-    open("/login", "_self");
+    logout();
   };
 
   function ColorButton({ color, className }: ColorButtonProps) {

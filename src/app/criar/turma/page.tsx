@@ -86,8 +86,10 @@ export default function CriarTurma() {
               width="36rem"
               height="34rem"
               onImported={(listaAlunos) => {
-                setAlunos(listaAlunos);
-                toast.success("Lista de alunos importada!");
+                if(listaAlunos.length !== 0) {
+                  setAlunos(listaAlunos);
+                  toast.success("Lista de alunos importada!");
+                }
               }}
             />
           </div>

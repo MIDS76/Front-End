@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import ButtonTT from "@/components/button/ButtonTT";
 import { cn } from "@/lib/utils";
 import BackgroundDevolutiva from "@/components/ui/background-devolutiva";
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "../access-denied";
 
 // ------------------ TIPOS ------------------
 interface Feedback {
@@ -76,6 +78,12 @@ interface DevolutivaAlunoProps {
 }
 
 function DevolutivaAluno({ isOpen, onClose, feedback, periodo }: DevolutivaAlunoProps) {
+  const { user } = useAuth();
+  
+  if (user?.role !== "aluno") {
+    return AccessDeniedPage();
+  }
+
   return (
     <aside
       className={cn(
