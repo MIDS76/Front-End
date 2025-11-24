@@ -37,7 +37,12 @@ export default function Login() {
     console.log("Resposta da API:", session);
 
     if (session) {
-      router.push(`/${(session.role).toLowerCase()}`);
+      if(session.primeiroAcesso){
+        router.push(`/alterarSenha`);
+      }else{
+        router.push(`/${session.role.toLowerCase()}`);
+      }
+      
     } else {
       newErrors.final = "E-mail ou senha incorretos.";
       setErrors(newErrors);
