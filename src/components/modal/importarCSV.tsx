@@ -2,17 +2,26 @@
 
 import { useState, useRef } from "react";
 import { toast } from "sonner";
+import Papa from 'papaparse';
 
 interface ImportarCSVProps {
   isOpen: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+<<<<<<< HEAD
   onImported?: () => void;
+=======
+  onImported?: (data: any[]) => void;
+>>>>>>> origin/develop
   width?: string;  // largura opcional
   height?: string; // altura opcional
 }
 
 export default function ImportarCSV({ isOpen, setOpen, onImported, width, height }: ImportarCSVProps) {
+<<<<<<< HEAD
   const [arquivo, setArquivo] = useState<File | null>(null);
+=======
+  const [arquivo, setArquivo] = useState<any[] | null>([]);
+>>>>>>> origin/develop
   const [error, setError] = useState<string | null>(null);
 
   const inputFileRef = useRef<HTMLInputElement>(null);
@@ -22,24 +31,34 @@ export default function ImportarCSV({ isOpen, setOpen, onImported, width, height
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setArquivo(file);
-      setError(null);
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (result) => {
+          setArquivo(result.data);
+          setError(null);
+        },
+        error: (err) => {
+          setError("Erro ao ler o arquivo CSV.");
+          toast.error("Erro ao ler o arquivo CSV");
+        }
+      })
     }
-  };
+  }
 
   const handleChooseFileClick = () => {
     inputFileRef.current?.click();
   };
 
   const handleImport = () => {
-    if (!arquivo) {
+    if (!arquivo || arquivo.length === 0) {
       setError("Por favor, escolha um arquivo CSV.");
       return;
     }
-    toast.success("Arquivo importado com sucesso!");
-    setArquivo(null);
 
-    if (onImported) onImported();
+    toast.success("Arquivo importado com sucesso!");
+    onImported?.(arquivo);
+    setOpen(false);
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
@@ -61,7 +80,18 @@ export default function ImportarCSV({ isOpen, setOpen, onImported, width, height
     e.stopPropagation();
     const file = e.dataTransfer.files[0];
     if (file && file.type === "text/csv") {
-      setArquivo(file);
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (result) => {
+          setArquivo(result.data);
+          setError(null);
+        },
+        error: (err) => {
+          setError("Erro ao ler o arquivo CSV.");
+          toast.error("Erro ao ler o arquivo CSV");
+        }
+      })
       setError(null);
     } else {
       setError("Por favor, arraste um arquivo CSV válido.");
@@ -74,7 +104,11 @@ export default function ImportarCSV({ isOpen, setOpen, onImported, width, height
       <label
         htmlFor="arquivo"
         className="block border-2 border-dashed border-gray-400 rounded-lg cursor-pointer"
+<<<<<<< HEAD
         style={{ width: width || "24rem", height: height || "18rem" }} 
+=======
+        style={{ width: width || "24rem", height: height || "18rem" }}
+>>>>>>> origin/develop
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}

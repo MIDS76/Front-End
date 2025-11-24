@@ -195,7 +195,7 @@ export default function RepresentantePage() {
         isOpen={isConfirmOpen}
         setOpen={setIsConfirmOpen}
         title="Deseja liberar pré-conselho?"
-        description="Ao confirmar, todos os dados relacionados ao pré-conselho serão enviados."
+        conteudo="Ao confirmar, todos os dados relacionados ao pré-conselho serão enviados."
         actionButtonLabel="Confirmar"
         onConfirm={handleConfirmarRepresentantes}
       />
