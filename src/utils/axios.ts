@@ -1,7 +1,9 @@
 import { verifySession } from "@/app/actions/session";
 import axios from "axios";
 
+
 const user = await verifySession();
+console.log('Sessão verificada:', user);
 
 const api = axios.create({
   baseURL: "http://localhost:8081/api",

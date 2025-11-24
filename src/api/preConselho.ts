@@ -114,7 +114,7 @@ export const criarUnidadeCurricular = async (nome: string) => {
     const controller = new AbortController();
 
     try {
-        const response = await api.post(`/unidadeCurricular/criar`, nome, { signal: controller.signal });
+        const response = await api.post(`/unidadeCurricular/criar`, {nome}, { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
@@ -125,11 +125,11 @@ export const criarUnidadeCurricular = async (nome: string) => {
 }
 
 // criar lista de unidade curricular
-export const criarUnidadeCurricularLista = async (lista: string[]) => {
+export const criarUnidadeCurricularLista = async (lista: any[]) => {
     const controller = new AbortController();
 
     try {
-        const response = await api.post(`/unidadeCurricular/criarLista`, lista, { signal: controller.signal });
+        const response = await api.post(`/unidadeCurricular/criarLista`, lista , { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {

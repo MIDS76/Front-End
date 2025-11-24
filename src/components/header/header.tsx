@@ -36,7 +36,6 @@ export default function Header({ login = false, className }: HeaderProps) {
   
   return (
     <header className={cn(
-<<<<<<< HEAD
       "fixed top-0 left-0 right-0 z-50 flex h-20 py-4 w-full shrink-0 items-center px-4 md:px-8 justify-between", //header fica fixo no topo da página
       header,
       className
@@ -44,15 +43,6 @@ export default function Header({ login = false, className }: HeaderProps) {
 
     >
       <Link href={`/${userRole}`} className="mr-6 flex items-center gap-2 sm:gap-4" prefetch>
-=======
-      "fixed top-0 left-0 right-0 z-50 flex h-20 py-4 w-full shrink-0 items-center px-4 laptop:px-8 justify-between", //header fica fixo no topo da página
-     header, 
-     className
-     )}
-
-     >
-      <Link href={`/${userRole}`} className="mr-6 flex items-center gap-2 tablet:gap-4" prefetch>
->>>>>>> origin/develop
         <Logo size={48} fill="fill-accent-foreground" />
         <h1 className="hidden tablet:block tablet:text-3xl text-accent-foreground font-title font-bold">
           Portal do Conselho
