@@ -1,17 +1,22 @@
 "use client";
 
+import React from "react";
 interface InfoCardProps {
   titulo: string;
-  subtitulo?: string;
-  descricao: string;
+  search?: React.ReactNode;
   className?: string;
   style?: React.CSSProperties; 
 }
 
-export default function InfoCard({ titulo, subtitulo, descricao, className, style }: InfoCardProps) {
+export default function InfoCard({ 
+    titulo,
+    search, 
+    className, 
+    style 
+    }: InfoCardProps) {
   return (
     <div
-      className={`rounded-2xl shadow p-[1rem] ${className || ""}`}
+      className={`rounded-2desktop shadow p-[1rem] ${className}`}
       style={{
         backgroundColor: "hsl(var(--card))",
         color: "hsl(var(--card-foreground))",
@@ -25,11 +30,8 @@ export default function InfoCard({ titulo, subtitulo, descricao, className, styl
         style={{ borderBottom: "1px solid hsl(var(--border))" }}
       />
 
-      {subtitulo && (
-        <h6 className="text-[1.25rem] font-medium mb-[0.5rem] opacity-80">{subtitulo}</h6>
-      )}
-
-      <p className="text-[1rem] leading-relaxed">{descricao}</p>
+      {search && <div className="mb-4">{search}</div>}
+      
     </div>
   );
 }

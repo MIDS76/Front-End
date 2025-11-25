@@ -3,8 +3,16 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FiSearch } from "react-icons/fi";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import LogLateral from "@/components/sidebar/logLateral";
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "@/app/access-denied";
+import ButtonTT from "@/components/button/ButtonTT";
+import { toast } from "sonner";
+import Lista from "@/components/lista/lista";
+import { Usuario } from "@/utils/types";
+import usuariosData from "@/data/usuarios.json";
+import InfoCard from "@/components/card/cardTituloTelas";
+import ActionModal from "@/components/modal/actionModal";
 
 export default function RepresentantePage() {
   const router = useRouter();
@@ -175,7 +183,17 @@ export default function RepresentantePage() {
         }))}
         onRemover={handleRemover}
         vazioTexto="Nenhum representante selecionado"
-        onProximo={() => router.push("/criar/conselho/finalizar")}
+        onProximo={handleProximo}
+      />
+
+      {/* ACTION MODAL */}
+      <ActionModal
+        isOpen={isConfirmOpen}
+        setOpen={setIsConfirmOpen}
+        title="Deseja liberar pré-conselho?"
+        conteudo="Ao confirmar, todos os dados relacionados ao pré-conselho serão enviados."
+        actionButtonLabel="Confirmar"
+        onConfirm={handleConfirmarRepresentantes}
       />
     </div>
   );

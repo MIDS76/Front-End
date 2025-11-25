@@ -1,4 +1,4 @@
-import { ConfigDialog } from "@/components/configDialog";
+import { ConfigDialog } from "@/components/perfil/configDialog";
 
 
 export default function ConfigurationButton() {
