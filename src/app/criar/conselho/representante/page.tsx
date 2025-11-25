@@ -118,72 +118,70 @@ export default function RepresentantePage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
-
-      {/* CONTEÚDO PRINCIPAL */}
-      <main className="flex-1 px-[3rem] pt-[2rem] pb-[3rem] mt-[5rem]">
-        <div className="max-w-[80rem] mx-auto flex flex-col items-center">
-
-          {/* CABEÇALHO */}
-          <div className="flex justify-center mt-[1.5rem]">
-            <InfoCard
-              titulo="Conselho da Turma MI 76"
-              descricao="Selecione os representantes da turma"
-              className="w-[48.5rem] mb-6"
-            />
-          </div>
-
-          {/* LISTA DE REPRESENTANTES */}
-          <div
-            className="bg-[hsl(var(--background))] rounded-xl border-2 border-[hsl(var(--border))] shadow-sm 
-            w-[48.4rem] p-[1.25rem] flex flex-col gap-3"
-            style={{
-              height: "30rem",
-              overflowY: "auto",
-              scrollbarWidth: "thin",
-            }}
-          >
-
-            {/* CAMPO DE BUSCA */}
-            <div className="relative mb-[1rem]">
-              <FiSearch className="absolute left-[0.75rem] top-[0.65rem] text-[hsl(var(--muted-foreground))]" />
-              <input
-                type="text"
-                placeholder="Buscar Representante"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-[2.25rem] pr-[0.75rem] py-[0.5rem] text-sm border rounded-md border-[hsl(var(--border))] 
-                bg-white focus:outline-none focus:ring-1 
-                focus:ring-[hsl(var(--primary))] placeholder:text-[hsl(var(--muted-foreground))]"
-              />
-            </div>
-
-            {/* LISTA FILTRADA */}
-            <Lista
-              usuarios={alunosFiltrados}
-              tipo="checkbox"
-              isDialogOpen={isDialogOpen}
-              setIsDialogOpen={setIsDialogOpen}
-              onSelect={(usuario: Usuario) => toggleSelecionado(usuario)}
-              selecionados={selecionados}
-              className="flex-1"
-            />
-          </div>
-
-          {/* BOTÕES */}
-          <div className="w-[48.4rem] flex justify-between mt-[1rem]">
-            <ButtonTT
-              mode="default"
-              onClick={() => router.push("/criar/conselho")}
-              className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--secondary))] text-[hsl(var(--primary-foreground))] 
-              px-[1.25rem] py-[0.5rem] rounded-md text-sm font-medium shadow-md transition-all"
-            >
-              Anterior
-            </ButtonTT>
-          </div>
-
+  <div className="flex min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
+    
+    {/* CONTEÚDO PRINCIPAL */}
+    <main className="flex-1 px-4 pt-4 pb-[rem] mt-[6rem]">
+      <div className="max-w-[35rem] mx-auto flex flex-col items-center laptop: max-w-[40rem] mx-auto flex flex-col items-center">
+        
+        {/* CABEÇALHO DO CONSELHO */}
+        <div className="flex justify-center mt-[1.5rem] w-full">
+          <InfoCard
+            titulo="Conselho da Turma MI 76"
+            descricao="Selecione os representantes da turma"
+            className="w-full border-25 border-[hsl(var(--border))] rounded-x2 px-25 shadow-lg"
+          />
         </div>
-      </main>
+
+        {/* LISTA DE REPRESENTANTES */}
+        <div
+          className="w-full sm:w-[35rem] bg-[hsl(var(--background))] rounded-xl border-2 border-[hsl(var(--border))] shadow-sm 
+          p-[1.25rem] flex flex-col gap-6 mt-[1rem] laptop:  desktop: "
+          style={{
+            height: "30rem",
+            overflowY: "auto",
+            scrollbarWidth: "thin",
+          }}
+        >
+          {/* CAMPO DE BUSCA */}
+          <div className="relative mb-[1rem]">
+            <FiSearch className="absolute left-[0.75rem] top-[0.65rem] text-[hsl(var(--muted-foreground))]" />
+            <input
+              type="text"
+              placeholder="Buscar Representante"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-[2.25rem] pr-[0.75rem] py-[0.5rem] text-sm border rounded-md border-[hsl(var(--border))] 
+              bg-white focus:outline-none focus:ring-1 focus:ring-[hsl(var(--primary))] placeholder:text-[hsl(var(--muted-foreground))]"
+            />
+          </div>
+
+          {/* LISTA FILTRADA */}
+          <Lista
+            usuarios={alunosFiltrados}
+            tipo="checkbox"
+            isDialogOpen={isDialogOpen}
+            setIsDialogOpen={setIsDialogOpen}
+            onSelect={(usuario: any) => toggleSelecionado(usuario)}
+            selecionados={selecionados}
+            className="flex-1"
+          />
+        </div>
+
+        {/* BOTÕES */}
+        <div className="w-full sm:w-[35rem] flex justify-between mt-[1rem]">
+          <ButtonTT
+            mode="default"
+            onClick={() => router.push("/criar/conselho")}
+            className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--secondary))] text-[hsl(var(--primary-foreground))] 
+            px-[1.25rem] py-[0.5rem] rounded-md text-sm font-medium shadow-md transition-all"
+          >
+            Anterior
+          </ButtonTT>
+        </div>
+
+      </div>
+    </main>
 
       {/* LOG LATERAL */}
       <LogLateral
@@ -198,7 +196,7 @@ export default function RepresentantePage() {
         onProximo={handleProximo}
       />
 
-      {/* ACTION MODAL: */}
+      {/* ACTION MODAL */}
       <ActionModal
         isOpen={isConfirmOpen}
         setOpen={setIsConfirmOpen}
