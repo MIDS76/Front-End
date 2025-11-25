@@ -5,12 +5,7 @@ import InfoCard from "@/components/card/cardSearchBar";
 import SearchBar from "@/components/input/searchBar";
 import MedModal from "@/components/modal/medModal";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-interface Turma {
-  id: number;
-  codigoTurma: string;
-  nomeCurso: string;
-}
+import { Turma } from "@/utils/types";
 
 interface BlocoTurmasProps {
     turmas: Turma[];
@@ -53,8 +48,8 @@ export default function BlocoTurmas({
             {turmas?.map((classItem, index) => (
               <div className="h-32" key={index}>
                 <MedModal
-                  courseCode={classItem.codigoTurma}
-                  courseName={classItem.nomeCurso}
+                  courseCode={classItem.nome}
+                  courseName={classItem.curso}
                   onClick={() => handleTurmaClick(classItem.id)}
                   simple
                 />
