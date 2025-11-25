@@ -7,6 +7,9 @@ import TextField from "@/components/input/textField";
 import ButtonTT from "@/components/button/ButtonTT";
 import SenhaSucess from "@/components/modal/senhaAlteradaSucesso";
 import { validatePassword, validatePasswordMatch } from "@/utils/formValidation";
+import { set } from "date-fns";
+import { apiAtualizarSenha } from "@/api/atualizarSenha";
+import Cookies from "js-cookie";
 
 export default function ResetPassword() {
   const [error, setError] = useState("");
@@ -42,10 +45,27 @@ export default function ResetPassword() {
       return;
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const userId = Cookies.get("session") ? JSON.parse(Cookies.get("session")!).id : "";
+    console.log(Cookies.get('session'));  // Verifique o conteúdo do cookie
 
-    setIsLoading(false);
-    setShowSuccessModal(true);
+
+    if (!userId) {
+        setError("Usuário não autenticado.");
+        setIsLoading(false);
+        return;
+    }
+
+    try{
+
+      await apiAtualizarSenha(userId, newPassword);
+
+      setIsLoading(false);
+      setShowSuccessModal(true);
+    }catch(error){
+      setError("Erro ao atualizar a senha. Tente novamente!")
+      setIsLoading(false)
+  }
+   
   };
 
   const handleCloseSuccessModal = () => {
