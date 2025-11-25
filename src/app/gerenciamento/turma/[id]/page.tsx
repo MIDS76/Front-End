@@ -8,6 +8,8 @@ import { useParams } from "next/navigation";
 import TurmaForm from "@/components/turma/TurmaForm";
 import { useRouter } from "next/navigation";
 import InfoCard from "@/components/card/cardTituloTelas";
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "@/app/access-denied";
 
 export default function GerenciarTurma() {
   const usuariosArray = usuarios;
@@ -18,6 +20,12 @@ export default function GerenciarTurma() {
   const alunos = usuariosArray.filter((user) => user.role === "Aluno");
   const turmaId = Number(id);
   const turma = turmasArray.find((t) => t.id === turmaId);
+
+  const { user } = useAuth();
+  
+  if (user?.role !== "pedagogico" && user?.role !== "admin") {
+    return AccessDeniedPage();
+  }
 
   return (
     <ProtectedRoute>

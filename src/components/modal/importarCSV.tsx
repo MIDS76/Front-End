@@ -22,21 +22,43 @@ export default function ImportarCSV({ isOpen, setOpen, onImported, width, height
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+
     if (file) {
       Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
         complete: (result) => {
-          setArquivo(result.data);
-          setError(null);
+          const data = result.data;
+
+          // Verifique se data é um array e se o primeiro item é um objeto
+          if (Array.isArray(data) && data.length > 0 && data[0] !== null && typeof data[0] === "object") {
+            const keys = Object.keys(data[0]);  // Acesse as chaves do primeiro objeto (cabeçalho do CSV)	
+
+            // Verificação para Unidade Curricular (uma coluna 'nome')
+            if (keys.length === 1 && keys[0] === "nome") {
+              setArquivo(data);  // Atualiza o estado com a lista de unidades curriculares
+              setError(null);     // Reseta o erro
+            }
+
+            // Verificação para Lista de Alunos (3 colunas: 'nome', 'email', 'matricula')
+            else if (keys.length === 3 && keys.includes("nome") && keys.includes("email") && keys.includes("matricula")) {
+              setArquivo(data);  // Atualiza o estado com a lista de alunos
+              setError(null);     // Reseta o erro
+            } else {
+              setError("Arquivo inválido.");
+            }
+          } else {
+            setError("Arquivo vazio ou inválido.");
+          }
         },
-        error: (err) => {
+        error: () => {
           setError("Erro ao ler o arquivo CSV.");
-          toast.error("Erro ao ler o arquivo CSV");
         }
-      })
+      });
     }
-  }
+  };
+
+
 
   const handleChooseFileClick = () => {
     inputFileRef.current?.click();

@@ -11,6 +11,8 @@ import usuariosData from "@/data/usuarios.json";
 import InfoCard from "@/components/card/cardTituloTelas";
 import { useRouter } from "next/navigation"; // Usar diretamente no componente
 import { validateRequired } from "@/utils/formValidation";
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "../access-denied";
 
 type CampoFormulario = {
   titulo: string;
@@ -141,6 +143,12 @@ export default function PreConselhoFormulario() {
     router.push("/aluno"); // Redireciona para a página /aluno
   };
 
+  const { user } = useAuth();
+  
+  if (user?.role !== "aluno") {
+    return AccessDeniedPage();
+  }
+
   return (
     <div className="w-full max-w-[90rem] mx-auto overflow-x-hidden" style={{ paddingTop: "8rem", paddingBottom: "2rem" }}>
       <InfoCard
@@ -174,7 +182,23 @@ export default function PreConselhoFormulario() {
           <ButtonTT
             tooltip="Anterior"
             mode="default"
-            onClick={() => setPagina(pagina - 1)}
+            onClick={() => {
+              const secaoAtual = formulario[pagina];
+              const novosErros: { [key: string]: string } = {};
+
+              novosErros.positivos = validateRequired(secaoAtual.positivos, "pontos positivos");
+              novosErros.melhoria = validateRequired(secaoAtual.melhoria, "melhoria");
+              novosErros.sugestoes = validateRequired(secaoAtual.sugestoes, "sugestões");
+
+              if (Object.keys(novosErros).length > 0) {
+                setCamposErro(novosErros);
+                toast.error("Preencha todos os campos antes de voltar!");
+                return;
+              }
+
+              setCamposErro({});
+              setPagina(pagina - 1);
+            }}
             className="text-[0.875rem] leading-[1.25rem] px-8"
           >
             Anterior
