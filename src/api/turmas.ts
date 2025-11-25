@@ -12,7 +12,6 @@ export interface Aluno {
 }
 
 export const buscarTurmas = async () => {
-
     try {
         const response = await api.get<Turma[]>("/turmas/listar", { signal: controller.signal });
 
@@ -56,6 +55,7 @@ export const excluirTurma = async (idTurma: number) => {
 export const criarAlunos = async (listaAlunos: Aluno[]) => {
     try {
         const response = await api.post(`/auth/cadastrar/listaAlunos`, listaAlunos, { signal: controller.signal });
+        console.log(response.data);
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {

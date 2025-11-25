@@ -49,7 +49,7 @@ export default function GerenciamentoUsersTurmas() {
   };
 
   const { user } = useAuth();
-  
+
   if (user?.role !== "pedagogico" && user?.role !== "admin") {
     return AccessDeniedPage();
   }

@@ -28,40 +28,41 @@ export default function CriarTurma() {
   }
 
   const handleSubmit = async (form: Turma) => {
-    setTurmaData(form);
     if (alunos.length === 0) {
       toast.error("Adicione alunos à turma antes de criar!");
       return;
     }
-
+  
     try {
-      // Cria a turma e aguarda a resposta
-      const turma = await criarTurma(turmaData);
+      // Cria a turma diretamente com os dados do form
+      const turma = await criarTurma(form);
       console.log("Turma criada:", turma);
-
-      if (turma) {
-        const alunosCriados = await criarAlunos(alunos);
-        console.log(alunosCriados);
-
-        if (!alunosCriados || alunosCriados.length === 0) {
-          await excluirTurma(turma.id);
-          toast.error("Erro ao criar a lista de alunos. Verifique os dados!");
-          return;
-        }else{
-          const idsAlunos: number[] = alunosCriados.map((a: Aluno) => a.id);
-          const associarResponse = await associarAlunosTurma({idTurma: turma.id, idsAlunos: idsAlunos});
-
-          if(associarResponse){
-            toast.success("Turma e alunos criados com sucesso!");
-          }
-        }
-
-      } else {
+  
+      if (!turma) {
         toast.error("Erro ao criar a turma.");
+        return;
       }
-    } catch (err) {
-      console.error("Erro ao criar turma ou alunos:", err);
-      toast.error("Erro ao criar a turma ou os alunos.");
+  
+      // Cria os alunos
+      const alunosCriados = await criarAlunos(alunos);
+      console.log("Alunos criados:", alunosCriados);
+  
+      if (!alunosCriados || alunosCriados.length === 0) {
+        await excluirTurma(turma.id);
+        toast.error("Erro ao criar a lista de alunos. Verifique os dados!");
+        return;
+      }
+  
+      // Associa os alunos à turma
+      const idsAlunos = alunosCriados.map((a: Aluno) => a.id);
+      const associarResponse = await associarAlunosTurma({ idTurma: turma.id, idsAlunos });
+  
+      if (associarResponse) {
+        toast.success("Turma e alunos criados com sucesso!");
+      }
+    } catch (error) {
+      console.error("Erro durante o processo de criação:", error);
+      toast.error("Erro durante o processo de criação da turma ou dos alunos.");
     }
   };
 
