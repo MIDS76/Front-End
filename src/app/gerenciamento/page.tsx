@@ -18,6 +18,7 @@ import {
   filtrarConselhoEtapa // Adicione outras funções de filtro
 } from "@/api/filtros";
 
+
 export default function GerenciamentoUsersTurmas() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQueryTurmas, setSearchQueryTurmas] = useState("");
@@ -33,19 +34,17 @@ export default function GerenciamentoUsersTurmas() {
 
       const usuariosArray = await buscarUsuarios();
       setUsuarios(usuariosArray || []);
-    };
+    }
 
     fetchData();
   }, []);
 
-<<<<<<< HEAD
   const handleAplicarFiltro = async (grupo: string, valor: string) => {
     console.log(`Filtro Aplicado (Pai): Grupo=${grupo}, Valor=${valor}`);
     let dadosNovos: any[] = [];
     let tipoDados: 'usuarios' | 'turmas' | 'outros' = 'outros';
 
     try {
-      // Lógica de filtro reintroduzida AQUI
       if (grupo === "Usuario") {
         tipoDados = 'usuarios';
         if (valor === "A-Z" || valor === "Z-A") {
@@ -54,13 +53,6 @@ export default function GerenciamentoUsersTurmas() {
           dadosNovos = await filtrarPorAtividade(valor) || [];
         }
       }
-=======
-  useEffect(() => {
-    return () => {
-      document.title = "Gerenciamento - Portal do Conselho";
-    };
-  }, []);
->>>>>>> origin/develop
 
       // Lógica de filtro reintroduzida AQUI
       else if (grupo === "Turma" || grupo === "Curso" || grupo === "Ano de Entrada") {
@@ -99,7 +91,6 @@ export default function GerenciamentoUsersTurmas() {
 
   return (
     <ProtectedRoute>
-<<<<<<< HEAD
       <div className="mt-32 w-full grid gap-10 grid-cols-1 tablet:grid-cols-1 laptop:grid-cols-2 desktop:grid-cols-2 px-10 laptop:max-w-[1350px] laptop:mx-auto">
 
         <BlocoTurmas
@@ -118,58 +109,6 @@ export default function GerenciamentoUsersTurmas() {
           setIsDialogOpen={setIsDialogOpen}
           onAplicarFiltro={handleAplicarFiltro}
         />
-=======
-
-      {/* CONTAINER GERAL */}
-      <div 
-        className="
-          w-full 
-          min-h-screen
-
-          tablet:overflow-auto      /* Tablet → página com scroll */
-          laptop:overflow-hidden    /* Laptop → sem scroll geral */
-        "
-      >
-
-        {/* GRID DOS BLOCOS */}
-        <div
-          className="
-            w-full 
-            grid gap-10 grid-cols-1
-
-            mt-24                    
-            tablet:mt-[6rem]
-            tablet:mb-[2rem]
-            laptop:mt-[6rem]              
-            desktop:mt-[10rem] 
-
-            tablet:grid-cols-1 
-            laptop:grid-cols-2 
-            desktop:grid-cols-2 
-
-            px-6 
-            laptop:max-w-[1350px] 
-            laptop:mx-auto
-          "
-        >
-          <BlocoTurmas
-            turmas={turmas}
-            searchQuery={searchQueryTurmas}
-            setSearchQuery={setSearchQueryTurmas}
-            handleTurmaClick={handleTurmaClick}
-            scrollHeight="28rem"  
-          />
-
-          <BlocoUsuarios
-            usuarios={usuarios}
-            searchQuery={searchQueryUsuarios}
-            setSearchQuery={setSearchQueryUsuarios}
-            isDialogOpen={isDialogOpen}
-            setIsDialogOpen={setIsDialogOpen}
-            scrollHeight="28rem"
-          />
-        </div>
->>>>>>> origin/develop
 
       </div>
     </ProtectedRoute>
