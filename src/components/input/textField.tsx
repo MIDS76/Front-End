@@ -56,7 +56,7 @@ export default function TextField({
         {label}
       </Label>
 
-      <div className="flex flex-col items-end relative">
+      <div className="relative w-full">
         <Input
           name={name}
           id={id}
@@ -67,7 +67,7 @@ export default function TextField({
             error
               ? "border-red-500 focus-visible:ring-red-500"
               : "border-gray-300 focus-visible:ring-gray-400"
-          }`}
+          } `} 
           value={value}
           readOnly={!editavel}
           onChange={handleChange}
@@ -83,7 +83,7 @@ export default function TextField({
             onClick={() => setShowPassword((prev) => !prev)}
           >
             {showPassword ? (
-              <EyeIcon className="w-4 h-4 text-accent-foreground" />
+              <EyeIcon className="w-4 h-4 laptop:w-6 laptop:h-6 text-accent-foreground" />
             ) : (
               <EyeOffIcon className="w-4 h-4 text-accent-foreground" />
             )}
