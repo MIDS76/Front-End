@@ -16,34 +16,26 @@ interface ListaConselhosProps {
   turma: TurmaType | null;
 }
 
-// Função que converte "2023-08-01" → "08/2023"
+/* Converter datas para MM/YYYY */
 const converterData = (data: string | Date | null | undefined): string => {
   if (!data) return "—";
+  const d = new Date(data);
+  if (isNaN(d.getTime())) return "—";
+  return `${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+};
 
-  // Se já for um Date, extrai mês/ano diretamente
-  if (data instanceof Date) {
-    const mes = String(data.getMonth() + 1).padStart(2, "0");
-    const ano = String(data.getFullYear());
-    return `${mes}/${ano}`;
-  }
+/* Mapa de status → nomes finais */
+const mapStatus = (status: string): string => {
+  const s = status.toLowerCase();
 
-  // Tenta dividir formato "YYYY-MM-DD"
-  const partes = data.split("-");
-  if (partes.length >= 2) {
-    const mes = partes[1];
-    const ano = partes[0];
-    return `${mes}/${ano}`;
-  }
+  if (s.includes("nao") || s.includes("não")) return "Não iniciado";
+  if (s.includes("pre")) return "Pré-conselho";
+  if (s.includes("cons")) return "Conselho";
+  if (s.includes("aguard")) return "Aguardando resultado";
+  if (s.includes("result") || s.includes("final") || s.includes("conc"))
+    return "Concluído";
 
-  // Fallback: tenta parsear a string para Date
-  const parsed = new Date(data);
-  if (!isNaN(parsed.getTime())) {
-    const mes = String(parsed.getMonth() + 1).padStart(2, "0");
-    const ano = String(parsed.getFullYear());
-    return `${mes}/${ano}`;
-  }
-
-  return "—";
+  return "Não iniciado";
 };
 
 export default function ListaConselhos({
@@ -60,6 +52,7 @@ export default function ListaConselhos({
     setModalAberto(false);
   };
 
+  /* Carregar conselhos */
   useEffect(() => {
     if (!turma) {
       setTurmaLocal(null);
@@ -69,20 +62,61 @@ export default function ListaConselhos({
 
     const encontrada =
       turmasData.find((t) => t.codigoTurma === turma.codigoTurma) || turma;
+
     setTurmaLocal(encontrada);
 
-    const filtrados = conselhosData
+    const filtrados: ConselhoType[] = conselhosData
       .filter((c) => c.turmaId === encontrada.id)
       .map((c) => ({
         id: c.id,
+        turmaId: c.turmaId,
+
+        /* Corrige o nome das datas */
         dataInicio: c.periodoInicio,
         dataFim: c.periodoFim,
-        status: c.status,
-        turma: encontrada,
-      })) as unknown as ConselhoType[];
 
-    setConselhos(filtrados);
+        /* Status padronizado */
+        status: mapStatus(c.status),
+        etapa: mapStatus(c.status),
+
+        turma: encontrada,
+      }));
+
+    /* Se houver mais de 1 em andamento → deixar só o mais novo */
+    const concluidos: ConselhoType[] = [];
+    const emAndamento: ConselhoType[] = [];
+
+    filtrados.forEach((c) => {
+      if (c.status === "Concluído") concluidos.push(c);
+      else emAndamento.push(c);
+    });
+
+    if (emAndamento.length > 1) {
+      const maisRecente = emAndamento.sort(
+        (a, b) =>
+          Number(new Date(b.dataInicio)) -
+          Number(new Date(a.dataInicio))
+      )[0];
+
+      const ajustados = filtrados.map((c) =>
+        c.id !== maisRecente.id && c.status !== "Concluído"
+          ? { ...c, status: "Concluído" }
+          : c
+      );
+
+      setConselhos(ajustados);
+    } else {
+      setConselhos(filtrados);
+    }
   }, [turma]);
+
+  /* Pode editar? (3 pontinhos só aparecem se NÃO estiver concluído) */
+  const podeEditar = (status: string) => status !== "Concluído";
+
+  /* Regras para criar novo conselho: só se não existe em andamento */
+  const existeConselhoAberto = conselhos.some(
+    (c) => c.status !== "Concluído"
+  );
 
   return (
     <>
@@ -95,43 +129,42 @@ export default function ListaConselhos({
         )}
       >
         <div className="flex flex-col h-full shadow-xl bg-card border-l">
-          {/* Conteúdo principal (Cards de Conselho) */}
-          <div className="flex-1 overflow-auto  px-5 pt-10   bg-background ">
+
+          {/* Conteúdo */}
+          <div className="flex-1 overflow-auto px-5 pt-10 bg-background">
             {conselhos.length > 0 ? (
               <div className="flex flex-wrap justify-center pt-6 gap-6">
-                {conselhos.map((conselho, idx) => (
+                {conselhos.map((conselho) => (
                   <Card
-                    key={conselho.id ?? idx}
-                    className="rounded-[0.5rem] shadow-md overflow-hidden cursor-pointer w-[70%] border"
+                    key={conselho.id}
+                    className="rounded-[0.5rem] shadow-md overflow-hidden w-[70%] border"
                   >
-                    {/* header */}
+                    {/* HEADER */}
                     <div className="bg-primary text-primary-foreground px-4 py-3 flex justify-between items-start">
                       <div>
-                        <div className="text-xs opacity-80 font-normal">
-                          Período
-                        </div>
+                        <div className="text-xs opacity-80">Período</div>
                         <div className="text-lg font-medium">
                           {converterData(conselho.dataInicio)} até{" "}
                           {converterData(conselho.dataFim)}
                         </div>
                       </div>
-                      <div className="opacity-90">
+
+                      {/* 3 pontinhos só aparecem se não estiver concluído */}
+                      {podeEditar(conselho.status) && (
                         <Icon icon="MoreHorizontal" />
-                      </div>
+                      )}
                     </div>
 
-                    {/* footer */}
+                    {/* FOOTER */}
                     <div className="text-foreground px-4 py-3 flex items-center justify-between bg-card">
                       <div className="text-sm">
                         <span className="font-medium">Status:</span>{" "}
-                        <span className="font-normal">
-                          {conselho.status ?? "Em andamento"}
-                        </span>
+                        <span className="font-normal">{conselho.status}</span>
                       </div>
 
-                      {conselho.status === "Resultado" ? (
+                      {conselho.status === "Aguardando resultado" && (
                         <Icon icon="IoIosChatboxes" />
-                      ) : null}
+                      )}
                     </div>
                   </Card>
                 ))}
@@ -143,14 +176,19 @@ export default function ListaConselhos({
             )}
           </div>
 
-          {/* Rodapé - Botão para criar novo conselho */}
-          <div className="p-6 bg-card mb-16"> {/* Fixando o footer na parte inferior */}
+          {/* FOOTER BOTÃO */}
+          <div className="p-6 bg-card mb-16">
             <div className="flex justify-center">
               <ButtonTT
+                disabled={existeConselhoAberto}
                 className="text-primary-foreground rounded-md text-base font-medium"
                 onClick={() => setModalAberto(true)}
                 mode="default"
-                tooltip="Criar novo conselho para esta turma"
+                tooltip={
+                  existeConselhoAberto
+                    ? "Já existe um conselho em andamento"
+                    : "Criar novo conselho para esta turma"
+                }
                 type="button"
               >
                 Criar novo conselho para esta turma
@@ -160,7 +198,6 @@ export default function ListaConselhos({
         </div>
       </aside>
 
-      {/* Modal de confirmação para criar um novo conselho */}
       <ConfirmarConselhoModal
         open={modalAberto}
         onClose={() => setModalAberto(false)}

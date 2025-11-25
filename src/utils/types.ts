@@ -15,12 +15,18 @@ export interface Turma {
 }
 
 export interface Conselho {
-  periodoInicio(periodoInicio: any): import("react").ReactNode;
-  status: string;
   id: number;
-  dataInicio: Date;
-  dataFim: Date;
-  etapa: number;
+  turmaId: number;
+
+  periodoInicio?: string;
+  periodoFim?: string;
+
+  dataInicio: string;
+  dataFim: string;
+
+  status: string;
+  etapa: string;
+
   turma: Turma;
 }
 
