@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import EditUserDialog from "../modal/editUserDialog";
 import { Conselho, Usuario } from "@/utils/types";
-import ListCell from "./listcell"; 
+import ListCell from "./listcell";
 
 interface ListaProps {
   className?: string;
@@ -16,6 +16,7 @@ interface ListaProps {
   setSearchQuery?: React.Dispatch<React.SetStateAction<string>>;
   onSelect?: (usuario: Usuario) => void;
   usuarioSelecionado?: Usuario | null;
+  selecionados?: Usuario[]; 
 }
 
 export default function Lista({
@@ -27,6 +28,7 @@ export default function Lista({
   setIsDialogOpen,
   onSelect,
   usuarioSelecionado,
+  selecionados = [], 
 }: ListaProps) {
   const [selectedUsuarios, setSelectedUsuarios] = useState<Usuario[]>([]);
   const [editingUser, setEditingUser] = useState<Usuario>({} as Usuario);
@@ -62,11 +64,15 @@ export default function Lista({
               usuario={usuario}
               conselho={conselho}
               tipo={tipo}
-              toggleSelected={() => toggleUsuario(usuario)}
+              toggleSelected={() => {
+                toggleUsuario(usuario); 
+                if (onSelect) onSelect(usuario); 
+              }}
               setEditingUser={setEditingUser}
               isDialogOpen={isDialogOpen}
               setIsDialogOpen={setIsDialogOpen}
               copy
+              isUserAlreadySelected={selecionados.some((u) => u.id === usuario.id)} 
               onClick={() => {
                 if (tipo === "limpa" && onSelect) {
                   onSelect(usuario);

@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -15,7 +14,6 @@ interface ActionModalProps {
   children?: React.ReactNode;
   conteudo?: React.ReactNode;
   title: string;
-  description: string;
   closeButtonLabel?: string;
   actionButtonLabel?: string;
   destructive?: boolean;
@@ -31,9 +29,8 @@ export default function ActionModal({
   removeBg = false,
   children,
   title,
-  description,
   closeButtonLabel = "Cancelar",
-  actionButtonLabel = "Confirmar",
+  actionButtonLabel = "Salvar",
   destructive,
   onConfirm,
   onClose,
@@ -57,14 +54,11 @@ export default function ActionModal({
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-      
         <section>{conteudo}</section>
-
        
-        <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2">
+        <DialogFooter className="flex flex-row justify-center gap-4 pt-4">
       
           <DialogClose asChild>
             <ButtonTT
