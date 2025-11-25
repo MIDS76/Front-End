@@ -71,7 +71,7 @@ export default function Login() {
         </div>
       </div>
 
-      <div className="bg-white p-12 shadow-xl flex flex-col justify-center w-full">
+      <div className="bg-white p-12 shadow-xl flex flex-col justify-center w-full ">
         <div className="mx-auto w-full">
           <div className="text-left mb-10">
             <h1 className="text-3xl font-bold text-gray-900 mb-1">
@@ -123,7 +123,7 @@ export default function Login() {
                 mode="default" 
                 tooltip="Fazer login" 
                 type="submit" 
-                className="w-full mt-6 bg-sky-950 hover:bg-sky-800 text-white py-3 rounded-lg" // Estilo do botão ajustado
+                className="mt-6 bg-sky-950 hover:bg-sky-800 text-white py-2 px-4 rounded-lg mx-auto tablet:w-60 laptop:w-72 desktop:w-88" // Estilo do botão ajustado
             >
               Login
             </ButtonTT>
