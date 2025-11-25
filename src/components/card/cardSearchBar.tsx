@@ -16,7 +16,7 @@ export default function InfoCard({
     }: InfoCardProps) {
   return (
     <div
-      className={`rounded-2desktop shadow p-[1rem] ${className}`}
+      className={`rounded-2xl desktop shadow p-[1rem] ${className}`}
       style={{
         backgroundColor: "hsl(var(--card))",
         color: "hsl(var(--card-foreground))",

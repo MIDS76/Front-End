@@ -3,110 +3,104 @@
 import { toast } from "sonner";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import TurmaForm from "@/components/turma/TurmaForm";
+import { Usuario } from "@/utils/types";
+import { useRouter } from "next/navigation";
 import InfoCard from "@/components/card/cardTituloTelas";
-import LogLateral from "@/components/sidebar/logLateral";
 import ImportarCSV from "@/components/modal/importarCSV";
-import { useState } from "react";
+import LogLateral from "@/components/sidebar/logLateral";
 
 export default function CriarTurma() {
-  const [alunos, setAlunos] = useState<any[]>([]);
 
-  function handleRemover(idOuNome: string) {
-    setAlunos((prev) =>
-      prev.filter(
-        (s) => s.id !== idOuNome && s.nome !== idOuNome
-      )
-    );
-  }
-
+  const router = useRouter();
+  const alunos: Usuario[] = [];
+  
   return (
     <ProtectedRoute>
-      <div
-        className="
-          flex min-h-screen
-          bg-[hsl(var(--background))]
-          text-[hsl(var(--foreground))]
-          desktop:items-stretch
-          laptop:items-stretch
-        "
-      >
-        {/* CONTEÚDO PRINCIPAL */}
+      <div className="flex min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
+
+        {/* ÁREA PRINCIPAL */}
         <div
           className="
-            flex flex-col
-            w-full
-            mt-28 p-6 gap-10
+            flex 
+            flex-col laptop:flex-row
 
-            laptop:flex-row laptop:items-start laptop:justify-center 
-            desktop:flex-row desktop:items-start desktop:justify-between
+            w-full 
+            max-w-[110rem]    
+            mx-auto            
+      
+            gap-10
+            mt-[5rem] 
+            p-10    
 
-            desktop:pl-20
+            pr-[26rem]          
           "
         >
-          {/* LADO ESQUERDO — Card + Form */}
-          <div className="flex flex-col gap-4 w-full laptop:w-auto items-center desktop:w-auto">
-            {/* Card */}
-            <div className="w-full laptop:w-[46rem] desktop:w-[46rem]">
-              <InfoCard
-                titulo="Criar nova turma"
-                subtitulo="Resumo"
-                descricao={`Alunos ativos: ${alunos.length}`}
-              />
-            </div>
+          {/* ESQUERDA — Card + Form */}
+          <div className="flex flex-col gap-6 w-full laptop:w-[36rem]">
+            <InfoCard
+              titulo="Criar nova turma"
+              subtitulo="Resumo"
+              descricao="Alunos ativos: 0"
+            />
 
-            {/* Form */}
-            <div className="w-full laptop:w-[46rem] desktop:w-[46rem]">
-              <TurmaForm
-                title="Criar Turma"
-                onSubmit={() => {
-                  if(alunos.length === 0) {
-                    toast.error("Adicione alunos à turma antes de criar!");
-                    return;
-                  }
-                  toast.success("Turma criada com sucesso!");
-                }}
-              />
-            </div>
+            <TurmaForm
+              title="Criar Turma"
+              onSubmit={() => {
+                toast.success("Turma criada com sucesso!");
+              }}
+            />
           </div>
 
-          {/* LADO DIREITO — CSV */}
+          {/* DIREITA — CSV */}
           <div
             className="
-              w-full
-              laptop:w-auto
-              desktop:w-auto 
-              flex justify-center laptop:justify-start
-              laptop:mr-0 laptop:ml-[-1.5rem]
-              desktop:mr-[2rem]
+              w-full 
+              laptop:w-[28rem]
+              flex justify-center
+              laptop:items-start
+
+              desktop:ml-[8rem]       
+              desktop:mt-[2rem]
+              
             "
           >
             <ImportarCSV
               isOpen={true}
               setOpen={() => {}}
-              width="36rem"
-              height="34rem"
-              onImported={(listaAlunos) => {
-                if(listaAlunos.length !== 0) {
-                  setAlunos(listaAlunos);
-                  toast.success("Lista de alunos importada!");
-                }
+              width="28rem"
+              height="32rem"
+              onImported={() => {
+                toast.success("Lista de alunos importada com sucesso!");
               }}
             />
           </div>
+
         </div>
 
-        {/* LOG LATERAL */}
-        <LogLateral
-          titulo="Alunos"
-          itens={alunos.map((a) => ({
-          id: a.matricula,
-          unidade: a.nome,
-          professor: a.email,
-        }))}
-          vazioTexto="Nenhum aluno selecionado"
-          onRemover={handleRemover}
-          onProximo={() => {}}
-        />
+        {/* LOG LATERAL FIXO */}
+        <div
+          className="
+            hidden tablet:flex
+            w-[25rem]
+            flex-shrink-0
+
+            fixed
+            right-0
+            top-20
+            bottom-0
+            z-40
+          "
+        >
+          <LogLateral
+            titulo="Listar Todos"
+            itens={[]}
+            vazioTexto="Nenhum aluno selecionado"
+            onRemover={() => {}}
+            onProximo={() => {}}
+            mostrarProximo={false}
+          />
+        </div>
+
       </div>
     </ProtectedRoute>
   );
