@@ -129,7 +129,7 @@ export default function ListaConselhos({
                         </span>
                       </div>
 
-                      {conselho.status === "Finalizado" ? (
+                      {conselho.status === "Resultado" ? (
                         <Icon icon="IoIosChatboxes" />
                       ) : null}
                     </div>
