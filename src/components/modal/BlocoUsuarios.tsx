@@ -21,6 +21,7 @@ interface BlocoUsuariosProps {
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onAplicarFiltro: (grupo: string, valor: string) => Promise<void>;
 }
 
 
@@ -30,6 +31,7 @@ export default function BlocoUsuarios({
   setSearchQuery,
   isDialogOpen,
   setIsDialogOpen,
+  onAplicarFiltro
 }: BlocoUsuariosProps) {
   return (
     <div className="w-full flex flex-col gap-6">
@@ -43,10 +45,11 @@ export default function BlocoUsuarios({
               setSearchQuery={setSearchQuery}
               filter
               filtrosMostrar={{
-                aluno: false,
-                turma: true,
+                usuario: true,
+                turma: false,
                 conselho: false,
               }}
+              onSelect={onAplicarFiltro}
             />
           </div>
         }

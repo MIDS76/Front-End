@@ -12,6 +12,7 @@ interface BlocoTurmasProps {
     searchQuery: string;
     setSearchQuery: React.Dispatch<React.SetStateAction<string>>; 
     handleTurmaClick: (id: number) => void;
+    onAplicarFiltro: (grupo: string, valor: string) => Promise<void>;
   }
   
 
@@ -20,6 +21,7 @@ export default function BlocoTurmas({
   searchQuery,
   setSearchQuery,
   handleTurmaClick,
+  onAplicarFiltro,
 }: BlocoTurmasProps) {
   return (
     <div className="w-full flex flex-col gap-6">
@@ -33,10 +35,11 @@ export default function BlocoTurmas({
               setSearchQuery={setSearchQuery}
               filter
               filtrosMostrar={{
-                aluno: false,
+                usuario: false,
                 turma: true,
                 conselho: false,
               }}
+              onSelect={onAplicarFiltro}
             />
           </div>
         }

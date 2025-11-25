@@ -17,11 +17,12 @@ interface SearchBarParams {
   placeholder?: string;
   filter?: boolean;
   filtrosMostrar?: {
-    aluno?: boolean;
+    usuario?: boolean;
     turma?: boolean;
     conselho?: boolean;
   };
   children?: React.ReactNode;
+  onSelect?: (grupo: string, valor: string) => Promise<void>;
 }
 
 export default function SearchBar({
@@ -32,6 +33,7 @@ export default function SearchBar({
   filter = false,
   filtrosMostrar, 
   children,
+  onSelect
 }: SearchBarParams) {
   return (
     <div
@@ -63,7 +65,9 @@ export default function SearchBar({
             align="end"
             className="select-none min-w-[220px] p-0 bg-transparent shadow-none border-none"
           >
-            <FiltrosDinamicos mostrar={filtrosMostrar} />
+            <FiltrosDinamicos
+             mostrar={filtrosMostrar}
+             onSelect={onSelect} />
           </DropdownMenuContent>
         </DropdownMenu>
       )}
