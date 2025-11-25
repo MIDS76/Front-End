@@ -8,7 +8,8 @@ import SmallModal from "@/components/modal/smallModal";  // Modal para exibir as
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";  // Menu suspenso para exibir as notificações
 import * as ScrollArea from "@radix-ui/react-scroll-area";  // Scroll para as notificações
 import { useWebSocket } from "@/context/WebSocketContext";
-import { marcarComoLida } from "@/api/notificacao";
+import { marcarComoLida, listarNotificacao } from "@/api/notificacao";
+import { id } from "date-fns/locale";
 
 // Tipo de Notificação esperado
 export interface Notificacao {
@@ -36,11 +37,31 @@ const formatarDataHora = (data: string) => {
 const NotificationButton = () => {
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   const { subscribeToNotifications, isConnected } = useWebSocket();
+  const [open, setOpen] = useState(false);
+  const idUsuario = 1;
+
+  // para carregar as notificações quando clilcar no botao
+  useEffect(() => {
+    if (open) {
+      const carregar = async () => {
+        try {
+          const data = await listarNotificacao(idUsuario);
+          setNotificacoes(data);
+        } catch (error) {
+          toast.error("Erro ao carregar notificações")
+        }
+      };
+
+      carregar();
+    }
+  }, [open, idUsuario]);
 
   // Inscreve-se nas notificações ao conectar
   useEffect(() => {
     if (isConnected) {
-      subscribeToNotifications(); // Inscrição para receber notificações
+      subscribeToNotifications((novaNotificacao: Notificacao) => {
+        setNotificacoes((prev) => [novaNotificacao, ...prev]);
+      });
     }
   }, [isConnected, subscribeToNotifications]);
 
@@ -76,7 +97,7 @@ const NotificationButton = () => {
   };
 
   return (
-    <DropdownMenu.Root>
+    <DropdownMenu.Root open={open} onOpenChange={setOpen}>
       {/* Botão de abrir notificações */}
       <DropdownMenu.Trigger asChild>
         <div>

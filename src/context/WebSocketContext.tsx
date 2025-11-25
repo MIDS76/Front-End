@@ -1,9 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, ReactNode, useRef } from "react";
-import SockJs from "sockjs-client";  // Importando SockJS
-import Stomp, { Client, Message } from "stompjs";  // Importando STOMP
-import { toast } from "sonner";  // Para exibir mensagens de toast
+import SockJs from "sockjs-client";
+import Stomp, { Client, Message } from "stompjs";
 
 // Tipo de Notificação esperado
 interface Notificacao {
@@ -17,60 +16,76 @@ interface Notificacao {
 interface WebSocketContextType {
   stompClient: Client | null;
   isConnected: boolean;
-  subscribeToNotifications: () => void;
+  subscribeToNotifications: (
+    callback: (Notification: Notificacao) => void
+  ) => void;
   disconnect: () => void;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
 
-export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const socketClient = useRef<Client | null>(null);
+export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
+  const stompClientRef = useRef<Client | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  // Conectar ao WebSocket quando o componente for montado
+
+  // conectar ao WebSocket quando o componente for iniciado
   useEffect(() => {
     const ws = new SockJs("http://localhost:3000/ws");  // URL do WebSocket
-    const stompClient = Stomp.over(ws);
-    socketClient.current = stompClient;
+    const client = Stomp.over(ws);
 
-    stompClient.connect({}, () => {
+    stompClientRef.current = client;
+
+    client.connect({}, () => {
       setIsConnected(true);
-      subscribeToNotifications();  // Inscrever-se para notificações assim que conectado
     }, () => {
       setIsConnected(false);  // Se falhar a conexão
     });
 
-    // Limpeza ao desmontar o componente
     return () => {
-      if (socketClient.current && isConnected) {
-        socketClient.current.disconnect(() => {
+      if (stompClientRef.current) {
+        stompClientRef.current.disconnect(() => {
           setIsConnected(false);
-          
+
         });
       }
     };
-  }, [isConnected]);
+  }, []);
 
   // Inscrever-se no tópico de notificações do WebSocket
-  const subscribeToNotifications = () => {
-    if (!socketClient.current || !isConnected) return;
+  const subscribeToNotifications = (
+    callback: (notification: Notificacao) => void
+  ) => {
+    if (!stompClientRef.current || !isConnected) return;
 
-    socketClient.current.subscribe("/topic/notificacoes", (message: Message) => {
-      const notification: Notificacao = JSON.parse(message.body); // Parse da mensagem recebida
-      toast(notification.mensagem);  // Exibe a mensagem de notificação
+    if (!isConnected) {
+      setTimeout(() => subscribeToNotifications(callback), 200);
+      return;
+    }
+
+    stompClientRef.current.subscribe("/topic/notificacoes", (message: Message) => {
+      const notification: Notificacao = JSON.parse(message.body);
+      callback(notification);
     });
   };
 
   // Desconectar do WebSocket
   const disconnect = () => {
-    if (socketClient.current && isConnected) {
-      socketClient.current.disconnect(() => {
+    if (stompClientRef.current && isConnected) {
+      stompClientRef.current.disconnect(() => {
         setIsConnected(false);
       });
     }
   };
 
   return (
-    <WebSocketContext.Provider value={{ stompClient: socketClient.current, isConnected, subscribeToNotifications, disconnect }}>
+    <WebSocketContext.Provider 
+    value={{
+      stompClient: stompClientRef.current,
+      isConnected,
+      subscribeToNotifications, 
+      disconnect
+    }}
+    >
       {children}
     </WebSocketContext.Provider>
   );
