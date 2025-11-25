@@ -12,17 +12,24 @@ interface BlocoTurmasProps {
     searchQuery: string;
     setSearchQuery: React.Dispatch<React.SetStateAction<string>>; 
     handleTurmaClick: (id: number) => void;
+    scrollHeight?: string;
     onAplicarFiltro: (grupo: string, valor: string) => Promise<void>;
   }
   
-
 export default function BlocoTurmas({
   turmas,
   searchQuery,
   setSearchQuery,
   handleTurmaClick,
   onAplicarFiltro,
+  scrollHeight = "40rem",
 }: BlocoTurmasProps) {
+
+  // FILTRANDO AS TURMAS PELO searchQuery
+  const filteredTurmas = turmas.filter((t) =>
+    t.nome.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="w-full flex flex-col gap-6">
       <InfoCard
@@ -45,11 +52,11 @@ export default function BlocoTurmas({
         }
       />
 
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 h-[600px]">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 h-[600px]" style={{ height: scrollHeight }}>
         <ScrollArea className="h-full w-full">
           <div className="grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-2 gap-4 px-4 auto-rows-min items-start">
-            {turmas?.map((classItem, index) => (
-              <div className="h-32" key={index}>
+            {filteredTurmas.map((classItem) => (
+              <div className="h-32" key={classItem.id}>
                 <MedModal
                   courseCode={classItem.nome}
                   courseName={classItem.curso}

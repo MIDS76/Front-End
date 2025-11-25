@@ -7,14 +7,6 @@ import Lista from "@/components/lista/lista";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Usuario } from "@/utils/types";
 
-
-// interface Usuario {
-//   id: number;
-//   nome: string;
-//   email: string;
- 
-// }
-
 interface BlocoUsuariosProps {
   usuarios: Usuario[];
   searchQuery: string;
@@ -22,8 +14,8 @@ interface BlocoUsuariosProps {
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
   onAplicarFiltro: (grupo: string, valor: string) => Promise<void>;
+  scrollHeight?: string;
 }
-
 
 export default function BlocoUsuarios({
   usuarios,
@@ -31,10 +23,18 @@ export default function BlocoUsuarios({
   setSearchQuery,
   isDialogOpen,
   setIsDialogOpen,
-  onAplicarFiltro
+  onAplicarFiltro,
+  scrollHeight = "40rem"
 }: BlocoUsuariosProps) {
+
+  // FILTRAGEM AQUI
+  const usuariosFiltrados = usuarios.filter((u) =>
+    u.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    u.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="w-full flex flex-col gap-6">
+    <div className="w-full h-full flex flex-col gap-6">
       <InfoCard
         titulo="Gerenciamento de Usuários"
         search={
@@ -55,13 +55,16 @@ export default function BlocoUsuarios({
         }
       />
 
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 h-[600px]">
+      <div
+        className="hsl(var(--background)) rounded-2xl shadow-lg border border-gray-200 p-2"
+        style={{ height: scrollHeight }}
+      >
         <ScrollArea className="h-full w-full">
           <Lista
             isDialogOpen={isDialogOpen}
             setIsDialogOpen={setIsDialogOpen}
             tipo="edit"
-            usuarios={usuarios}
+            usuarios={usuariosFiltrados} 
           />
         </ScrollArea>
       </div>
