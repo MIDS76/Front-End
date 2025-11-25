@@ -24,7 +24,7 @@ export default function Login() {
 
     const newErrors: { [key: string]: string } = {};
 
-    newErrors.senha = validateRequired(password, "senha");
+    newErrors.senha = validateRequired(password, "Senha");
     newErrors.email = validateEmail(email);
 
     if (newErrors.senha || newErrors.email) {
@@ -57,13 +57,13 @@ export default function Login() {
 
         <div className="absolute inset-0 bg-sky-950/45"></div>
 
-        <div className="relative z-10 p-16 text-white flex flex-col items-start">
+        <div className="relative z-10 p-16 text-white flex flex-row items-center">
           <Image
             src="/favicon.ico" 
             alt="Logo do Conselho"
             width={70} 
             height={70} 
-            className="mb-4"
+            className="mr-4"
           />
           <h2 className="text-5xl font-semibold">
             Portal do Conselho
@@ -71,8 +71,8 @@ export default function Login() {
         </div>
       </div>
 
-      <div className="bg-white p-12 shadow-xl flex flex-col justify-center">
-        <div className="max-w-md w-full mx-auto">
+      <div className="bg-white p-12 shadow-xl flex flex-col justify-center w-full">
+        <div className="mx-auto w-full">
           <div className="text-left mb-10">
             <h1 className="text-3xl font-bold text-gray-900 mb-1">
               Bem-Vindo
@@ -82,8 +82,8 @@ export default function Login() {
             </p>
           </div>
 
-          <Form action={handleLogin} className="flex flex-col gap-6"> 
-            <div className="flex flex-col gap-1">
+          <Form action={handleLogin} className="flex flex-wrap gap-6 w-full mx-auto"> 
+            <div className="flex flex-col gap-1 w-full">
               <span className="text-sm font-semibold text-gray-800">Login</span> 
               <TextField
                 id="email"
@@ -94,7 +94,7 @@ export default function Login() {
               />
             </div>
 
-            <div className="flex flex-col gap-1 relative">
+            <div className="flex flex-col gap-1 w-full">
               <span className="text-sm font-semibold text-gray-800">Senha</span>
               <TextField
                 id="password"
