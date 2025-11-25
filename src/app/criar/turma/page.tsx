@@ -7,7 +7,7 @@ import InfoCard from "@/components/card/cardTituloTelas";
 import LogLateral from "@/components/sidebar/logLateral";
 import ImportarCSV from "@/components/modal/importarCSV";
 import { useState } from "react";
-import { Aluno, associarAlunosTurma, criarAlunos, criarTurma } from "@/api/turmas";
+import { Aluno, associarAlunosTurma, criarAlunos, criarTurma, excluirTurma } from "@/api/turmas";
 import { Turma } from "@/utils/types";
 
 export default function CriarTurma() {
@@ -38,13 +38,24 @@ export default function CriarTurma() {
       // Cria a turma e aguarda a resposta
       const turma = await criarTurma(turmaData);
       console.log("Turma criada:", turma);
-  
+
       if (turma) {
-        console.log("Criando alunos:", alunos);
-  
-        // Criação dos alunos ocorre apenas após a turma ser criada
-        const alunosCriados = await criarAlunos(alunos);  // Aguarda a criação dos alunos
-  
+        const alunosCriados = await criarAlunos(alunos);
+        console.log(alunosCriados);
+
+        if (!alunosCriados || alunosCriados.length === 0) {
+          await excluirTurma(turma.id);
+          toast.error("Erro ao criar a lista de alunos. Verifique os dados!");
+          return;
+        }else{
+          const idsAlunos: number[] = alunosCriados.map((a: Aluno) => a.id);
+          const associarResponse = await associarAlunosTurma({idTurma: turma.id, idsAlunos: idsAlunos});
+
+          if(associarResponse){
+            toast.success("Turma e alunos criados com sucesso!");
+          }
+        }
+
       } else {
         toast.error("Erro ao criar a turma.");
       }

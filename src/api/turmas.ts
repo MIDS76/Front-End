@@ -5,6 +5,7 @@ import { AxiosError } from "axios";
 const controller = new AbortController();
 
 export interface Aluno {
+    id?: number;
     matricula: string;
     nome: string;
     email: string;
@@ -27,6 +28,22 @@ export const criarTurma = async (data: Turma) => {
     try {
         const response = await api.post(`/turmas/criar`, data, { signal: controller.signal });
         return response.data;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.log(err.response?.status);
+            console.log(err.response?.data);
+        }
+    }
+}
+
+export const excluirTurma = async (idTurma: number) => {
+    try {
+        const response = await api.delete(`/turmas/deletar/${idTurma}`, { signal: controller.signal });
+        if (response.status === 200) {
+            console.log("Turma excluída com sucesso.");
+          } else {
+            console.log("Erro ao excluir turma.");
+          }
     } catch (err) {
         if (err instanceof AxiosError) {
             console.log(err.response?.status);
