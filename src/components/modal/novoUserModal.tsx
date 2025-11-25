@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { Combobox } from "../ui/combobox";
 import { useState, useEffect } from "react";
 import { USER_ROLES } from "@/utils/types";
+import { hasErrors, showError, validateEmail, validateRequired } from "@/utils/formValidation";
+import { criarUsuario } from "@/api/usuarios";
 
 interface NovoUserModalProps {
   isOpen: boolean;
@@ -18,42 +20,49 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
   const [value, setValue] = useState<string>("");
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
-  const [errors, setErrors] = useState<{ nome?: string; email?: string; tipo?: string }>({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const validate = () => {
-    const newErrors: typeof errors = {};
-
-    if (!nome.trim()) newErrors.nome = "O nome é obrigatório.";
-    if (!email.trim()) {
-      newErrors.email = "O e-mail é obrigatório.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "E-mail inválido.";
-    }
-    if (!value) newErrors.tipo = "Selecione um tipo de usuário.";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleOpenConfirm = () => {
-    if (validate()) setConfirmOpen(true);
+    setErrors({});
+    const newErrors: { [key: string]: string } = {};
+
+    newErrors.nome = validateRequired(nome, "nome");
+    newErrors.email = validateEmail(email);
+    newErrors.tipo = validateRequired(value, "tipo de usuário");
+
+    if (!hasErrors(newErrors)) {
+      setConfirmOpen(true);
+      console.log("abrir confirm");
+    } else {
+      setErrors(newErrors);
+      showError();
+      console.log(newErrors);
+    }
   };
 
-  const handleConfirm = () => {
-    toast.success("Usuário criado com sucesso!");
-    setConfirmOpen(false);
-    setTimeout(() => {
-      setOpen(false);
-     
-      setNome("");
-      setEmail("");
-      setValue("");
-      setErrors({});
-    }, 300);
+  const handleConfirm = async () => {
+    try {
+      const novoUsuario = await criarUsuario({ nome: nome, email: email, role: value });
+
+      if (novoUsuario && novoUsuario.id) {
+          toast.success("Usuário criado com sucesso!");
+          setConfirmOpen(false);
+          setTimeout(() => {
+              setOpen(false);
+
+              setNome("");
+              setEmail("");
+              setValue("");
+              setErrors({});
+          }, 300);
+      }
+  } catch (error) {
+      console.error("Erro ao criar o usuário:", error);
+      toast.error("Erro ao criar o usuário. Tente novamente.");
+  }
   };
 
-  
   useEffect(() => {
     if (!isOpen) {
       setTimeout(() => {
@@ -77,7 +86,7 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
         onConfirm={handleOpenConfirm}
         conteudo={
           <div className="space-y-4 max-w-md mx-auto">
-            <Form action={() => {}} className="flex flex-col gap-4">
+            <Form action={() => { }} className="flex flex-col gap-4">
               <div>
                 <TextField
                   label="Nome"
@@ -103,10 +112,7 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
               </div>
 
               <div>
-                <label className="text-sm font-medium leading-none">
-                  Tipo de Usuário
-                </label>
-                <div className="mt-2">
+                <div>
                   <Combobox
                     items={USER_ROLES}
                     value={value}
@@ -114,10 +120,10 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
                     placeholder="Selecione um tipo de usuário..."
                     emptyMessage="Nenhum tipo de usuário encontrado."
                     width="100%"
+                    id="tipoUsuario"
+                    label="Tipo de Usuário"
+                    error={errors.tipo}
                   />
-                  {errors.tipo && (
-                    <p className="text-red-500 text-sm mt-1">{errors.tipo}</p>
-                  )}
                 </div>
               </div>
             </Form>
