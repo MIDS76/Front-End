@@ -1,47 +1,78 @@
 "use client";
 
-import ButtonTT from "@/components/button/ButtonTT";
-import ActionModal from "@/components/modal/actionModal";
-import SmallModal from "@/components/modal/smallModal";
-import api from "@/utils/axios";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import * as ScrollArea from "@radix-ui/react-scroll-area";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import useSWR from "swr";
+import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";  // Para exibir mensagens de toast
+import ButtonTT from "@/components/button/ButtonTT";  // Componente de botão customizado
+import ActionModal from "@/components/modal/actionModal";  // Modal de ação
+import SmallModal from "@/components/modal/smallModal";  // Modal para exibir as notificações
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";  // Menu suspenso para exibir as notificações
+import * as ScrollArea from "@radix-ui/react-scroll-area";  // Scroll para as notificações
+import { useWebSocket } from "@/context/WebSocketContext";
+import { marcarComoLida } from "@/api/notificacao";
 
-const fetchNotifications = async () => {
-  const response = await api.get("/notificacoes/todas");
-  if (!response.status) throw new Error("Erro ao buscar notificações");
-  return response.data;
-};
-
+// Tipo de Notificação esperado
 export interface Notificacao {
   id: number;
-  tipo: string;
-  horario: string;
+  titulo: string;
   mensagem: string;
+  lido: boolean;
+  horario: string;
 }
 
-export default function NotificationButton() {
-  const { data } = useSWR<Notificacao[]>("/api/notifications", fetchNotifications);
+const formatarDataHora = (data: string) => {
+  const date = new Date(data);
+  return date.toLocaleDateString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+};
+
+const NotificationButton = () => {
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
-  const tiposNotificacoes = ["CRIADO", "ATUALIZADO", "REMOVIDO", "PARTE_ATUALIZADA"];
+  const { subscribeToNotifications, isConnected } = useWebSocket();
 
+  // Inscreve-se nas notificações ao conectar
   useEffect(() => {
-    if (data) setNotificacoes(data);
-  }, [data]);
-
-  const handleDelete = async () => {
-    try {
-      const response = await api.get(`/usuarios/buscar-por-email?email=admin`);
-      const user = response.data;
-      await api.delete(`/notificacoes/deletar-todas/${user.id}`);
-      setNotificacoes([]);
-      toast.success("Notificações apagadas com sucesso!");
-    } catch (error: any) {
-      toast.error(error.response?.data?.mensagem || "Erro ao apagar notificações");
+    if (isConnected) {
+      subscribeToNotifications(); // Inscrição para receber notificações
     }
+  }, [isConnected, subscribeToNotifications]);
+
+  // Função para marcar a notificação como lida
+  const handleMarkAsRead = async (id: number) => {
+    try {      
+      await marcarComoLida(id);
+
+      setNotificacoes((prevNotifications) =>
+        prevNotifications.map((notif) =>
+          notif.id === id ? { ...notif, lido: true } : notif
+        )
+      );
+
+      toast.success("Notificação marcada como lida!");
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao marcar notificação como lida");
+    }
+  };
+
+  // Função para apagar notificações individuais
+  const handleDelete = (id: number) => {
+    setNotificacoes((prevNotifications) =>
+      prevNotifications.filter((notif) => notif.id !== id)
+    );
+    toast.success("Notificação apagada da lista!");
+  };
+
+  // Função para apagar todas as notificações
+  const handleDeleteAll = () => {
+    setNotificacoes([]);
+    toast.success("Todas as notificações apagadas!");
   };
 
   return (
@@ -58,12 +89,12 @@ export default function NotificationButton() {
         </div>
       </DropdownMenu.Trigger>
 
-      {/* Conteúdo: dropdown abaixo do header */}
+      {/* Conteúdo do dropdown (lista de notificações) */}
       <DropdownMenu.Portal>
         <DropdownMenu.Content
           align="end"
           side="bottom"
-          sideOffset={20} // controla a distância abaixo do header
+          sideOffset={20} // Distância abaixo do header
           className="p-2 flex flex-col bg-popover rounded-md shadow-md border border-border mt-2"
         >
           <div className="flex flex-row justify-between px-4 pt-2 pb-0">
@@ -71,10 +102,11 @@ export default function NotificationButton() {
               Notificações
             </DropdownMenu.Label>
 
+            {/* Modal de limpar todas as notificações */}
             <ActionModal
               description="Excluir todas as suas notificações"
               title="Limpar todas notificações"
-              onConfirm={handleDelete}
+              onConfirm={handleDeleteAll} // Chama a função de apagar todas
               destructive
             >
               <ButtonTT
@@ -87,6 +119,7 @@ export default function NotificationButton() {
             </ActionModal>
           </div>
 
+          {/* Scroll para as notificações */}
           <ScrollArea.Root className="h-96 w-96 flex flex-col items-center">
             <ScrollArea.Viewport>
               {notificacoes.length === 0 ? (
@@ -97,17 +130,15 @@ export default function NotificationButton() {
                 notificacoes.map((notificacao) => (
                   <SmallModal
                     key={notificacao.id}
-                    title={
-                      tiposNotificacoes.includes(notificacao.tipo)
-                        ? "Sistema"
-                        : "Alerta"
-                    }
-                    description={notificacao.horario}
+                    title={notificacao.titulo}
+                    description={formatarDataHora(notificacao.horario)}
                     content={notificacao.mensagem}
                     id={notificacao.id}
-                    notif={() => console.log("Notificação")}
-                    onClick={() => console.log("Outro")}
+                    notif={() => console.log("Notificação visualizada")}
+                    onClick={() => handleMarkAsRead(notificacao.id)}
+                    onDelete={() => handleDelete(notificacao.id)}
                     setNotificacoes={setNotificacoes}
+                    lido={notificacao.lido}
                   />
                 ))
               )}
@@ -117,4 +148,6 @@ export default function NotificationButton() {
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
   );
-}
+};
+
+export default NotificationButton;
