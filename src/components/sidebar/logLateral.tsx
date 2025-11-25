@@ -41,7 +41,7 @@ export default function LogLateral({
   console.log(itens);
 
   return (
-    <aside className="relative w-[25rem] flex-shrink-0 mt-[5rem] flex flex-col rounded-l-xl overflow-hidden shadow-md">
+    <aside className="flex h-[calc(100vh-80px)] w-full tablet: w-[20rem] laptop:w-[25rem] desktop:w-[30rem] flex-shrink-0 flex flex-col rounded-l-xl overflow-hidden shadow-md">
       {/* Cabeçalho */}
       <div className="bg-[hsl(var(--primary))] p-[1rem]">
         <div className="text-[hsl(var(--primary-foreground))] font-semibold flex justify-between items-center mb-[0.25rem] px-[0.25rem]">
