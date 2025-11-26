@@ -15,7 +15,7 @@ import {
   filtrarPorAnoEntrada,
   filtrarAlunoOrdemAlfabetica,
   filtrarPorAtividade,
-  filtrarConselhoEtapa // Adicione outras funções de filtro
+  filtrarConselhoEtapa
 } from "@/api/filtros";
 
 
@@ -40,7 +40,6 @@ export default function GerenciamentoUsersTurmas() {
   }, []);
 
   const handleAplicarFiltro = async (grupo: string, valor: string) => {
-    console.log(`Filtro Aplicado (Pai): Grupo=${grupo}, Valor=${valor}`);
     let dadosNovos: any[] = [];
     let tipoDados: 'usuarios' | 'turmas' | 'outros' = 'outros';
 
@@ -49,12 +48,11 @@ export default function GerenciamentoUsersTurmas() {
         tipoDados = 'usuarios';
         if (valor === "A-Z" || valor === "Z-A") {
           dadosNovos = await filtrarAlunoOrdemAlfabetica(valor) || [];
-        } else { // Ativo/Inativo
+        } else { 
           dadosNovos = await filtrarPorAtividade(valor) || [];
         }
       }
 
-      // Lógica de filtro reintroduzida AQUI
       else if (grupo === "Turma" || grupo === "Curso" || grupo === "Ano de Entrada") {
         tipoDados = 'turmas';
 
@@ -72,13 +70,11 @@ export default function GerenciamentoUsersTurmas() {
         dadosNovos = await filtrarConselhoEtapa(valor) || [];
       }
 
-      // ✅ CORREÇÃO: ATUALIZA O ESTADO CORRESPONDENTE E MANTÉM O OUTRO!
       if (tipoDados === 'usuarios') {
         setUsuarios(dadosNovos as Usuario[]);
       } else if (tipoDados === 'turmas') {
         setTurmas(dadosNovos as Turma[]);
       } else if (grupo === "Conselho") {
-        // Lógica de filtro de conselho
       }
 
     } catch (error) {
