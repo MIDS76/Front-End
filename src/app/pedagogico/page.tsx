@@ -89,7 +89,7 @@ export default function PedagogicoPage() {
     setFilteredTurmas(filtradas.slice(inicio, fim));
   }, [searchQuery, paginaAtual, screenWidth, sideModalOpen]);
 
-  // 👉 **CORREÇÃO DEFINITIVA AQUI**
+  // CORREÇÃO DEFINITIVA AQUI
   const handleOpenModal = (turma: Turma) => {
     setSelectedTurma(turma); // sempre troca a turma
     setSideModalOpen(true); // modal abre imediatamente
@@ -128,7 +128,7 @@ export default function PedagogicoPage() {
 
           <div ref={modalRef}>
             {/* 
-              👉 ESSA LINHA É A CORREÇÃO QUE RESOLVE TUDO 
+              ESSA LINHA É A CORREÇÃO QUE RESOLVE TUDO 
               FORÇA RECARREGAR QUANDO selectedTurma MUDA 
             */}
             <ListaConselhos
