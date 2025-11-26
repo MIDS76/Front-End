@@ -27,9 +27,12 @@ export const criarUsuario = async (data: Usuario) => {
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
-            console.log(err.response?.status);
-            console.log(err.response?.data);
+            console.error("Erro Axios:", err.response?.status, err.response?.data);
+        } else {
+            console.error("Erro genérico:", err);
         }
+        
+        throw err; 
     }
 }
 

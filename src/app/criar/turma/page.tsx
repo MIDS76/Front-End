@@ -43,7 +43,8 @@ export default function CriarTurma() {
         return;
       }
   
-      // Cria os alunos
+      console.log("Alunos enviados:", alunos);
+
       const alunosCriados = await criarAlunos(alunos);
       console.log("Alunos criados:", alunosCriados);
   
