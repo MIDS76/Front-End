@@ -10,6 +10,7 @@ export interface Aluno {
     email: string;
 }
 
+// buscar turmas
 export const buscarTurmas = async () => {
 
     try {
@@ -23,6 +24,7 @@ export const buscarTurmas = async () => {
     }
 }
 
+// criar turmas
 export const criarTurma = async (data: Turma) => {
 
     try {

@@ -94,21 +94,6 @@ export const preConselhoAmbienteEnsino = async (ambienteEnsino: {
     }
 }
 
-// listar na hora de criar um conselho
-export const unidadeCurricular = async () => {
-    const controller = new AbortController();
-
-    try {
-        const response = await api.get(`/unidadeCurricular/listar`, { signal: controller.signal });
-        return response.data;
-    } catch (err) {
-        if (err instanceof AxiosError) {
-            console.log(err.response?.status);
-            console.log(err.response?.data);
-        }
-    }
-}
-
 // criar unidade curricular
 export const criarUnidadeCurricular = async (nome: string) => {
     const controller = new AbortController();
@@ -140,7 +125,22 @@ export const criarUnidadeCurricularLista = async (lista: any[]) => {
 }
 
 // listar na hora de criar um conselho
-export const professores = async () => {
+export const listarUnidadeCurricular = async () => {
+    const controller = new AbortController();
+
+    try {
+        const response = await api.get(`/unidadeCurricular/listar`, { signal: controller.signal });
+        return response.data;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.log(err.response?.status);
+            console.log(err.response?.data);
+        }
+    }
+}
+
+// listar na hora de criar um conselho
+export const listarProfessores = async () => {
     const controller = new AbortController();
 
     try {
