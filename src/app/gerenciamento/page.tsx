@@ -39,6 +39,12 @@ export default function GerenciamentoUsersTurmas() {
     router.push(`/gerenciamento/turma/${id}`);
   };
 
+  const { user } = useAuth();
+
+  if (user?.role !== "pedagogico" && user?.role !== "admin") {
+    return AccessDeniedPage();
+  }
+
   return (
     <ProtectedRoute>
 

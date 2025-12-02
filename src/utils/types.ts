@@ -7,11 +7,11 @@ export interface Page<T> {
 }
 
 export interface Turma {
-  id: number;
+  id?: number;
   nome: string;
   curso: string;
-  dataInicio: Date;
-  dataFinal: Date;
+  dataInicio: string;
+  dataFinal: string;
 }
 
 export interface Conselho {
