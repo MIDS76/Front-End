@@ -12,8 +12,8 @@ import { useAuth } from "@/context/AuthContext";
 import BaixarDocumentosModal from "@/components/modal/BaixarDocumentosModal"; 
 
 
-export default function PedagogicoPage() {
-  const { user } = useAuth(); // pega a role
+export default function WegPage() {
+  const { user } = useAuth(); 
 
   const [dataAleatoria] = useState(() => {
     const hoje = new Date();
