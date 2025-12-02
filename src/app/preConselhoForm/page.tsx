@@ -22,35 +22,32 @@ type CampoFormulario = {
   sugestoes: string;
 };
 
-const descricaoPorRole = (role: string): string => {
-  switch (role) {
-    case "Professor":
-      return "Relacionado ao desempenho em sala, didática, relacionamento com os alunos e domínio da matéria.";
-    case "Supervisor":
-      return "Avalie os aspectos relacionados à metodologia de ensino, domínio de conteúdo, clareza nas orientações, postura profissional e qualidade do acompanhamento oferecido pela supervisão.";
-    case "Técnico Pedagógico":
-      return "Relacionado ao apoio à turma, acompanhamento pedagógico e comunicação com os docentes.";
-    case "Secretária Pedagógica":
-      return "Avalie os aspectos relacionados à organização acadêmica, eficiência no atendimento, clareza nas informações, disponibilidade para auxiliar e qualidade no suporte prestado pela Secretaria Pedagógica.";
-    default:
-      return "";
-  }
-};
-
 const secoesIniciais: CampoFormulario[] = [
   ...usuariosData
     .filter((u) => u.role !== "Aluno" && u.isActive)
-    .sort((a, b) => {
-      const ordem = ["Supervisor", "Técnico Pedagógico", "Secretária Pedagógica", "Professor"];
-      return ordem.indexOf(a.role) - ordem.indexOf(b.role);
-    })
     .map((u) => ({
-      titulo: `${u.role} ${u.nome}`,
-      descricao: descricaoPorRole(u.role),
+      titulo: `${u.role} ${u.nome} - UNIDADE CURRICULAR`,
+      descricao: "Relacionado ao desempenho em sala, didática, relacionamento com os alunos e domínio da matéria.",
       positivos: "",
       melhoria: "",
       sugestoes: "",
     })),
+  {
+    titulo: "Supervisor",
+    descricao:
+      "Avalie os aspectos relacionados à metodologia de ensino, domínio de conteúdo, clareza nas orientações, postura profissional e qualidade do acompanhamento oferecido pela supervisão.",
+    positivos: "",
+    melhoria: "",
+    sugestoes: "",
+  },
+  {
+    titulo: "Técnico Pedagógico",
+    descricao:
+      "Relacionado ao apoio à turma, acompanhamento pedagógico e comunicação com os docentes.",
+    positivos: "",
+    melhoria: "",
+    sugestoes: "",
+  },
   {
     titulo: "Ambiente de Ensino",
     descricao:
@@ -144,7 +141,7 @@ export default function PreConselhoFormulario() {
   };
 
   const { user } = useAuth();
-  
+
   if (user?.role !== "aluno") {
     return AccessDeniedPage();
   }
@@ -190,7 +187,7 @@ export default function PreConselhoFormulario() {
               novosErros.melhoria = validateRequired(secaoAtual.melhoria, "melhoria");
               novosErros.sugestoes = validateRequired(secaoAtual.sugestoes, "sugestões");
 
-              if (Object.keys(novosErros).length > 0) {
+              if (Object.values(novosErros).some((erro) => erro)) {
                 setCamposErro(novosErros);
                 toast.error("Preencha todos os campos antes de voltar!");
                 return;
