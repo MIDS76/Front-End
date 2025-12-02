@@ -36,24 +36,29 @@ export default function SearchBar({
   children,
 }: SearchBarParams) {
   return (
-    <div className=" flex flex-col items-start gap-1 justify-center rounded-xl bg-[#FAFAFA] p-4 ml-7 tablet:w-[46%] laptop:w-[35%] desktop:w-[25%] ">
-      <h1 className="text-primary font-bold font-title text-3xl">{texto}</h1>
-      <div
-        className={`flex flex-row items-center gap-2 justify-between w-full border-t-[1px] border-t-[#AAAAAA80] pt-1  ${className}`}
-      >
-        <Input
-          placeholder={placeholder}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className=""
-        />
-
-        {children}
+    <div
+      className={`flex flex-col items-start justify-center rounded-xl bg-[#FAFAFA] border border-gray-300 px-3 py-2 w-full ${className}`}
+    >
+      {texto && (
+        <h1 className="text-primary font-bold font-title text-xl mb-1">{texto}</h1>
+      )}
+      
+      <div className="flex flex-row items-center gap-2 w-full">
+        
+        <div className="flex-1 flex flex-row items-center border-b-[1px] border-b-[#AAAAAA80]">
+          <Input
+            placeholder={placeholder}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="bg-transparent border-none shadow-none focus-visible:ring-0 px-0 h-8 text-sm" 
+          />
+          {children}
+        </div>
 
         {filter && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <div>
+              <div className="pb-1"> 
                 <ButtonTT
                   tooltip="Visualizar e aplicar filtros"
                   mode="small"

@@ -56,10 +56,10 @@ export default function GerenciarTurma() {
           <TurmaForm
             title="Gerenciar Turma"
             initialData={{
-              codigoTurma: turma?.codigoTurma ?? "",
-              nomeCurso: turma?.nomeCurso ?? "",
+              nome: turma?.codigoTurma ?? "",
+              curso: turma?.nomeCurso ?? "",
               dataInicio: turma?.dataInicio ?? "",
-              dataFim: turma?.dataFim ?? "",
+              dataFinal: turma?.dataFim ?? "",
             }}
             onSubmit={() => {
               toast.success("Turma atualizada com sucesso!");
