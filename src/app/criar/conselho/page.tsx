@@ -9,6 +9,7 @@ import AccessDeniedPage from "@/app/access-denied";
 import InfoCard from "@/components/card/cardTituloTelas";
 import ButtonTT from "@/components/button/ButtonTT";
 import { toast } from "sonner";
+import ActionModal from "@/components/modal/actionModal";
 
 export default function ConselhoPage() {
   const router = useRouter();
@@ -55,6 +56,7 @@ export default function ConselhoPage() {
   const [buscaProfessor, setBuscaProfessor] = useState("");
   const [buscaUnidade, setBuscaUnidade] = useState("");
   const [erros, setErros] = useState<{ professor?: boolean; unidade?: boolean }>({});
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const normalizar = (texto: string) =>
     texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -133,12 +135,38 @@ export default function ConselhoPage() {
   if (user?.role !== "pedagogico" && user?.role !== "admin") {
     return AccessDeniedPage();
   }
+
   function handleProximoPasso() {
     localStorage.setItem("conselhoSalvos", JSON.stringify(salvos));
   
     setTimeout(() => {
       router.push("/criar/conselho/representante");
     }, 10);
+  }
+
+  function handleConfirmarUcProfessores() {
+    try {
+      localStorage.removeItem("representantes-selecionados");
+      localStorage.removeItem("associacoes");
+      localStorage.removeItem("preconselho-formulario");
+
+      const role = localStorage.getItem("user-role");
+
+      const rotasPorRole: Record<string, string> = {
+        "Aluno": "/aluno",
+        "Coordenação pedagógica": "/pedagogico",
+        "Administrador": "/admin",
+      };
+
+      const rotaInicial = rotasPorRole[role ?? ""] || "/";
+
+      router.push(rotaInicial);
+
+    } catch (e) {
+      console.error("Erro ao limpar localStorage:", e);
+    } finally {
+      setIsConfirmOpen(false);
+    }
   }
   
 
@@ -268,6 +296,17 @@ export default function ConselhoPage() {
         onRemover={handleRemover}
         vazioTexto="Nenhuma unidade salva ainda"
         onProximo={handleProximoPasso}
+      />
+
+{/* implementando aqui */}
+      {/* ACTION MODAL: */} 
+      <ActionModal
+        isOpen={isConfirmOpen}
+        setOpen={setIsConfirmOpen}
+        title="Deseja liberar pré-conselho?"
+        conteudo="Ao confirmar, todos os dados relacionados ao pré-conselho serão enviados."
+        actionButtonLabel="Confirmar"
+        onConfirm={handleConfirmarUcProfessores}
       />
     </div>
   );

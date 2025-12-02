@@ -11,6 +11,7 @@ export interface Aluno {
     email: string;
 }
 
+// buscar turmas
 export const buscarTurmas = async () => {
     try {
         const response = await api.get<Turma[]>("/turmas/listar", { signal: controller.signal });
@@ -23,6 +24,7 @@ export const buscarTurmas = async () => {
     }
 }
 
+// criar turmas
 export const criarTurma = async (data: Turma) => {
     try {
         const response = await api.post(`/turmas/criar`, data, { signal: controller.signal });

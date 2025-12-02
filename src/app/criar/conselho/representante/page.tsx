@@ -195,6 +195,7 @@ export default function RepresentantePage() {
         }))}
         onRemover={handleRemover}
         vazioTexto="Nenhum representante selecionado"
+        // aqui vou criar o conselho - e vai para selecionar professor e uc
         onProximo={handleProximo}
       />
 
