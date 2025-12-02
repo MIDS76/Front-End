@@ -2,8 +2,6 @@
 
 import { toast } from "sonner";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import usuarios from "@/data/usuarios.json";
-import turmas from "@/data/turma.json";
 import { useParams } from "next/navigation";
 import TurmaForm from "@/components/turma/TurmaForm";
 import { useRouter } from "next/navigation";
@@ -13,9 +11,7 @@ import AccessDeniedPage from "@/app/access-denied";
 import BlocoUsuarios from "@/components/modal/BlocoUsuarios";
 import { useEffect, useState } from "react";
 import { Turma, Usuario } from "@/utils/types";
-import { buscarUsuarios } from "@/api/usuarios";
-import { buscarAlunosTurma, buscarTurmas } from "@/api/turmas";
-import { filtrarAlunoOrdemAlfabetica, filtrarPorAtividade } from "@/api/filtros";
+import { buscarTurmas } from "@/api/turmas";
 import { buscarAlunosPorTurma } from "@/api/alunos";
 
 export default function GerenciarTurma() {
@@ -41,7 +37,6 @@ export default function GerenciarTurma() {
         }
 
         const alunos = await buscarAlunosPorTurma(turmaId);
-  
         
         setAlunosDaTurmaOriginal(alunos || []);
         setUsuarios(alunos || []); 
@@ -51,9 +46,10 @@ export default function GerenciarTurma() {
         setTurma(turmaEncontrada);
 
       } catch (error) {
-        console.error("Erro ao carregar dados da turma e alunos:", error);
+        console.error("Erro ao carregar dados da turma e alunos.", error);
         setAlunosDaTurmaOriginal([]);
         setUsuarios([]);
+        toast.error("Falha ao carregar alunos.");
       }
     };
 
@@ -64,7 +60,8 @@ export default function GerenciarTurma() {
   const handleAplicarFiltroUsuario = async (grupo: string, valor: string) => {
     if (grupo !== "Usuario") return;
 
-    let dadosNovos: Usuario[] = [];    let listaBase = [...alunosDaTurmaOriginal]; 
+    let dadosNovos: Usuario[] = [];
+    let listaBase = [...alunosDaTurmaOriginal]; 
 
     try {
       if (valor === "A-Z") {
@@ -72,9 +69,9 @@ export default function GerenciarTurma() {
       } else if (valor === "Z-A") {
         dadosNovos = listaBase.sort((a, b) => b.nome.localeCompare(a.nome));
       } else if (valor === "Ativo") {
-        dadosNovos = listaBase.filter(aluno => aluno.ativo === true);
+        dadosNovos = listaBase.filter(aluno => !aluno.ativo);
       } else if (valor === "Inativo") {
-        dadosNovos = listaBase.filter(aluno => aluno.ativo === false);
+        dadosNovos = listaBase.filter(aluno => !!aluno.ativo);
       } else {
         dadosNovos = alunosDaTurmaOriginal;
       }
@@ -83,7 +80,7 @@ export default function GerenciarTurma() {
 
     } catch (error) {
       console.error("Erro ao aplicar filtro de usuário:", error);
-      setUsuarios(alunosDaTurmaOriginal);
+      setUsuarios(alunosDaTurmaOriginal); 
     }
   };
 
