@@ -3,8 +3,6 @@
 import { toast } from "sonner";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import TurmaForm from "@/components/turma/TurmaForm";
-import { Usuario } from "@/utils/types";
-import { useRouter } from "next/navigation";
 import InfoCard from "@/components/card/cardTituloTelas";
 import ImportarCSV from "@/components/modal/importarCSV";
 import { useState } from "react";
@@ -12,12 +10,13 @@ import { Aluno, associarAlunosTurma, criarAlunos, criarTurma, excluirTurma } fro
 import { Turma } from "@/utils/types";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import LogLateral from "@/components/sidebar/logLateral";
 
 export default function CriarTurma() {
   const [alunos, setAlunos] = useState<Aluno[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { user } = useAuth(); 
+  const { user } = useAuth();
 
   function handleRemover(idOuNome: string) {
     setAlunos((prev) =>
@@ -107,12 +106,6 @@ export default function CriarTurma() {
                 isLoading={isLoading}
               />
             </div>
-            <TurmaForm
-              title="Criar Turma"
-              onSubmit={() => {
-                toast.success("Turma criada com sucesso!");
-              }}
-            />
           </div>
 
           {/* DIREITA — CSV */}
@@ -131,18 +124,13 @@ export default function CriarTurma() {
             <ImportarCSV
               isOpen={true}
               setOpen={() => { }}
-              width="36rem"
-              height="34rem"
+              width="28rem"
+              height="32rem"
               onImported={(listaAlunos) => {
                 if (listaAlunos.length > 0) {
                   setAlunos(listaAlunos);
                   toast.success("Lista de alunos importada!");
                 }
-              setOpen={() => {}}
-              width="28rem"
-              height="32rem"
-              onImported={() => {
-                toast.success("Lista de alunos importada com sucesso!");
               }}
             />
           </div>
@@ -163,28 +151,20 @@ export default function CriarTurma() {
             z-40
           "
         >
+          {/* LOG LATERAL */}
           <LogLateral
-            titulo="Listar Todos"
-            itens={[]}
+            titulo="Alunos"
+            itens={alunos.map((a) => ({
+              id: a.matricula,
+              unidade: a.nome,
+              professor: a.email,
+            }))}
             vazioTexto="Nenhum aluno selecionado"
-            onRemover={() => {}}
-            onProximo={() => {}}
+            onRemover={handleRemover}
+            onProximo={() => { }}
             mostrarProximo={false}
           />
         </div>
-
-        {/* LOG LATERAL */}
-        <LogLateral
-          titulo="Alunos"
-          itens={alunos.map((a) => ({
-            id: a.matricula,
-            unidade: a.nome,
-            professor: a.email,
-          }))}
-          vazioTexto="Nenhum aluno selecionado"
-          onRemover={handleRemover}
-          onProximo={() => { }}
-        />
       </div>
     </ProtectedRoute>
   );

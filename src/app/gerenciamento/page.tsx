@@ -8,6 +8,8 @@ import { Turma, Usuario } from "@/utils/types";
 import { buscarUsuarios } from "@/api/usuarios";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "../access-denied";
 
 export default function GerenciamentoUsersTurmas() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
