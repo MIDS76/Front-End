@@ -1,6 +1,6 @@
 import api from "@/utils/axios";
 import { Usuario } from "@/utils/types";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 
 export const buscarUsuarios = async () => {
     const controller = new AbortController();
@@ -19,7 +19,7 @@ export const criarUsuario = async (data: Usuario) => {
     const controller = new AbortController();
 
     try {
-        const response = await api.post(`/auth/cadastrar/${data.role}`, {
+        const response = await axios.post(`http://localhost:8081/api/auth/cadastrar/${data.role}`, {
             nome: data.nome,
             email: data.email
         },

@@ -17,9 +17,10 @@ interface TurmaFormProps {
         dataFinal: string;
     };
     onSubmit: (form: Turma) => void;
+    isLoading?: boolean;
 }
 
-export default function TurmaForm({ title, initialData, onSubmit }: TurmaFormProps) {
+export default function TurmaForm({ title, initialData, onSubmit, isLoading }: TurmaFormProps) {
     const router = useRouter();
 
     const [form, setForm] = useState<Turma>({
@@ -114,7 +115,7 @@ export default function TurmaForm({ title, initialData, onSubmit }: TurmaFormPro
                             Cancelar
                         </Button>
 
-                        <Button onClick={handleSubmit}>Salvar</Button>
+                        <Button onClick={handleSubmit} disabled={isLoading}>Salvar</Button>
                     </div>
                 </div>
             </div>

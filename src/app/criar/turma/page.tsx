@@ -14,6 +14,7 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function CriarTurma() {
   const [alunos, setAlunos] = useState<Aluno[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { user } = useAuth(); 
 
@@ -31,11 +32,14 @@ export default function CriarTurma() {
       return;
     }
 
+    setIsLoading(true);
+
     try {
       // Cria a turma
       const turma = await criarTurma(form);
       if (!turma) {
         toast.error("Erro ao criar a turma.");
+        setIsLoading(false);
         return;
       }
 
@@ -44,6 +48,7 @@ export default function CriarTurma() {
       if (!alunosCriados || alunosCriados.length === 0) {
         await excluirTurma(turma.id);
         toast.error("Erro ao criar a lista de alunos. Verifique os dados!");
+        setIsLoading(false);
         return;
       }
 
@@ -59,6 +64,8 @@ export default function CriarTurma() {
       // Se as funções de API relançarem o erro (throw err), ele será capturado aqui
       console.error("Erro durante o processo de criação:", error);
       toast.error("Erro durante o processo de criação da turma ou dos alunos.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -102,6 +109,7 @@ export default function CriarTurma() {
               <TurmaForm
                 title="Criar Turma"
                 onSubmit={handleSubmit}
+                isLoading={isLoading}
               />
             </div>
           </div>
