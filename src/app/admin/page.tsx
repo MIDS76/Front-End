@@ -1,15 +1,19 @@
 "use client";
 
 import MedModal from "@/components/modal/medModal";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import ConselhosModal from "@/components/modal/conselhosModal";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Page, Turma } from "@/utils/types";
+import { Turma } from "@/utils/types";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SearchBar from "@/components/input/searchBar";
-import turmas from "@/data/turma.json";
+import Paginacao from "@/components/paginacao/paginacao";
+import { buscarTurmas } from "@/api/turmas";
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "../access-denied";
 
 export default function LandingPage() {
+
   const [dataAleatoria] = useState(() => {
     const hoje = new Date();
     const diasAleatorios = Math.floor(Math.random() * 90);
@@ -18,9 +22,45 @@ export default function LandingPage() {
     return data.toLocaleDateString();
   });
 
+  const [paginaAtual, setPaginaAtual] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [sideModalOpen, setSideModalOpen] = useState(false);
   const [selectedTurma, setSelectedTurma] = useState({} as Turma);
+
+  const [data, setData] = useState<Turma[]>([]);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await buscarTurmas();
+      setData(response ?? []);
+      setFilteredTurmas(response ?? []);
+      setTotalPages(2);
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    setPaginaAtual(0);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (!data) return;
+
+    const query = searchQuery.toLowerCase().replaceAll(" ", "");
+    const filtradas = data.filter((turma) => {
+      const codigo = turma.nome?.toLowerCase().replaceAll(" ", "");
+      const curso = turma.curso?.toLowerCase().replaceAll(" ", "");
+      return codigo.includes(query) || curso.includes(query);
+    });
+
+    setFilteredTurmas(filtradas);
+  }, [searchQuery, data]);
+
+  if (user?.role !== "admin") {
+    return AccessDeniedPage();
+  }
 
   return (
     <ProtectedRoute>
@@ -66,11 +106,11 @@ export default function LandingPage() {
   );
 
   function ListaTurmas() {
-    return turmas?.map((turma, index) => (
+    return filteredTurmas?.map((turma, index) => (
       <MedModal
         key={index}
-        courseCode={turma.codigoTurma}
-        courseName={turma.nomeCurso}
+        courseCode={turma.nome}
+        courseName={turma.curso}
         onClick={() => {
           if (sideModalOpen && selectedTurma.id !== turma.id) {
             setSideModalOpen(false);

@@ -5,6 +5,7 @@ import ButtonTT from "../../button/ButtonTT";
 import { BsFillPeopleFill } from "react-icons/bs";
 import { FaUserPlus } from "react-icons/fa";
 import { IoDocumentText } from "react-icons/io5";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,9 +16,19 @@ import {
 import NovoUserModal from "../../modal/novoUserModal";
 import { MdManageAccounts } from "react-icons/md";
 
+import  ImportarUnidadeCurricular  from "../../modal/importarUnidadeCurricular";
+import { MdMenuBook } from "react-icons/md";
+
+import NovaUnidadeCurricular from "../../modal/novaUnidadeCurricular";
+import { MdFileUpload } from "react-icons/md";
+
 export default function CreateButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const [modalCriarUCOpen, setModalCriarUCOpen] = useState(false);
+  const [modalImportarUCOpen, setModalImportarUCOpen] = useState(false);
+
 
   const handleCreateUserClick = () => {
     setIsOpen(false);
@@ -25,6 +36,24 @@ export default function CreateButton() {
 
     setTimeout(() => {
       setIsOpen(true);
+    }, 100);
+  };
+
+  const handleCriarUCClick = () => {
+    setModalCriarUCOpen(false);
+    setDropdownOpen(false);
+
+    setTimeout(() => {
+      setModalCriarUCOpen(true);
+    }, 100);
+  };
+
+  const handleImportarUCClick = () => {
+    setModalImportarUCOpen(false);
+    setDropdownOpen(false);
+
+    setTimeout(() => {
+      setModalImportarUCOpen(true);
     }, 100);
   };
 
@@ -71,13 +100,34 @@ export default function CreateButton() {
         </DropdownMenuItem>
         <DropdownMenuItem
           className="cursor-pointer hover:bg-accent text-base"
-          onClick={() => open("/criar/conselho", "_self")}
+          onClick={() => open("/criar/conselho/turma", "_self")}
+
         >
           <IoDocumentText />
           <span>Criar conselho</span>
         </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={handleCriarUCClick}
+          className="cursor-pointer hover:bg-accent text-base"
+        >
+          <MdMenuBook />
+          <span>Criar unidade curricular</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={handleImportarUCClick}
+          className="cursor-pointer hover:bg-accent text-base"
+        >
+          <MdFileUpload />
+          <span>Importar unidade curricular</span>
+        </DropdownMenuItem>
       </DropdownMenuContent>
       <NovoUserModal isOpen={isOpen} setOpen={setIsOpen} />
+      {modalCriarUCOpen && (
+        <NovaUnidadeCurricular isOpen={modalCriarUCOpen} setOpen={setModalCriarUCOpen} />
+      )}
+      {modalImportarUCOpen && (
+        <ImportarUnidadeCurricular isOpen={modalImportarUCOpen} setOpen={setModalImportarUCOpen} />
+      )}
     </DropdownMenu>
   );
 }

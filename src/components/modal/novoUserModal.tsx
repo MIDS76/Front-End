@@ -8,7 +8,9 @@ import { toast } from "sonner";
 import { Combobox } from "../ui/combobox";
 import { useState, useEffect } from "react";
 import { USER_ROLES } from "@/utils/types";
-import { showError, validateEmail, validateRequired } from "@/utils/formValidation";
+import { hasErrors, showError, validateEmail, validateRequired } from "@/utils/formValidation";
+import { criarUsuario } from "@/api/usuarios";
+import { AxiosError } from "axios";
 
 interface NovoUserModalProps {
   isOpen: boolean;
@@ -30,26 +32,58 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
     newErrors.email = validateEmail(email);
     newErrors.tipo = validateRequired(value, "tipo de usuário");
 
-    if (Object.keys(newErrors).length === 0) {
+    if (!hasErrors(newErrors)) {
       setConfirmOpen(true);
-    }else{
+      console.log("abrir confirm");
+    } else {
       setErrors(newErrors);
-      showError
+      showError();
+      console.log(newErrors);
     }
   };
 
-  const handleConfirm = () => {
-    toast.success("Usuário criado com sucesso!");
-    setConfirmOpen(false);
-    setTimeout(() => {
+  const handleConfirm = async () => {
+    try {
+      // Tenta criar o usuário. Se falhar, Lança o erro.
+      const novoUsuario = await criarUsuario({ nome: nome, email: email, role: value });
+
+      // Se chegou aqui, a requisição foi bem-sucedida e novoUsuario não é nulo/undefined
+      toast.success("Usuário criado com sucesso!");
+
+      // Fechar o modal de confirmação
+      setConfirmOpen(false);
+
+      // Fechar o modal principal
       setOpen(false);
-     
+
+    } catch (error) {
+      console.error("Erro ao criar o usuário:", error);
+      let errorMessage = "Erro desconhecido ao tentar criar o usuário. Tente novamente.";
+
+      if (error instanceof AxiosError) {
+        if (error.response?.data) {
+          errorMessage = error.response.data.message ||
+            `Erro ${error.response.status}: Falha na requisição.`;
+        } else {
+          errorMessage = "Erro de conexão ou servidor indisponível.";
+        }
+      }
+
+      toast.error(errorMessage);
+    }
+  };
+
+  useEffect(() => {
+    if (!isOpen) {
+      // Limpar os campos e estados ao fechar o modal
       setNome("");
       setEmail("");
       setValue("");
       setErrors({});
-    }, 300);
-  };
+      setConfirmOpen(false);
+    }
+  }, [isOpen]);
+
 
   useEffect(() => {
     if (!isOpen) {
@@ -69,12 +103,11 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
         isOpen={isOpen}
         setOpen={setOpen}
         title="Novo Usuário"
-        description="Insira as informações do novo usuário"
         onClose={() => setOpen(false)}
         onConfirm={handleOpenConfirm}
         conteudo={
           <div className="space-y-4 max-w-md mx-auto">
-            <Form action={() => {}} className="flex flex-col gap-4">
+            <Form action={() => { }} className="flex flex-col gap-4">
               <div>
                 <TextField
                   label="Nome"
