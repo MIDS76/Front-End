@@ -8,8 +8,13 @@ import SearchBar from "@/components/input/searchBar";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ListaConselhos from "@/components/modal/listaConselhos";
 import Paginacao from "@/components/paginacao/paginacao";
+import { useAuth } from "@/context/AuthContext";
+import BaixarDocumentosModal from "@/components/modal/BaixarDocumentosModal"; 
+
 
 export default function PedagogicoPage() {
+  const { user } = useAuth(); // pega a role
+
   const [dataAleatoria] = useState(() => {
     const hoje = new Date();
     const diasAleatorios = Math.floor(Math.random() * 90);
@@ -24,6 +29,10 @@ export default function PedagogicoPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [sideModalOpen, setSideModalOpen] = useState(false);
   const [selectedTurma, setSelectedTurma] = useState<Turma | null>(null);
+
+  // ADICIONADO
+  const [baixarModalOpen, setBaixarModalOpen] = useState(false);
+  const [conselhoSelecionado, setConselhoSelecionado] = useState<any | null>(null);
 
   const [screenWidth, setScreenWidth] = useState(0);
 
@@ -56,13 +65,19 @@ export default function PedagogicoPage() {
 
     const turmasPorPagina = getTurmasPorPagina();
 
-    const turmasArray = Object.values(turmasData);
+    const turmasArray = Object.values(turmasData).map((t) => ({
+      id: t.id,
+      nome: t.nomeCurso,
+      curso: t.codigoTurma,
+      dataInicio: t.dataInicio,
+      dataFinal: t.dataFim,
+    }));
 
     const query = searchQuery.toLowerCase().replaceAll(" ", "");
     const filtradas = turmasArray.filter((turma) => {
-      const codigo = turma.codigoTurma?.toLowerCase().replaceAll(" ", "");
-      const curso = turma.nomeCurso?.toLowerCase().replaceAll(" ", "");
-      return codigo.includes(query) || curso.includes(query);
+      const codigo = turma.curso.toLowerCase().replaceAll(" ", "");
+      const nome = turma.nome.toLowerCase().replaceAll(" ", "");
+      return codigo.includes(query) || nome.includes(query);
     });
 
     setTotalPages(Math.ceil(filtradas.length / turmasPorPagina));
@@ -72,26 +87,31 @@ export default function PedagogicoPage() {
     setFilteredTurmas(filtradas.slice(inicio, fim));
   }, [searchQuery, paginaAtual, screenWidth, sideModalOpen]);
 
-  // CORREÇÃO DEFINITIVA AQUI
+  // CORREÇÃO DEFINITIVA
   const handleOpenModal = (turma: Turma) => {
-    // Clicou na mesma turma → fecha
     if (selectedTurma?.id === turma.id) {
       setSideModalOpen(false);
       setSelectedTurma(null);
       return;
     }
-  
-    // Clicou em outra turma → mantém aberto + troca conteúdo
+
     setSelectedTurma(turma);
     setSideModalOpen(true);
   };
-  
+
+  // Função para abrir o modal de baixar documentos
+  const handleBaixarDocumentos = (conselho: any) => {
+    setConselhoSelecionado(conselho);
+    setBaixarModalOpen(true);
+  };
+
 
   return (
     <ProtectedRoute>
       <main className="w-full flex flex-col">
         <div className="flex flex-row flex-auto">
           <section className="w-full max-h-full md:w-3/5 xl:w-3/4 h-full flex flex-col items-start p-4 pt-24 gap-y-4">
+
             <SearchBar
               texto="Todos os Conselhos"
               className="w-full xl:w-3/5 2xl:w-2/5"
@@ -119,15 +139,21 @@ export default function PedagogicoPage() {
           </section>
 
           <div ref={modalRef}>
-            {/* 
-              ESSA LINHA É A CORREÇÃO QUE RESOLVE TUDO 
-              FORÇA RECARREGAR QUANDO selectedTurma MUDA 
-            */}
             <ListaConselhos
               key={selectedTurma?.id}
               turma={selectedTurma}
               estaAberto={sideModalOpen}
               aoFechar={() => setSideModalOpen(false)}
+              onBaixarDocumentos={handleBaixarDocumentos} 
+              role={user?.role ?? ""}
+            />
+
+            {/*  MODAL DE BAIXAR DOCUMENTOS */}
+            <BaixarDocumentosModal
+              open={baixarModalOpen}
+              onClose={() => setBaixarModalOpen(false)}
+              conselho={conselhoSelecionado}
+              role={user?.role}
             />
           </div>
         </div>
@@ -146,8 +172,8 @@ export default function PedagogicoPage() {
     return filteredTurmas.map((turma, index) => (
       <MedModal
         key={index}
-        courseCode={turma.codigoTurma}
-        courseName={turma.nomeCurso}
+        courseCode={turma.curso}
+        courseName={turma.nome}
         onClick={() => handleOpenModal(turma)}
       >
         <b>Último conselho:</b> {dataAleatoria}
