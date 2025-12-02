@@ -40,23 +40,6 @@ export default function PedagogicoPage() {
     };
   }, []);
 
-  // Fecha o modal ao clicar fora
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        setSideModalOpen(false);
-      }
-    };
-
-    if (sideModalOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [sideModalOpen]);
-
   // Filtro e paginação
   useEffect(() => {
     const getTurmasPorPagina = () => {
@@ -91,9 +74,18 @@ export default function PedagogicoPage() {
 
   // CORREÇÃO DEFINITIVA AQUI
   const handleOpenModal = (turma: Turma) => {
-    setSelectedTurma(turma); // sempre troca a turma
-    setSideModalOpen(true); // modal abre imediatamente
+    // Clicou na mesma turma → fecha
+    if (selectedTurma?.id === turma.id) {
+      setSideModalOpen(false);
+      setSelectedTurma(null);
+      return;
+    }
+  
+    // Clicou em outra turma → mantém aberto + troca conteúdo
+    setSelectedTurma(turma);
+    setSideModalOpen(true);
   };
+  
 
   return (
     <ProtectedRoute>

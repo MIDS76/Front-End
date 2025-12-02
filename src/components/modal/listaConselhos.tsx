@@ -13,7 +13,7 @@ import ConfirmarConselhoModal from "./confirmarConselhoModal";
 import AvancarEtapaModal from "./avancarEtapaModal";
 import BaixarDocumentosModal from "./BaixarDocumentosModal";
 
-import { FileSpreadsheet, FileDown } from "lucide-react";
+import { FileSpreadsheet } from "lucide-react";
 
 interface ListaConselhosProps {
   estaAberto: boolean;
@@ -48,18 +48,18 @@ export default function ListaConselhos({
   aoFechar,
   turma,
 }: ListaConselhosProps) {
-
   const [modalEtapaAberto, setModalEtapaAberto] = useState(false);
   const [modalDocumentosAberto, setModalDocumentosAberto] = useState(false);
 
-  const [conselhoSelecionado, setConselhoSelecionado] = useState<ConselhoType | null>(null);
+  const [conselhoSelecionado, setConselhoSelecionado] =
+    useState<ConselhoType | null>(null);
 
   const ordemStatus = [
     "Não iniciado",
     "Pré-conselho",
     "Conselho",
     "Aguardando resultado",
-    "Resultado"
+    "Resultado",
   ];
 
   function proximoStatus(atual: string) {
@@ -115,8 +115,7 @@ export default function ListaConselhos({
     if (emAndamento.length > 1) {
       const maisRecente = emAndamento.sort(
         (a, b) =>
-          Number(new Date(b.dataInicio)) -
-          Number(new Date(a.dataInicio))
+          Number(new Date(b.dataInicio)) - Number(new Date(a.dataInicio))
       )[0];
 
       const ajustados = filtrados.map((c) =>
@@ -154,26 +153,29 @@ export default function ListaConselhos({
     <>
       <aside
         className={cn(
-          "fixed top-[4.5rem] right-0 z-40 flex flex-col w-[30rem] sm:w-[35rem]",
-          "transform transition-transform duration-300 ease-in-out",
-          estaAberto ? "translate-x-0" : "translate-x-full",
-          "h-full"
-        )}
-      >
-        <div className="flex flex-col h-full shadow-xl bg-card border-l">
+          // POSICIONAMENTO
+          "fixed top-[4.5rem] right-0 z-40 flex flex-col w-[30rem] sm:w-[35rem] h-full bg-card border-l shadow-xl",
 
+          // ANIMAÇÃO SUAVE DE ENTRADA/SAÍDA
+          "transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]",
+
+          // ESTADOS
+          estaAberto
+            ? "translate-x-0 opacity-100"
+            : "translate-x-full opacity-0"
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex flex-col h-full bg-card">
           <div className="flex-1 overflow-auto px-5 pt-10 bg-background">
             {conselhos.length > 0 ? (
               <div className="flex flex-wrap justify-center pt-6 gap-6">
                 {conselhos.map((conselho) => (
                   <Card
                     key={conselho.id}
-                    className="rounded-[0.5rem] shadow-md overflow-hidden w-[70%] border cursor-pointer"
-                    onClick={() => {
-                      setConselhoSelecionado(conselho);
-                      setModalDocumentosAberto(true);
-                    }}
+                    className="rounded-[0.5rem] shadow-md overflow-hidden w-[70%] border"
                   >
+                    {/* HEADER */}
                     <div className="bg-primary text-primary-foreground px-4 py-3 flex justify-between items-start">
                       <div>
                         <div className="text-xs opacity-80">Período</div>
@@ -183,6 +185,7 @@ export default function ListaConselhos({
                         </div>
                       </div>
 
+                      {/* 3 PONTINHOS */}
                       {podeEditar(conselho.status) && (
                         <button
                           onClick={(e) => {
@@ -196,14 +199,25 @@ export default function ListaConselhos({
                       )}
                     </div>
 
+                    {/* BODY */}
                     <div className="text-foreground px-4 py-3 flex items-center justify-between bg-card">
                       <div className="text-sm">
                         <span className="font-medium">Status:</span>{" "}
                         <span className="font-normal">{conselho.status}</span>
                       </div>
 
-                      {conselho.status === "Aguardando resultado" && (
-                        <FileSpreadsheet size={22} className="opacity-70" />
+                      {["Conselho", "Aguardando resultado", "Resultado"].includes(
+                        conselho.status
+                      ) && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setConselhoSelecionado(conselho);
+                            setModalDocumentosAberto(true);
+                          }}
+                        >
+                          <FileSpreadsheet size={22} className="opacity-70" />
+                        </button>
                       )}
                     </div>
                   </Card>
@@ -237,6 +251,7 @@ export default function ListaConselhos({
         </div>
       </aside>
 
+      {/* Modais */}
       <ConfirmarConselhoModal
         open={modalAberto}
         onClose={() => setModalAberto(false)}

@@ -18,12 +18,23 @@ export default function BaixarDocumentosModal({
 
   const status = conselho.status;
 
+  // Pré-Conselho liberado a partir de qualquer fase
   const podePre = ["Pré-conselho", "Conselho", "Aguardando resultado", "Resultado"].includes(status);
-  const podeConselho = status === "Resultado";
+
+  // Conselho liberado quando o status for "Aguardando resultado" OU "Resultado"
+  const podeConselho = ["Aguardando resultado", "Resultado"].includes(status);
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-[480px] rounded-2xl p-6">
+    <Dialog
+      open={open}
+      onOpenChange={(state) => {
+        if (!state) onClose();
+      }}
+    >
+      <DialogContent
+        className="max-w-[480px] rounded-2xl p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-center">
             Baixar Documentos do Conselho
@@ -34,8 +45,8 @@ export default function BaixarDocumentosModal({
 
           {/* CARD - PRÉ CONSELHO */}
           {podePre && (
-            <div className="border rounded-xl p-4 bg-muted/30 flex items-center justify-between select-none">
-              <div className="flex items-center gap-3 pointer-events-none">
+            <div className="border rounded-xl p-4 bg-muted/30 flex items-center justify-between select-none pointer-events-none">
+              <div className="flex items-center gap-3">
                 <FileSpreadsheet className="text-black" size={26} />
                 <div>
                   <div className="font-medium">Pré-Conselho</div>
@@ -46,7 +57,7 @@ export default function BaixarDocumentosModal({
               <button
                 onClick={() => console.log("BAIXAR PRÉ")}
                 disabled={!podePre}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium 
+                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium pointer-events-auto
                   ${podePre ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground cursor-not-allowed"}
                 `}
               >
@@ -58,8 +69,8 @@ export default function BaixarDocumentosModal({
 
           {/* CARD - CONSELHO */}
           {podeConselho && (
-            <div className="border rounded-xl p-4 bg-muted/30 flex items-center justify-between select-none">
-              <div className="flex items-center gap-3 pointer-events-none">
+            <div className="border rounded-xl p-4 bg-muted/30 flex items-center justify-between select-none pointer-events-none">
+              <div className="flex items-center gap-3">
                 <FileSpreadsheet className="text-black" size={26} />
                 <div>
                   <div className="font-medium">Conselho</div>
@@ -70,7 +81,7 @@ export default function BaixarDocumentosModal({
               <button
                 onClick={() => console.log("BAIXAR CONSELHO")}
                 disabled={!podeConselho}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium 
+                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium pointer-events-auto
                   ${podeConselho ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground cursor-not-allowed"}
                 `}
               >
@@ -80,6 +91,7 @@ export default function BaixarDocumentosModal({
             </div>
           )}
 
+          {/* Nenhum documento disponível */}
           {!podePre && !podeConselho && (
             <p className="text-center text-muted-foreground text-sm">
               Nenhum documento disponível para este status.
