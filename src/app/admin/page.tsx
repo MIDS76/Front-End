@@ -24,8 +24,6 @@ export default function LandingPage() {
 
   const [paginaAtual, setPaginaAtual] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredTurmas, setFilteredTurmas] = useState<Turma[]>([]);
-  const [totalPages, setTotalPages] = useState(0);
   const [sideModalOpen, setSideModalOpen] = useState(false);
   const [selectedTurma, setSelectedTurma] = useState({} as Turma);
 
@@ -87,12 +85,6 @@ export default function LandingPage() {
                 <ListaTurmas />
               </ul>
             </ScrollArea>
-
-            <Paginacao
-              paginaAtual={paginaAtual}
-              setPaginaAtual={setPaginaAtual}
-              totalPages={totalPages}
-            />
           </section>
 
           <section
