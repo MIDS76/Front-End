@@ -20,13 +20,13 @@ export default function EditUserDialog({
 }: EditUserDialogProps) {
   const [nome, setNome] = useState(usuario.nome);
   const [email, setEmail] = useState(usuario.email);
-  const [active, setActive] = useState(usuario.isActive ? "true" : "false");
+  const [active, setActive] = useState(usuario.ativo ? "true" : "false");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     setNome(usuario.nome);
     setEmail(usuario.email);
-    setActive(usuario.isActive ? "true" : "false");
+    setActive(usuario.ativo ? "true" : "false");
   }, [usuario]);
 
   const handleUpdateUser = () => {
@@ -56,7 +56,7 @@ export default function EditUserDialog({
   const handleCancel = () => {
     setNome(usuario.nome);
     setEmail(usuario.email);
-    setActive(usuario.isActive ? "true" : "false");
+    setActive(usuario.ativo ? "true" : "false");
     setErrors({});
     setOpen(false);
   };
@@ -72,7 +72,7 @@ export default function EditUserDialog({
       onConfirm={() => {
         handleUpdateUser();
       }}
-      description=""
+
       conteudo={
         <div className="flex flex-col gap-2">
           <TextField

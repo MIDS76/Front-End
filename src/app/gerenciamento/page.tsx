@@ -18,6 +18,8 @@ import {
   filtrarConselhoEtapa
 } from "@/api/filtros";
 
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "../access-denied";
 
 export default function GerenciamentoUsersTurmas() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -84,6 +86,12 @@ export default function GerenciamentoUsersTurmas() {
   const handleTurmaClick = (id: number) => {
     router.push(`/gerenciamento/turma/${id}`);
   };
+
+  const { user } = useAuth();
+
+  if (user?.role !== "pedagogico" && user?.role !== "admin") {
+    return AccessDeniedPage();
+  }
 
   return (
     <ProtectedRoute>

@@ -22,7 +22,7 @@ export default function GerenciarTurma() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [alunosDaTurmaOriginal, setAlunosDaTurmaOriginal] = useState<Usuario[]>([]);
   
-  const [turma, setTurma] = useState<Turma | undefined>(undefined);
+  const [turma, setTurma] = useState<Turma | any>(undefined);
   const [searchQueryUsuarios, setSearchQueryUsuarios] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -120,13 +120,13 @@ export default function GerenciarTurma() {
           <TurmaForm
             title="Gerenciar Turma"
             initialData={{
-              codigoTurma: turma?.nome ?? "",
-              nomeCurso: turma?.curso ?? "",
+              nome: turma?.nome ?? "",
+              curso: turma?.curso ?? "",
               dataInicio: 
                 turma?.dataInicio instanceof Date 
                   ? turma.dataInicio.toISOString().substring(0, 10) 
                   : (turma?.dataInicio || ""),
-              dataFim: 
+              dataFinal: 
                 turma?.dataFinal instanceof Date 
                   ? turma.dataFinal.toISOString().substring(0, 10) 
                   : (turma?.dataFinal || "")

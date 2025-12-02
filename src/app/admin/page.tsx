@@ -7,7 +7,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Turma } from "@/utils/types";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SearchBar from "@/components/input/searchBar";
-import Paginacao from "@/components/paginacao/paginacao";
 import { buscarTurmas } from "@/api/turmas";
 import { useAuth } from "@/context/AuthContext";
 import AccessDeniedPage from "../access-denied";
@@ -24,10 +23,10 @@ export default function LandingPage() {
 
   const [paginaAtual, setPaginaAtual] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredTurmas, setFilteredTurmas] = useState<Turma[]>([]);
-  const [totalPages, setTotalPages] = useState(0);
   const [sideModalOpen, setSideModalOpen] = useState(false);
   const [selectedTurma, setSelectedTurma] = useState({} as Turma);
+  const [filteredTurmas, setFilteredTurmas] = useState<Turma[]>([]);
+  const [totalPages, setTotalPages] = useState(0);
 
   const [data, setData] = useState<Turma[]>([]);
   const { user } = useAuth();
@@ -87,12 +86,6 @@ export default function LandingPage() {
                 <ListaTurmas />
               </ul>
             </ScrollArea>
-
-            <Paginacao
-              paginaAtual={paginaAtual}
-              setPaginaAtual={setPaginaAtual}
-              totalPages={totalPages}
-            />
           </section>
 
           <section

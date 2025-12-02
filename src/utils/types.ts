@@ -7,18 +7,26 @@ export interface Page<T> {
 }
 
 export interface Turma {
-  id: number;
+  id?: number;
   nome: string;
   curso: string;
-  dataInicio: Date;
-  dataFinal: Date;
+  dataInicio: string;
+  dataFinal: string;
 }
 
 export interface Conselho {
   id: number;
-  dataInicio: Date;
-  dataFim: Date;
-  etapa: number;
+  turmaId: number;
+
+  periodoInicio?: string;
+  periodoFim?: string;
+
+  dataInicio: string;
+  dataFim: string;
+
+  status: string;
+  etapa: string;
+
   turma: Turma;
 }
 

@@ -89,7 +89,7 @@ export default function SelecionarTurmaPreConselho() {
                     setSearchQuery={setSearchTerm}
                     filter
                     filtrosMostrar={{
-                      aluno: false,
+                      usuario: false,
                       turma: true,
                       conselho: false,
                     }}
@@ -98,7 +98,7 @@ export default function SelecionarTurmaPreConselho() {
 
                 {/* GRID — AGORA COM MedModal */}
                 <div className="flex-1 overflow-y-auto pr-2">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-3 gap-4">
                     {turmasFiltradas.map((t) => {
                       const isSelected = selected?.sigla === t.sigla;
 
@@ -144,7 +144,6 @@ export default function SelecionarTurmaPreConselho() {
 
           {/* LATERAL */}
           <LogLateral
-            className="h-[calc(100vh-5rem)]"
             titulo="Turma"
             itens={
               selected
