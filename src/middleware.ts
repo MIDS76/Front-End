@@ -3,7 +3,6 @@ import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 
 const protectedRoutes = [
-  "/",
   "/admin",
   "/aluno",
   "/chat",
@@ -39,7 +38,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/:path*",
     "/admin/:path*",
     "/aluno/:path*",
     "/chat/:path*",
