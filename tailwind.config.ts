@@ -93,6 +93,8 @@ export default {
 			'tablet': '1024px',  // => Para telas maiores que 1024px (tablet e acima): tablet:text-lg
 			'laptop': '1366px',  // => Para telas maiores que 1366px (laptop e acima): laptop:text-xl
 			'desktop': '1920px', // => Para telas maiores que 1920px (desktop e acima): desktop:text-2xl
+
+		
 		},
 	},
 	plugins: [require("tailwindcss-animate")],
