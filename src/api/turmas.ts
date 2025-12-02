@@ -29,9 +29,10 @@ export const criarTurma = async (data: Turma) => {
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
-            console.log(err.response?.status);
-            console.log(err.response?.data);
+            console.error("Erro ao criar turma:", err.response?.status, err.response?.data);
         }
+        // RELANÇAR o erro é VITAL para o catch no componente funcionar
+        throw err;
     }
 }
 
@@ -40,14 +41,12 @@ export const excluirTurma = async (idTurma: number) => {
         const response = await api.delete(`/turmas/deletar/${idTurma}`, { signal: controller.signal });
         if (response.status === 200) {
             console.log("Turma excluída com sucesso.");
-          } else {
-            console.log("Erro ao excluir turma.");
-          }
+        }
     } catch (err) {
         if (err instanceof AxiosError) {
-            console.log(err.response?.status);
-            console.log(err.response?.data);
+            console.error("Erro ao excluir turma:", err.response?.status, err.response?.data);
         }
+        throw err;
     }
 }
 
@@ -55,13 +54,12 @@ export const excluirTurma = async (idTurma: number) => {
 export const criarAlunos = async (listaAlunos: Aluno[]) => {
     try {
         const response = await api.post(`/auth/cadastrar/listaAlunos`, listaAlunos, { signal: controller.signal });
-        console.log(response.data);
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
-            console.log(err.response?.status);
-            console.log(err.response?.data);
+            console.error("Erro ao criar alunos:", err.response?.status, err.response?.data);
         }
+        throw err;
     }
 }
 
@@ -73,12 +71,11 @@ export const associarAlunosTurma = async (alunoTurma: {
     try {
         const response = await api.post(`/aluno-turma/criar`, alunoTurma, { signal: controller.signal });
         return response.data;
-
     } catch (err) {
         if (err instanceof AxiosError) {
-            console.log(err.response?.status);
-            console.log(err.response?.data);
+            console.error("Erro ao associar alunos:", err.response?.status, err.response?.data);
         }
+        throw err;
     }
 }
 

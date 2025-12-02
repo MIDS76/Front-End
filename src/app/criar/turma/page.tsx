@@ -9,15 +9,13 @@ import ImportarCSV from "@/components/modal/importarCSV";
 import { useState } from "react";
 import { Aluno, associarAlunosTurma, criarAlunos, criarTurma, excluirTurma } from "@/api/turmas";
 import { Turma } from "@/utils/types";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 export default function CriarTurma() {
   const [alunos, setAlunos] = useState<Aluno[]>([]);
-  const [turmaData, setTurmaData] = useState<Turma>({
-    nome: "",
-    curso: "",
-    dataInicio: "",
-    dataFinal: "",
-  });
+  const router = useRouter();
+  const { user } = useAuth(); 
 
   function handleRemover(idOuNome: string) {
     setAlunos((prev) =>
@@ -32,36 +30,33 @@ export default function CriarTurma() {
       toast.error("Adicione alunos à turma antes de criar!");
       return;
     }
-  
+
     try {
-      // Cria a turma diretamente com os dados do form
+      // Cria a turma
       const turma = await criarTurma(form);
-      console.log("Turma criada:", turma);
-  
       if (!turma) {
         toast.error("Erro ao criar a turma.");
         return;
       }
-  
-      console.log("Alunos enviados:", alunos);
 
+      // Cria os alunos
       const alunosCriados = await criarAlunos(alunos);
-      console.log("Alunos criados:", alunosCriados);
-  
       if (!alunosCriados || alunosCriados.length === 0) {
         await excluirTurma(turma.id);
         toast.error("Erro ao criar a lista de alunos. Verifique os dados!");
         return;
       }
-  
+
       // Associa os alunos à turma
       const idsAlunos = alunosCriados.map((a: Aluno) => a.id);
       const associarResponse = await associarAlunosTurma({ idTurma: turma.id, idsAlunos });
-  
+
       if (associarResponse) {
         toast.success("Turma e alunos criados com sucesso!");
+        router.push(`/${user?.role}`);
       }
     } catch (error) {
+      // Se as funções de API relançarem o erro (throw err), ele será capturado aqui
       console.error("Erro durante o processo de criação:", error);
       toast.error("Erro durante o processo de criação da turma ou dos alunos.");
     }
