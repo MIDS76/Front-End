@@ -218,8 +218,8 @@ export default function ConselhoCoordenacao() {
     setErrosCampos(erros);
 
     if (erros.positivos || erros.melhoria || erros.sugestoes) {
-        toast.warning("Os campos do aluno atual não estão preenchidos, mas você pode continuar navegando.");
-      return false;
+        toast.error("Por favor, preencha todos os campos do aluno atual antes de prosseguir.");
+      return false; 
     }
     return true;
   };
@@ -242,6 +242,10 @@ export default function ConselhoCoordenacao() {
 
   const trocarPagina = (novaPagina: number) => {
     
+    if (novaPagina > pagina) {
+        if (!validarCamposAluno()) return; 
+    }
+
     if (novaPagina < 0 || novaPagina >= formulario.length) {
         return; 
     }
@@ -254,6 +258,8 @@ export default function ConselhoCoordenacao() {
   };
   
   const handleTransitionToTurma = () => {
+      if (!validarCamposAluno()) return;
+
       const todosAlunosPreenchidos = formulario.every(
           (f) => f.positivos.trim() && f.melhoria.trim() && f.sugestoes.trim()
       );
@@ -268,18 +274,14 @@ export default function ConselhoCoordenacao() {
   };
 
   const handleSelecionarUsuario = (usuarioClicado: Usuario) => {
-      
+      if (!validarCamposAluno()) return;
+
       const novaPagina = usuarios.findIndex((u) => u.nome === usuarioClicado.nome);
       
       if (novaPagina !== -1) {
           setExibirFeedbackTurma(false); 
           setPagina(novaPagina);
           setUsuarioSelecionado(usuarioClicado);
-          
-          const alunoForm = formulario.find(f => f.titulo === usuarioClicado.nome);
-          if (alunoForm && (!alunoForm.positivos.trim() || !alunoForm.melhoria.trim() || !alunoForm.sugestoes.trim())) {
-              toast.info(`Lembrete: O feedback de ${usuarioClicado.nome} ainda está incompleto.`);
-          }
       }
   };
 
@@ -289,7 +291,9 @@ export default function ConselhoCoordenacao() {
     toast.success("Conselho concluído e salvo com sucesso!");
     localStorage.removeItem("conselho-formulario");
     localStorage.removeItem("conselho-turma");
-  
+    
+    // Redireciona para a tela principal
+    router.push("/pedagogico");
   };
 
   const alunosFiltrados = usuarios.filter((usuario) =>
@@ -320,12 +324,12 @@ export default function ConselhoCoordenacao() {
 
   return (
     <div
-      className="w-screen h-screen flex flex-col items-center justify-center overflow-hidden px-6"
+      className="w-screen h-screen flex flex-col items-center justify-center overflow-auto lg:overflow-hidden px-4 xl:px-8 py-4 lg:py-0"
       style={{ backgroundColor: "hsl(var(--background))", color: "hsl(var(--foreground))" }}
     >
-      <div className="flex w-full max-w-[100rem] justify-center gap-4 lg:gap-8">
+      <div className="flex w-full max-w-[100rem] justify-center gap-4 xl:gap-8">
         
-        {/* Primeira div - Lista de alunos (flex-1 para igualar largura e min-w-0 para encolher) */}
+        {/* Primeira div - Lista de alunos */}
         <div className="flex flex-col flex-1 max-w-[46.875rem] min-w-0 gap-4">
           <InfoCard
             titulo="JGS - AI MIDS 2024/1 INT1"
@@ -334,7 +338,7 @@ export default function ConselhoCoordenacao() {
 
 
           <div
-            className="w-full h-[32rem] rounded-2xl shadow-inner overflow-hidden border"
+            className="w-full h-[26rem] lg:h-[32rem] rounded-2xl shadow-inner overflow-hidden border"
             style={{
               backgroundColor: "hsl(var(--background))",
               borderColor: "hsl(var(--border))",
@@ -366,7 +370,7 @@ export default function ConselhoCoordenacao() {
           </div>
         </div>
 
-        {/* Segunda div - Formulário (flex-1 para igualar largura e min-w-0 para encolher) */}
+        {/* Segunda div - Formulário */}
         <div className="flex flex-col flex-1 max-w-[46.875rem] min-w-0">
           
           <div
@@ -394,8 +398,6 @@ export default function ConselhoCoordenacao() {
                         <div className="flex justify-between items-start">
                             {/* MI 76 (Esquerda) */}
                             <div className="text-2xl font-bold">MI 76</div>
-                            
-                            {/* Ícone Removido */}
                         </div>
                         {/* Curso: Desenvolvimento de Sistemas (Abaixo e Alinhado à esquerda) */}
                         <p className="text-sm font-normal text-left -mt-1">Curso: Desenvolvimento de Sistemas</p>
