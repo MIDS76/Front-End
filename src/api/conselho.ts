@@ -74,24 +74,24 @@ export const conselhoAluno = async (feedbackAluno: {
             console.log(err.response?.data);
         }
     }
-    
+
 }
 
 export const listarConselhosPorTurma = async (idTurma: number): Promise<Conselho[]> => {
     const controller = new AbortController();
 
     try {
-        const url = `/conselhos/listarConselhorPorTurma/${idTurma}`; 
-        
+        const url = `/conselhos/listarConselhorPorTurma/${idTurma}`;
+
         const response = await api.get<Conselho[]>(url, { signal: controller.signal });
-        
+
         if (response.data && Array.isArray(response.data)) {
             return response.data;
         }
 
         console.warn(`API retornou sucesso (200), mas a lista de conselhos para turma ${idTurma} está vazia ou mal formatada.`);
-        return []; 
-        
+        return [];
+
     } catch (err) {
         if (err instanceof AxiosError) {
             console.error(`ERRO API ${err.response?.status} ao buscar conselhos:`, err.message);
@@ -102,23 +102,20 @@ export const listarConselhosPorTurma = async (idTurma: number): Promise<Conselho
     }
 }
 
-export const buscarUltimoConselhoPorTurma = async (idTurma: number): Promise<Conselho | null> => {
+export const buscarUltimoConselhoPorTurma = async (idTurma: number) => {
     const controller = new AbortController();
 
     try {
-        // ASSUMIDA: A rota ideal para otimização seria uma que retorne apenas o último conselho.
-        const url = `/conselhos/buscarConselhoPorTurma/${idTurma}`; 
-        
-        const response = await api.get<Conselho | null>(url, { signal: controller.signal });
-        
-        return response.data ?? null;
-        
+        const url = `/conselhos/buscarConselhoPorTurma/${idTurma}`;
+
+        const response = await api.get<Conselho>(url, { signal: controller.signal });
+        console.log(response.data);
+        return response.data;
+
     } catch (err) {
         if (err instanceof AxiosError) {
             console.error(`ERRO API ${err.response?.status} ao buscar último conselho:`, err.message);
-        } else {
-            console.error("Erro desconhecido ao buscar último conselho:", err);
         }
-        return null;
+        console.error("Erro desconhecido ao buscar último conselho:", err);
     }
 }
