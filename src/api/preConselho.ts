@@ -35,7 +35,7 @@ export const preConselhoSupervisao = async (supervisao: {
     }
 }
 
-export const preConselhoProfessor = async (professor: {
+export const preConselhoProfessor = async (idPreconselhoProfessor: number, professor: {
     idPreConselho: number;
     idUnidadeCurricular: number;
     idProfessor: number;
@@ -46,7 +46,7 @@ export const preConselhoProfessor = async (professor: {
     const controller = new AbortController();
 
     try {
-        const response = await api.post(`/preConselhoSupervisao/criar`, professor, { signal: controller.signal });
+        const response = await api.post(`/preConselhoSupervisao/atualizar/${idPreconselhoProfessor}`, professor, { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
@@ -94,12 +94,40 @@ export const preConselhoAmbienteEnsino = async (ambienteEnsino: {
     }
 }
 
+export const buscarPreConselho = async (id: number) => {
+    const controller = new AbortController();
+
+    try {
+        const response = await api.get(`/preConselho/buscar/${id}`, { signal: controller.signal });
+        return response.data;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.log(err.response?.status);
+            console.log(err.response?.data);
+        }
+    }
+}
+
 // listar na hora de criar um conselho
 export const unidadeCurricular = async () => {
     const controller = new AbortController();
 
     try {
         const response = await api.get(`/unidadeCurricular/listar`, { signal: controller.signal });
+        return response.data;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.log(err.response?.status);
+            console.log(err.response?.data);
+        }
+    }
+}
+
+export const listarPreConselhoProfessorPorConselho = async () => {
+    const controller = new AbortController();
+
+    try {
+        const response = await api.get(`/preConselhoProfessor/listar-por-pre-conselho`, { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {

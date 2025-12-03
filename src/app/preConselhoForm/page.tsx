@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { validateRequired } from "@/utils/formValidation";
 import { useAuth } from "@/context/AuthContext";
 import AccessDeniedPage from "../access-denied";
+import { buscarPreConselho, preConselhoAmbienteEnsino, preConselhoPedagogico, preConselhoProfessor, preConselhoSupervisao } from "@/api/preConselho";
 
 type CampoFormulario = {
   titulo: string;
@@ -21,6 +22,18 @@ type CampoFormulario = {
   melhoria: string;
   sugestoes: string;
 };
+
+type UsuarioApi = {
+  id: number;
+  idPreConselho: number;
+  idUnidadeCurricular: number;
+  nomeUc: string;
+  idProfessor: number;
+  nomeProfessor: string;
+  pontosPositivos: string;
+  pontoMelhoria: string;
+  sugestoes: string;
+}
 
 const secoesIniciais: CampoFormulario[] = [
   ...usuariosData
@@ -64,6 +77,7 @@ export default function PreConselhoFormulario() {
   const [isSuccessOpen, setIsSuccessOpen] = useState(false); // Modal de sucesso
   const [pagina, setPagina] = useState(0);
   const [camposErro, setCamposErro] = useState<{ [key: string]: string }>({});
+  const [professoresData, setProfessoresData] = useState<UsuarioApi[]>([]);
   const router = useRouter(); // Use diretamente no componente
 
   useEffect(() => {
@@ -119,118 +133,171 @@ export default function PreConselhoFormulario() {
     setPagina(pagina + 1);
   };
 
-  const handleSalvar = () => {
+  const handleSalvar = async () => {
     const tudoPreenchido = formulario.every((secao) => camposPreenchidos(secao));
     if (!tudoPreenchido) {
       toast.error("Preencha todos os campos antes de enviar o formulário completo!");
       return;
     }
 
-    toast.success("Pré-conselho salvo com sucesso!");
-    localStorage.setItem("preconselho-formulario", JSON.stringify(formulario));
+    try {
+      const preConselhoResponse = await buscarPreConselho(1);
 
-    // Abre o modal de sucesso
-    setIsSuccessOpen(true);
-    setIsConfirmOpen(false); // Fecha o modal de confirmação
-  };
+      if (!preConselhoResponse || !preConselhoResponse.id) {
+        throw new Error("Pré-conselho não encontrado.");
+      }
 
-  const secaoAtual = formulario[pagina];
+      const idPreConselho = preConselhoResponse.id;
 
-  const handleGoHome = () => {
-    router.push("/aluno"); // Redireciona para a página /aluno
-  };
+      const promises = [];
 
-  const { user } = useAuth();
+      for (const secao of formulario) {
+        const dataPadrao = {
+          idPreConselho: idPreConselho,
+          pontosPositivos: secao.positivos,
+          pontosMelhoria: secao.melhoria,
+          sugestoes: secao.sugestoes,
+        };
 
-  if (user?.role !== "aluno") {
-    return AccessDeniedPage();
+
+        if (secao.titulo.startsWith("Supervisor")) {
+          promises.push(preConselhoSupervisao(dataPadrao));
+        } else if (secao.titulo.startsWith("Técnico Pedagógico")) {
+          promises.push(preConselhoPedagogico(dataPadrao));
+        } else if (secao.titulo.startsWith("Ambiente de Ensino")) {
+          promises.push(preConselhoAmbienteEnsino(dataPadrao));
+        } else if (secao.titulo.includes("UNIDADE CURRICULAR")) {
+
+          const usuario = usuariosData.find(u => secao.titulo.includes(u.nome));
+
+          if (usuario) {
+            const dadosProfessor = {
+              ...dataPadrao,
+              idUnidadeCurricular: usuario.idUnidadeCurricular || 0,
+              idProfessor: usuario.id || 0,
+            };
+
+            promises.push(preConselhoProfessor(
+              usuario.id,
+              dadosProfessor
+            ));
+
+          } else {
+            console.error("Dados de professor/unidade curricular não encontrados para: ", secao.titulo);
+          }
+        }
+      }
+
+      await Promise.all(promises);
+
+      toast.success("Pré-conselho salvo com sucesso!");
+      localStorage.setItem("preconselho-formulario", JSON.stringify(formulario));
+
+      // Abre o modal de sucesso
+      setIsSuccessOpen(true);
+      setIsConfirmOpen(false); // Fecha o modal de confirmação
+    } catch (error) {
+      console.error("Erro durante o envio do formulário:", error);
+      toast.error("Erro ao enviar o Pré-Conselho. Tente novamente.");
+    };
+
+    const secaoAtual = formulario[pagina];
+
+    const handleGoHome = () => {
+      router.push("/aluno"); // Redireciona para a página /aluno
+    };
+
+    const { user } = useAuth();
+
+    if (user?.role !== "aluno") {
+      return AccessDeniedPage();
+    }
+
+    return (
+      <div className="w-full max-w-[90rem] mx-auto overflow-x-hidden" style={{ paddingTop: "8rem", paddingBottom: "2rem" }}>
+        <InfoCard
+          titulo="Pré-Conselho"
+          subtitulo={secaoAtual.titulo}
+          descricao={secaoAtual.descricao}
+          className="max-w-full tablet:max-w-[55rem] laptop:max-w-[75rem] desktop:max-w-[89rem] mx-auto"
+        />
+
+        <div className="mt-11 pl-2 pr-4 space-y-6 max-w-full tablet:max-w-[55rem] laptop:max-w-[75rem] desktop:max-w-[89rem] mx-auto">
+          {["positivos", "melhoria", "sugestoes"].map((campo) => (
+            <div key={campo} className="flex flex-col gap-2">
+              <Label className="text-sm font-semibold text-primary transition-colors">
+                {campo === "positivos" ? "Pontos positivos" : campo === "melhoria" ? "Pontos de melhoria" : "Sugestões"}
+              </Label>
+
+              <Textarea
+                placeholder={`Insira aqui os ${campo}...`}
+                className={`mt-1 resize-none rounded-xl border bg-background p-3 text-sm transition-colors focus:border-primary focus:ring-0 outline-none ${camposErro[campo] ? "border-destructive" : "border-border"}`}
+                value={secaoAtual[campo as keyof CampoFormulario] as string}
+                onChange={(e) => handleChange(campo as keyof CampoFormulario, e.target.value)}
+                style={{ minHeight: "5rem" }}
+              />
+              {camposErro[campo] && <p className="text-destructive text-sm">Este campo é obrigatório!</p>}
+            </div>
+          ))}
+        </div>
+
+        <div className="flex justify-end items-center pt-8 gap-4 pr-4 max-w-full tablet:max-w-[55rem] laptop:max-w-[75rem] desktop:max-w-[89rem] mx-auto">
+          {pagina > 0 && (
+            <ButtonTT
+              tooltip="Anterior"
+              mode="default"
+              onClick={() => {
+                const secaoAtual = formulario[pagina];
+                const novosErros: { [key: string]: string } = {};
+
+                novosErros.positivos = validateRequired(secaoAtual.positivos, "pontos positivos");
+                novosErros.melhoria = validateRequired(secaoAtual.melhoria, "melhoria");
+                novosErros.sugestoes = validateRequired(secaoAtual.sugestoes, "sugestões");
+
+                if (Object.values(novosErros).some((erro) => erro)) {
+                  setCamposErro(novosErros);
+                  toast.error("Preencha todos os campos antes de voltar!");
+                  return;
+                }
+
+                setCamposErro({});
+                setPagina(pagina - 1);
+              }}
+              className="text-[0.875rem] leading-[1.25rem] px-8"
+            >
+              Anterior
+            </ButtonTT>
+          )}
+
+          {pagina < formulario.length - 1 ? (
+            <ButtonTT tooltip="Próximo" mode="default" onClick={handleNext} className="text-[0.875rem] leading-[1.25rem] px-8">
+              Próximo
+            </ButtonTT>
+          ) : (
+            <ButtonTT tooltip="Salvar" mode="default" onClick={() => setIsConfirmOpen(true)} className="text-[0.875rem] leading-[1.25rem] px-8">
+              Enviar
+            </ButtonTT>
+          )}
+        </div>
+
+        <ActionModal
+          isOpen={isConfirmOpen}
+          setOpen={setIsConfirmOpen}
+          title="Tem certeza que deseja enviar?"
+          actionButtonLabel="Enviar"
+          onConfirm={() => {
+            handleSalvar();
+            localStorage.removeItem("preconselho-formulario");
+            setIsConfirmOpen(false);
+          }}
+        />
+
+        <SucessoEnviarModal
+          isOpen={isSuccessOpen}
+          setOpen={setIsSuccessOpen}
+          onClose={() => setIsSuccessOpen(false)}
+          handleGoHome={handleGoHome}
+        />
+      </div>
+    );
   }
-
-  return (
-    <div className="w-full max-w-[90rem] mx-auto overflow-x-hidden" style={{ paddingTop: "8rem", paddingBottom: "2rem" }}>
-      <InfoCard
-        titulo="Pré-Conselho"
-        subtitulo={secaoAtual.titulo}
-        descricao={secaoAtual.descricao}
-        className="max-w-full tablet:max-w-[55rem] laptop:max-w-[75rem] desktop:max-w-[89rem] mx-auto"
-      />
-
-      <div className="mt-11 pl-2 pr-4 space-y-6 max-w-full tablet:max-w-[55rem] laptop:max-w-[75rem] desktop:max-w-[89rem] mx-auto">
-        {["positivos", "melhoria", "sugestoes"].map((campo) => (
-          <div key={campo} className="flex flex-col gap-2">
-            <Label className="text-sm font-semibold text-primary transition-colors">
-              {campo === "positivos" ? "Pontos positivos" : campo === "melhoria" ? "Pontos de melhoria" : "Sugestões"}
-            </Label>
-
-            <Textarea
-              placeholder={`Insira aqui os ${campo}...`}
-              className={`mt-1 resize-none rounded-xl border bg-background p-3 text-sm transition-colors focus:border-primary focus:ring-0 outline-none ${camposErro[campo] ? "border-destructive" : "border-border"}`}
-              value={secaoAtual[campo as keyof CampoFormulario] as string}
-              onChange={(e) => handleChange(campo as keyof CampoFormulario, e.target.value)}
-              style={{ minHeight: "5rem" }}
-            />
-            {camposErro[campo] && <p className="text-destructive text-sm">Este campo é obrigatório!</p>}
-          </div>
-        ))}
-      </div>
-
-      <div className="flex justify-end items-center pt-8 gap-4 pr-4 max-w-full tablet:max-w-[55rem] laptop:max-w-[75rem] desktop:max-w-[89rem] mx-auto">
-        {pagina > 0 && (
-          <ButtonTT
-            tooltip="Anterior"
-            mode="default"
-            onClick={() => {
-              const secaoAtual = formulario[pagina];
-              const novosErros: { [key: string]: string } = {};
-
-              novosErros.positivos = validateRequired(secaoAtual.positivos, "pontos positivos");
-              novosErros.melhoria = validateRequired(secaoAtual.melhoria, "melhoria");
-              novosErros.sugestoes = validateRequired(secaoAtual.sugestoes, "sugestões");
-
-              if (Object.values(novosErros).some((erro) => erro)) {
-                setCamposErro(novosErros);
-                toast.error("Preencha todos os campos antes de voltar!");
-                return;
-              }
-
-              setCamposErro({});
-              setPagina(pagina - 1);
-            }}
-            className="text-[0.875rem] leading-[1.25rem] px-8"
-          >
-            Anterior
-          </ButtonTT>
-        )}
-
-        {pagina < formulario.length - 1 ? (
-          <ButtonTT tooltip="Próximo" mode="default" onClick={handleNext} className="text-[0.875rem] leading-[1.25rem] px-8">
-            Próximo
-          </ButtonTT>
-        ) : (
-          <ButtonTT tooltip="Salvar" mode="default" onClick={() => setIsConfirmOpen(true)} className="text-[0.875rem] leading-[1.25rem] px-8">
-            Enviar
-          </ButtonTT>
-        )}
-      </div>
-
-      <ActionModal
-        isOpen={isConfirmOpen}
-        setOpen={setIsConfirmOpen}
-        title="Tem certeza que deseja enviar?"
-        actionButtonLabel="Enviar"
-        onConfirm={() => {
-          handleSalvar();
-          localStorage.removeItem("preconselho-formulario");
-          setIsConfirmOpen(false);
-        }}
-      />
-
-      <SucessoEnviarModal
-        isOpen={isSuccessOpen}
-        setOpen={setIsSuccessOpen}
-        onClose={() => setIsSuccessOpen(false)}
-        handleGoHome={handleGoHome}
-      />
-    </div>
-  );
-}
