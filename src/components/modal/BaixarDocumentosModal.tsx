@@ -6,23 +6,63 @@ import { FileSpreadsheet } from "lucide-react";
 interface BaixarDocumentosModalProps {
   open: boolean;
   onClose: () => void;
-  conselho: any | null;
+  conselho: {
+    status: string;
+  } | null;
+  role: string | undefined;
 }
 
 export default function BaixarDocumentosModal({
   open,
   onClose,
-  conselho
+  conselho,
+  role
 }: BaixarDocumentosModalProps) {
   if (!conselho) return null;
 
-  const status = conselho.status;
+  // 1. NORMALIZAÇÃO DO STATUS
+  // Converte o status para minúsculo para facilitar a comparação (evita erro de 'Pré-Conselho' vs 'Pré-conselho')
+  const statusOriginal = conselho.status ?? "";
+  const statusLower = statusOriginal.toLowerCase();
 
-  // Pré-Conselho liberado a partir de qualquer fase
-  const podePre = ["Pré-conselho", "Conselho", "Aguardando resultado", "Resultado"].includes(status);
+  // 2. NORMALIZAÇÃO DA ROLE
+  const safeRole = (role || "").trim().toUpperCase();
+  const isWeg = safeRole === "WEG";
 
-  // Conselho liberado quando o status for "Aguardando resultado" OU "Resultado"
-  const podeConselho = ["Aguardando resultado", "Resultado"].includes(status);
+  // --- DEBUG (Olhe no F12 do navegador) ---
+  console.log("--- DEBUG MODAL ---");
+  console.log("Role:", safeRole);
+  console.log("É WEG?", isWeg);
+  console.log("Status Original:", statusOriginal);
+  console.log("Status Normalizado:", statusLower);
+
+  // --- REGRAS ---
+
+  // Lista de status permitidos (tudo em minúsculo para bater com statusLower)
+  const statusPermitidosPre = [
+    "pré-conselho", 
+    "pre-conselho", // garantindo sem acento
+    "conselho", 
+    "aguardando resultado", 
+    "resultado"
+  ];
+
+  const statusPermitidosFinal = [
+    "aguardando resultado", 
+    "resultado"
+  ];
+
+  // LOGICA DO PRÉ-CONSELHO:
+  // 1. O status está na lista permitida?
+  const statusOkPre = statusPermitidosPre.some(s => statusLower.includes(s));
+  // 2. Se for WEG, bloqueia. Se não for WEG, libera.
+  const podeMostrarPre = statusOkPre && !isWeg;
+
+  // LOGICA DO CONSELHO FINAL:
+  const podeConselho = statusPermitidosFinal.some(s => statusLower.includes(s));
+
+  console.log("Pode Mostrar Pré?", podeMostrarPre);
+  console.log("-------------------");
 
   return (
     <Dialog
@@ -43,9 +83,9 @@ export default function BaixarDocumentosModal({
 
         <div className="flex flex-col gap-5 mt-4">
 
-          {/* CARD - PRÉ CONSELHO */}
-          {podePre && (
-            <div className="border rounded-xl p-4 bg-muted/30 flex items-center justify-between select-none pointer-events-none">
+          {/* CARD — PRÉ CONSELHO */}
+          {podeMostrarPre && (
+            <div className="border rounded-xl p-4 bg-muted/30 flex items-center justify-between select-none">
               <div className="flex items-center gap-3">
                 <FileSpreadsheet className="text-black" size={26} />
                 <div>
@@ -56,10 +96,7 @@ export default function BaixarDocumentosModal({
 
               <button
                 onClick={() => console.log("BAIXAR PRÉ")}
-                disabled={!podePre}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium pointer-events-auto
-                  ${podePre ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground cursor-not-allowed"}
-                `}
+                className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 <FileSpreadsheet size={18} />
                 Baixar PDF
@@ -67,9 +104,9 @@ export default function BaixarDocumentosModal({
             </div>
           )}
 
-          {/* CARD - CONSELHO */}
+          {/* CARD — CONSELHO FINAL */}
           {podeConselho && (
-            <div className="border rounded-xl p-4 bg-muted/30 flex items-center justify-between select-none pointer-events-none">
+            <div className="border rounded-xl p-4 bg-muted/30 flex items-center justify-between select-none">
               <div className="flex items-center gap-3">
                 <FileSpreadsheet className="text-black" size={26} />
                 <div>
@@ -80,10 +117,7 @@ export default function BaixarDocumentosModal({
 
               <button
                 onClick={() => console.log("BAIXAR CONSELHO")}
-                disabled={!podeConselho}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium pointer-events-auto
-                  ${podeConselho ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground cursor-not-allowed"}
-                `}
+                className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 <FileSpreadsheet size={18} />
                 Baixar PDF
@@ -91,11 +125,11 @@ export default function BaixarDocumentosModal({
             </div>
           )}
 
-          {/* Nenhum documento disponível */}
-          {!podePre && !podeConselho && (
-            <p className="text-center text-muted-foreground text-sm">
-              Nenhum documento disponível para este status.
-            </p>
+          {/* MENSAGEM SE NADA ESTIVER DISPONÍVEL */}
+          {!podeMostrarPre && !podeConselho && (
+            <div className="text-center text-muted-foreground text-sm flex flex-col gap-1">
+              <p>Nenhum documento disponível.</p> 
+            </div>
           )}
         </div>
       </DialogContent>

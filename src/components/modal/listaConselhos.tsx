@@ -17,6 +17,7 @@ import turmasData from "@/data/turma.json";
 import conselhosData from "@/data/conselho.json";
 
 import { Turma as TurmaType, Conselho as ConselhoType } from "@/utils/types";
+import { FileSpreadsheet } from "lucide-react";
 
 
 
@@ -39,12 +40,9 @@ interface ListaConselhosProps {
   aoFechar: () => void;
 
   turma: TurmaType | null;
-
+  role: string;
+  onBaixarDocumentos?: (conselho: ConselhoType) => void;
 }
-
-
-
-/* Converter datas para MM/YYYY */
 
 const converterData = (data: string | Date | null | undefined): string => {
 
@@ -58,30 +56,16 @@ const converterData = (data: string | Date | null | undefined): string => {
 
 };
 
-
-
-/* Mapa de status → nomes finais */
-
+// Normaliza os status vindos do banco/json
 const mapStatus = (status: string): string => {
 
   const s = status.toLowerCase();
-
-
-
   if (s.includes("nao") || s.includes("não")) return "Não iniciado";
-
-  if (s.includes("pre")) return "Pré-conselho";
-
+  if (s.includes("pre")) return "Pré-conselho"; // Atenção aqui
   if (s.includes("cons")) return "Conselho";
 
   if (s.includes("aguard")) return "Aguardando resultado";
-
-  if (s.includes("result") || s.includes("final") || s.includes("conc"))
-
-    return "Resultado";
-
-
-
+  if (s.includes("result") || s.includes("final") || s.includes("conc")) return "Resultado";
   return "Não iniciado";
 
 };
@@ -89,50 +73,24 @@ const mapStatus = (status: string): string => {
 
 
 export default function ListaConselhos({
-
-  estaAberto = false,
-
+  estaAberto,
   aoFechar,
 
   turma,
-
+  role,
+  onBaixarDocumentos,
 }: ListaConselhosProps) {
 
   const [modalEtapaAberto, setModalEtapaAberto] = useState(false);
+  const [conselhoSelecionado, setConselhoSelecionado] = useState<ConselhoType | null>(null);
 
-  const [modalDocumentosAberto, setModalDocumentosAberto] = useState(false);
+  const ordemStatus = ["Não iniciado", "Pré-conselho", "Conselho", "Aguardando resultado", "Resultado"];
 
-
-
-  const [conselhoSelecionado, setConselhoSelecionado] =
-
-    useState<ConselhoType | null>(null);
-
-
-
-  const ordemStatus = [
-
-    "Não iniciado",
-
-    "Pré-conselho",
-
-    "Conselho",
-
-    "Aguardando resultado",
-
-    "Resultado",
-
-  ];
-
-
-
-  function proximoStatus(atual: string) {
-
+  const proximoStatus = (atual: string) => {
     const index = ordemStatus.indexOf(atual);
 
     return ordemStatus[index + 1] || atual;
-
-  }
+  };
 
 
 
@@ -152,10 +110,6 @@ export default function ListaConselhos({
 
   };
 
-
-
-  /* Carregar conselhos */
-
   useEffect(() => {
 
     if (!turma) {
@@ -168,13 +122,16 @@ export default function ListaConselhos({
 
     }
 
-
-
-    const encontrada =
-
-      turmasData.find((t) => t.codigoTurma === turma.nome) || turma;
-
-
+    const encontradaJson = turmasData.find((t) => t.id === turma.id);
+    const encontrada: TurmaType = encontradaJson
+      ? {
+          id: encontradaJson.id,
+          nome: encontradaJson.nomeCurso,
+          curso: encontradaJson.nomeCurso,
+          dataInicio: encontradaJson.dataInicio,
+          dataFinal: encontradaJson.dataFim
+        }
+      : turma;
 
     setTurmaLocal(encontrada);
 
@@ -189,21 +146,12 @@ export default function ListaConselhos({
         id: c.id,
 
         turmaId: c.turmaId,
-
-
-
         dataInicio: c.periodoInicio,
 
         dataFim: c.periodoFim,
-
-
-
         status: mapStatus(c.status),
 
         etapa: mapStatus(c.status),
-
-
-
         turma: encontrada,
 
       }));
@@ -229,15 +177,8 @@ export default function ListaConselhos({
     if (emAndamento.length > 1) {
 
       const maisRecente = emAndamento.sort(
-
-        (a, b) =>
-
-          Number(new Date(b.dataInicio)) - Number(new Date(a.dataInicio))
-
+        (a, b) => Number(new Date(b.dataInicio)) - Number(new Date(a.dataInicio))
       )[0];
-
-
-
       const ajustados = filtrados.map((c) =>
 
         c.id !== maisRecente.id && c.etapas !== "Resultado"
@@ -247,9 +188,6 @@ export default function ListaConselhos({
           : c
 
       );
-
-
-
       setConselhos(ajustados);
 
     } else {
@@ -263,23 +201,13 @@ export default function ListaConselhos({
 
 
   const podeEditar = (status: string) => status !== "Resultado";
-
-
-
-  const existeConselhoAberto = conselhos.some(
-
-    (c) => c.etapas !== "Resultado"
-
-  );
+  const existeConselhoAberto = conselhos.some((c) => c.status !== "Resultado");
 
 
 
   const handleAvancarEtapa = () => {
 
     if (!conselhoSelecionado) return;
-
-
-
     const atualizado = conselhos.map((c) =>
 
       c.id === conselhoSelecionado.id
@@ -289,9 +217,6 @@ export default function ListaConselhos({
         : c
 
     );
-
-
-
     setConselhos(atualizado);
 
     setModalEtapaAberto(false);
@@ -307,145 +232,96 @@ export default function ListaConselhos({
       <aside
 
         className={cn(
-
-          // POSICIONAMENTO
-
-          "fixed top-[4.5rem] right-0 z-40 flex flex-col w-[30rem] sm:w-[35rem] h-full bg-card border-l shadow-xl",
-
-
-
-          // ANIMAÇÃO SUAVE DE ENTRADA/SAÍDA
-
-          "transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]",
-
-
-
-          // ESTADOS
-
-          estaAberto
-
-            ? "translate-x-0 opacity-100"
-
-            : "translate-x-full opacity-0"
-
+          "fixed top-[4.5rem] right-0 z-40 flex flex-col w-[30rem] sm:w-[35rem]",
+          "transform transition-transform duration-300 ease-in-out",
+          estaAberto ? "translate-x-0" : "translate-x-full",
+          "h-full"
         )}
-
-        onClick={(e) => e.stopPropagation()}
-
       >
-
-        <div className="flex flex-col h-full bg-card">
-
+        <div className="flex flex-col h-full shadow-xl bg-card border-l">
           <div className="flex-1 overflow-auto px-5 pt-10 bg-background">
 
             {conselhos.length > 0 ? (
 
               <div className="flex flex-wrap justify-center pt-6 gap-6">
+                
+                {conselhos.map((conselho) => {
+                  
+                  // ===============================================
+                  // LÓGICA DE VISIBILIDADE DO BOTÃO CORRIGIDA
+                  // ===============================================
+                  const statusLower = conselho.status.toLowerCase();
+                  const isWeg = (role || "").trim().toUpperCase() === "WEG";
 
-                {conselhos.map((conselho) => (
+                  // LISTAS DE STATUS PERMITIDOS PARA VISUALIZAÇÃO
+                  // Nota: Removemos "Pré-conselho" destas listas para sumir com o botão nessa fase.
+                  
+                  // ADMIN/PEDAGÓGICO: Vê a partir de "Conselho"
+                  const listaStatusPre = ["conselho", "aguardando resultado", "resultado"];
+                  
+                  // WEG: Vê a partir de "Aguardando resultado"
+                  const listaStatusFinal = ["aguardando resultado", "resultado"];
 
-                  <Card
+                  // VERIFICAÇÃO EXATA (para evitar que "pré-conselho" ative "conselho" via includes)
+                  // Usamos .some com igualdade estrita ou includes exato na lista
+                  const adminPodeVer = !isWeg && listaStatusPre.includes(statusLower);
+                  const wegPodeVer   = isWeg  && listaStatusFinal.includes(statusLower); // Se for WEG, não vê 'conselho'
+                  
+                  // Admin vê se status for 'conselho' ou maior. 
+                  // WEG só vê se status for 'aguardando' ou maior (pois no 'conselho' ele não tem nada pra baixar).
+                  // Na fase 'aguardando/resultado', AMBOS veem.
+                  const deveMostrarBotao = adminPodeVer || (listaStatusFinal.includes(statusLower)); 
 
-                    key={conselho.id}
+                  return (
+                    <Card
+                      key={conselho.id}
+                      className="rounded-[0.5rem] shadow-md overflow-hidden w-[70%] border"
+                    >
+                      <div className="bg-primary text-primary-foreground px-4 py-3 flex justify-between items-start">
+                        <div>
+                          <div className="text-xs opacity-80">Período</div>
+                          <div className="text-lg font-medium">
+                            {converterData(conselho.dataInicio)} até {converterData(conselho.dataFim)}
+                          </div>
+                        </div>
+                        {podeEditar(conselho.status) && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setConselhoSelecionado(conselho);
+                              setModalEtapaAberto(true);
+                            }}
+                          >
+                            <Icon icon="MoreHorizontal" />
+                          </button>
+                        )}
+                      </div>
 
-                    className="rounded-[0.5rem] shadow-md overflow-hidden w-[70%] border"
-
-                  >
-
-                    {/* HEADER */}
-
-                    <div className="bg-primary text-primary-foreground px-4 py-3 flex justify-between items-start">
-
-                      <div>
-
-                        <div className="text-xs opacity-80">Período</div>
-
-                        <div className="text-lg font-medium">
-
-                          {converterData(conselho.dataInicio)} até{" "}
-
-                          {converterData(conselho.dataFim)}
-
+                      <div className="text-foreground px-4 py-3 flex items-center justify-between bg-card">
+                        <div className="text-sm">
+                          <span className="font-medium">Status:</span>{" "}
+                          <span className="font-normal">{conselho.status}</span>
                         </div>
 
+                        {/* BOTÃO APARECE CONFORME A REGRA */}
+                        {deveMostrarBotao && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setConselhoSelecionado(conselho);
+                              if (onBaixarDocumentos) {
+                                onBaixarDocumentos(conselho);
+                              }
+                            }}
+                            title="Baixar documentos"
+                          >
+                            <FileSpreadsheet size={22} className="opacity-70 hover:opacity-100 transition-opacity" />
+                          </button>
+                        )}
                       </div>
-
-
-
-                      {/* 3 PONTINHOS */}
-
-                      {podeEditar(conselho.etapas) && (
-
-                        <button
-
-                          onClick={(e) => {
-
-                            e.stopPropagation();
-
-                            setConselhoSelecionado(conselho);
-
-                            setModalEtapaAberto(true);
-
-                          }}
-
-                        >
-
-                          <Icon icon="MoreHorizontal" />
-
-                        </button>
-
-                      )}
-
-                    </div>
-
-
-
-                    {/* BODY */}
-
-                    <div className="text-foreground px-4 py-3 flex items-center justify-between bg-card">
-
-                      <div className="text-sm">
-
-                        <span className="font-medium">Status:</span>{" "}
-
-                        <span className="font-normal">{conselho.etapas}</span>
-
-                      </div>
-
-
-
-                      {["Conselho", "Aguardando resultado", "Resultado"].includes(
-
-                        conselho.etapas
-
-                      ) && (
-
-                        <button
-
-                          onClick={(e) => {
-
-                            e.stopPropagation();
-
-                            setConselhoSelecionado(conselho);
-
-                            setModalDocumentosAberto(true);
-
-                          }}
-
-                        >
-
-                          <FileSpreadsheet size={22} className="opacity-70" />
-
-                        </button>
-
-                      )}
-
-                    </div>
-
-                  </Card>
-
-                ))}
-
+                    </Card>
+                  );
+                })}
               </div>
 
             ) : (
@@ -502,10 +378,6 @@ export default function ListaConselhos({
 
       </aside>
 
-
-
-      {/* Modais */}
-
       <ConfirmarConselhoModal
 
         open={modalAberto}
@@ -531,21 +403,7 @@ export default function ListaConselhos({
         onConfirm={handleAvancarEtapa}
 
       />
-
-
-
-      <BaixarDocumentosModal
-
-        open={modalDocumentosAberto}
-
-        onClose={() => setModalDocumentosAberto(false)}
-
-        conselho={conselhoSelecionado}
-
-      />
-
     </>
 
   );
-
 }
