@@ -47,7 +47,7 @@ export const preConselhoProfessor = async (idPreconselhoProfessor: number, profe
     const controller = new AbortController();
 
     try {
-        const response = await api.post(`/preConselhoSupervisao/atualizar/${idPreconselhoProfessor}`, professor, { signal: controller.signal });
+        const response = await api.put(`/preConselhoProfessor/atualizar/${idPreconselhoProfessor}`, professor, { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
