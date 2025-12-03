@@ -36,12 +36,6 @@ export default function ConselhosModal({
   onClose,
   turma,
 }: ConselhosModalProps) {
-  // const [selectedConselho, setSelectedConselho] = useState({} as Conselho);
-
-  // useEffect(() => {
-  //   if (selectedConselho.etapa) {
-  //   }
-  // }, [selectedConselho]);
 
   const handleClick = (conselho: Conselho) => {
     const semConselho = turma;
@@ -62,7 +56,7 @@ export default function ConselhosModal({
         "h-[calc(100vh-5rem)]"
       )}
     >
-      <Card className="flex flex-col h-full border-t-0">
+      <Card className="flex flex-col h-full border-t-0 mt-10">
         <CardHeader className="flex flex-row items-start gap-2 space-y-0">
           <ButtonTT
             className="flex-shrink-0"

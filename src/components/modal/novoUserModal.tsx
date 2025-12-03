@@ -1,15 +1,13 @@
-"use client";
-
 import Form from "next/form";
 import TextField from "../input/textField";
 import ActionModal from "./actionModal";
-import ConfirmacaoNovoUser from "./confirmacaoNovoUser";
 import { toast } from "sonner";
 import { Combobox } from "../ui/combobox";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { USER_ROLES } from "@/utils/types";
 import { hasErrors, showError, validateEmail, validateRequired } from "@/utils/formValidation";
 import { criarUsuario } from "@/api/usuarios";
+import { AxiosError } from "axios";
 
 interface NovoUserModalProps {
   isOpen: boolean;
@@ -43,35 +41,43 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
 
   const handleConfirm = async () => {
     try {
+      // Tenta criar o usuário. Se falhar, Lança o erro.
       const novoUsuario = await criarUsuario({ nome: nome, email: email, role: value });
 
-      if (novoUsuario && novoUsuario.id) {
-          toast.success("Usuário criado com sucesso!");
-          setConfirmOpen(false);
-          setTimeout(() => {
-              setOpen(false);
+      // Se chegou aqui, a requisição foi bem-sucedida e novoUsuario não é nulo/undefined
+      toast.success("Usuário criado com sucesso!");
 
-              setNome("");
-              setEmail("");
-              setValue("");
-              setErrors({});
-          }, 300);
-      }
-  } catch (error) {
+      // Fechar o modal de confirmação
+      setConfirmOpen(false);
+
+      // Fechar o modal principal
+      setOpen(false);
+
+    } catch (error) {
       console.error("Erro ao criar o usuário:", error);
-      toast.error("Erro ao criar o usuário. Tente novamente.");
-  }
+      let errorMessage = "Erro desconhecido ao tentar criar o usuário. Tente novamente.";
+
+      if (error instanceof AxiosError) {
+        if (error.response?.data) {
+          errorMessage = error.response.data.message ||
+            `Erro ${error.response.status}: Falha na requisição.`;
+        } else {
+          errorMessage = "Erro de conexão ou servidor indisponível.";
+        }
+      }
+
+      toast.error(errorMessage);
+    }
   };
 
   useEffect(() => {
     if (!isOpen) {
-      setTimeout(() => {
-        setNome("");
-        setEmail("");
-        setValue("");
-        setErrors({});
-        setConfirmOpen(false);
-      }, 200);
+      // Limpar os campos e estados ao fechar o modal
+      setNome("");
+      setEmail("");
+      setValue("");
+      setErrors({});
+      setConfirmOpen(false);
     }
   }, [isOpen]);
 
@@ -81,7 +87,6 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
         isOpen={isOpen}
         setOpen={setOpen}
         title="Novo Usuário"
-        description="Insira as informações do novo usuário"
         onClose={() => setOpen(false)}
         onConfirm={handleOpenConfirm}
         conteudo={
@@ -93,9 +98,6 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
                   placeholder="Insira o nome do novo usuário"
                   type="text"
                   id="nome"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  error={errors.nome}
                 />
               </div>
 
@@ -105,39 +107,28 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
                   placeholder="Insira o e-mail do novo usuário"
                   type="email"
                   id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  error={errors.email}
                 />
               </div>
 
               <div>
-                <div>
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Tipo de Usuário
+                </label>
+                <div className="mt-2">
                   <Combobox
+                    id="tipo-usuario"
                     items={USER_ROLES}
                     value={value}
                     onChange={setValue}
                     placeholder="Selecione um tipo de usuário..."
                     emptyMessage="Nenhum tipo de usuário encontrado."
                     width="100%"
-                    id="tipoUsuario"
-                    label="Tipo de Usuário"
-                    error={errors.tipo}
                   />
                 </div>
               </div>
             </Form>
           </div>
         }
-      />
-
-      <ConfirmacaoNovoUser
-        isOpen={confirmOpen}
-        setOpen={setConfirmOpen}
-        onConfirm={handleConfirm}
-        onCancel={() => setConfirmOpen(false)}
-        title="Confirmar criação"
-        message={`Deseja criar o usuário "${nome}" com o e-mail "${email}" e tipo "${value}"?`}
       />
     </>
   );

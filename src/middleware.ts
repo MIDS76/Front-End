@@ -3,7 +3,6 @@ import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 
 const protectedRoutes = [
-  "/",
   "/admin",
   "/aluno",
   "/chat",
@@ -28,6 +27,11 @@ export async function middleware(request: NextRequest) {
   const session = cookieStore.get('session');
 
   const path = request.nextUrl.pathname
+
+  if (path.startsWith("/alterarSenha") || path.startsWith("/login")) {
+    return NextResponse.next();
+  }
+
   const isProtectedRoute = protectedRoutes.includes(path)
 
   if (isProtectedRoute && !session?.value) {
@@ -39,7 +43,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/:path*",
     "/admin/:path*",
     "/aluno/:path*",
     "/chat/:path*",

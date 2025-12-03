@@ -7,19 +7,20 @@ export interface Page<T> {
 }
 
 export interface Turma {
-  id: number;
+  id?: number;
   nome: string;
   curso: string;
-  dataInicio: Date;
-  dataFinal: Date;
+  dataInicio: string;
+  dataFinal: string;
 }
 
 export interface Conselho {
   id: number;
-  dataInicio: Date;
-  dataFim: Date;
-  etapa: number;
-  turma: Turma;
+  idTurma: number;
+  nomeTurma?: string;
+  dataInicio: string;
+  dataFim: string;
+  etapas: string;
 }
 
 export interface Usuario {
@@ -50,8 +51,9 @@ export type UserRoleLabels = (typeof USER_ROLES)[number]["label"];
 export type Role = "aluno" | "admin" | "pedagogico";
 
 export const etapas = [
-  "Pré conselho",
-  "Reunião",
-  "Conversas particulares",
-  "Resultados",
+  "Não inciado",
+  "Pré-conselho",
+  "Conselho",
+  "Agudando resultado",
+  "Resultado"
 ];

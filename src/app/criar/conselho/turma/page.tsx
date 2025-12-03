@@ -89,7 +89,7 @@ export default function SelecionarTurmaPreConselho() {
                     setSearchQuery={setSearchTerm}
                     filter
                     filtrosMostrar={{
-                      aluno: false,
+                      usuario: false,
                       turma: true,
                       conselho: false,
                     }}

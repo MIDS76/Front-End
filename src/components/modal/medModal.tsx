@@ -25,12 +25,12 @@ export default function MedModal({
 }: MedModalProps) {
   return (
     <Card
-      className={`
-        cursor-pointer rounded-lg overflow-hidden 
-        transition hover:scale-[1.02] shadow-sm
-        ${loading ? "animate-pulse bg-muted" : ""}
-        ${className}
-      `}
+      className={
+        className +
+        ` h-full  flex flex-col hover:shadow-md cursor-pointer ${
+          loading ? "animate-pulse bg-muted transition-all" : ""
+        }`
+      }
       onClick={onClick}
     >
       <CardHeader
