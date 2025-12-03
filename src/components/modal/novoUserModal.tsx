@@ -3,7 +3,7 @@ import TextField from "../input/textField";
 import ActionModal from "./actionModal";
 import { toast } from "sonner";
 import { Combobox } from "../ui/combobox";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { USER_ROLES } from "@/utils/types";
 import { hasErrors, showError, validateEmail, validateRequired } from "@/utils/formValidation";
 import { criarUsuario } from "@/api/usuarios";
@@ -81,9 +81,6 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
     }
   }, [isOpen]);
 
-
-  const [value, setValue] = useState<string>("");
-
   return (
     <>
       <ActionModal
@@ -119,6 +116,7 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
                 </label>
                 <div className="mt-2">
                   <Combobox
+                    id="tipo-usuario"
                     items={USER_ROLES}
                     value={value}
                     onChange={setValue}
@@ -130,8 +128,8 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
               </div>
             </Form>
           </div>
-        </>
-      }
-    ></ActionModal>
+        }
+      />
+    </>
   );
 }
