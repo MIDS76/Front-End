@@ -6,6 +6,8 @@ import ActionModal from "./actionModal";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { validateRequired } from "@/utils/formValidation";
+import { criarUnidadeCurricular } from "@/api/preConselho";
+import { ca } from "date-fns/locale";
 
 interface NovaUnidadeCurricularProps {
   isOpen: boolean;
@@ -28,7 +30,14 @@ export default function NovaUnidadeCurricular({
       return;
     }
 
-    toast.success("Unidade Curricular criada com sucesso!");
+    try{
+      const uc = criarUnidadeCurricular(nome);
+      console.log(uc);
+      toast.success("Unidade Curricular criada com sucesso!");
+    }catch(err){
+      toast.error("Erro ao criar Unidade Curricular.");
+      return;
+    }
 
     setTimeout(() => {
       setOpen(false);
@@ -51,7 +60,6 @@ export default function NovaUnidadeCurricular({
       isOpen={isOpen}
       setOpen={setOpen}
       title="Nova Unidade Curricular"
-      description=""
       onClose={() => setOpen(false)}
       onConfirm={handleConfirm}
       conteudo={

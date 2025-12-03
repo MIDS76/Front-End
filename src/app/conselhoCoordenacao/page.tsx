@@ -14,6 +14,8 @@ import InfoCard from "@/components/card/cardTituloTelas";
 import UserInfo from "@/components/lista/userInfo";
 import Lista from "@/components/lista/lista";
 import { showError, validateRequired } from "@/utils/formValidation";
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "../access-denied";
 
 type CampoFormulario = {
   titulo: string;
@@ -316,6 +318,12 @@ export default function ConselhoCoordenacao() {
   const proximoButtonColor = exibirFeedbackTurma || proximoDesabilitado 
     ? { backgroundColor: "#d2dbdc", color: "hsl(var(--foreground))", border: "1px solid hsl(var(--border))" }
     : { backgroundColor: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", border: `1px solid hsl(var(--primary))` };
+
+  const { user } = useAuth();
+  
+  if (user?.role !== "pedagogico" && user?.role !== "admin") {
+    return AccessDeniedPage();
+  }
 
   return (
     <div

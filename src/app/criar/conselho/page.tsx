@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FiSearch } from "react-icons/fi";
 import LogLateral from "@/components/sidebar/logLateral";
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "@/app/access-denied";
 import InfoCard from "@/components/card/cardTituloTelas";
 import ButtonTT from "@/components/button/ButtonTT";
 import { toast } from "sonner";
@@ -126,6 +128,11 @@ export default function ConselhoPage() {
     localStorage.setItem("conselhoSalvos", JSON.stringify(atualizados));
   }
 
+  const { user } = useAuth();
+  
+  if (user?.role !== "pedagogico" && user?.role !== "admin") {
+    return AccessDeniedPage();
+  }
   function handleProximoPasso() {
     localStorage.setItem("conselhoSalvos", JSON.stringify(salvos));
   

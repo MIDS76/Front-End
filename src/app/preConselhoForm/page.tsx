@@ -3,13 +3,16 @@
 import { useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import ActionModal from "@/components/modal/actionModal";
+import ActionModal from "@/components/modal/actionModal";  // Modal de confirmação
+import SucessoEnviarModal from "@/components/modal/sucessoEnviarModal";
 import ButtonTT from "@/components/button/ButtonTT";
 import { toast } from "sonner";
 import usuariosData from "@/data/usuarios.json";
 import InfoCard from "@/components/card/cardTituloTelas";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"; // Usar diretamente no componente
 import { validateRequired } from "@/utils/formValidation";
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "../access-denied";
 
 type CampoFormulario = {
   titulo: string;
@@ -61,8 +64,10 @@ const secoesIniciais: CampoFormulario[] = [
 export default function PreConselhoFormulario() {
   const [formulario, setFormulario] = useState<CampoFormulario[]>(secoesIniciais);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false); // Modal de sucesso
   const [pagina, setPagina] = useState(0);
   const [camposErro, setCamposErro] = useState<{ [key: string]: string }>({});
+  const router = useRouter(); // Use diretamente no componente
 
   useEffect(() => {
     const salvo = localStorage.getItem("preconselho-formulario");
@@ -126,73 +131,64 @@ export default function PreConselhoFormulario() {
 
     toast.success("Pré-conselho salvo com sucesso!");
     localStorage.setItem("preconselho-formulario", JSON.stringify(formulario));
+
+    // Abre o modal de sucesso
+    setIsSuccessOpen(true);
+    setIsConfirmOpen(false); // Fecha o modal de confirmação
   };
 
   const secaoAtual = formulario[pagina];
-  const estaCompleta = camposPreenchidos(secaoAtual);
+
+  const handleGoHome = () => {
+    router.push("/aluno"); // Redireciona para a página /aluno
+  };
+
+  const { user } = useAuth();
+  
+  if (user?.role !== "aluno") {
+    return AccessDeniedPage();
+  }
 
   return (
-    <div
-      className="w-full max-w-[90rem] mx-auto overflow-x-hidden"
-      style={{
-        paddingTop: "8rem",
-        paddingBottom: "2rem",
-        overflowX: "hidden",
-        color: "hsl(var(--foreground))",
-      }}
-    >
+    <div className="w-full max-w-[90rem] mx-auto overflow-x-hidden" style={{ paddingTop: "8rem", paddingBottom: "2rem" }}>
       <InfoCard
         titulo="Pré-Conselho"
         subtitulo={secaoAtual.titulo}
         descricao={secaoAtual.descricao}
-        className="max-w-[89rem] mx-auto"
+        className="max-w-full tablet:max-w-[55rem] laptop:max-w-[75rem] desktop:max-w-[89rem] mx-auto"
       />
 
-      <div className="mt-11 pl-2 pr-4 space-y-6">
+      <div className="mt-11 pl-2 pr-4 space-y-6 max-w-full tablet:max-w-[55rem] laptop:max-w-[75rem] desktop:max-w-[89rem] mx-auto">
         {["positivos", "melhoria", "sugestoes"].map((campo) => (
           <div key={campo} className="flex flex-col gap-2">
             <Label className="text-sm font-semibold text-primary transition-colors">
-              {campo === "positivos"
-                ? "Pontos positivos"
-                : campo === "melhoria"
-                  ? "Pontos de melhoria"
-                  : "Sugestões"}
+              {campo === "positivos" ? "Pontos positivos" : campo === "melhoria" ? "Pontos de melhoria" : "Sugestões"}
             </Label>
 
             <Textarea
               placeholder={`Insira aqui os ${campo}...`}
-              className={`mt-1 resize-none rounded-xl border bg-background p-3 text-sm transition-colors focus:border-primary focus:ring-0 outline-none ${camposErro[campo] ? "border-destructive" : "border-border"
-                }`}
+              className={`mt-1 resize-none rounded-xl border bg-background p-3 text-sm transition-colors focus:border-primary focus:ring-0 outline-none ${camposErro[campo] ? "border-destructive" : "border-border"}`}
               value={secaoAtual[campo as keyof CampoFormulario] as string}
-              onChange={(e) =>
-                handleChange(campo as keyof CampoFormulario, e.target.value)
-              }
-              style={{
-                minHeight: "5rem",
-              }}
+              onChange={(e) => handleChange(campo as keyof CampoFormulario, e.target.value)}
+              style={{ minHeight: "5rem" }}
             />
-            {camposErro[campo] && (
-              <p className="text-destructive text-sm">
-                Este campo é obrigatório!
-              </p>
-            )}
+            {camposErro[campo] && <p className="text-destructive text-sm">Este campo é obrigatório!</p>}
           </div>
         ))}
       </div>
 
-
-      <div className="flex justify-end pt-8 gap-4 mr-4">
+      <div className="flex justify-end items-center pt-8 gap-4 pr-4 max-w-full tablet:max-w-[55rem] laptop:max-w-[75rem] desktop:max-w-[89rem] mx-auto">
         {pagina > 0 && (
           <ButtonTT
             tooltip="Anterior"
             mode="default"
             onClick={() => {
               const secaoAtual = formulario[pagina];
-              const novosErros: { [key: string]: boolean } = {};
+              const novosErros: { [key: string]: string } = {};
 
-              if (secaoAtual.positivos.trim() === "") novosErros.positivos = true;
-              if (secaoAtual.melhoria.trim() === "") novosErros.melhoria = true;
-              if (secaoAtual.sugestoes.trim() === "") novosErros.sugestoes = true;
+              novosErros.positivos = validateRequired(secaoAtual.positivos, "pontos positivos");
+              novosErros.melhoria = validateRequired(secaoAtual.melhoria, "melhoria");
+              novosErros.sugestoes = validateRequired(secaoAtual.sugestoes, "sugestões");
 
               if (Object.keys(novosErros).length > 0) {
                 setCamposErro(novosErros);
@@ -204,49 +200,17 @@ export default function PreConselhoFormulario() {
               setPagina(pagina - 1);
             }}
             className="text-[0.875rem] leading-[1.25rem] px-8"
-            style={{
-              backgroundColor: "hsl(var(--card))",
-              color: "hsl(var(--card-foreground))",
-              border: "1px solid hsl(var(--border))",
-            }}
           >
             Anterior
           </ButtonTT>
         )}
 
-
         {pagina < formulario.length - 1 ? (
-          <ButtonTT
-            tooltip="Próximo"
-            mode="default"
-            onClick={handleNext}
-            className="text-[0.875rem] leading-[1.25rem] px-8"
-            style={{
-              backgroundColor: "hsl(var(--primary))",
-              color: "hsl(var(--primary-foreground))",
-              border: "1px solid hsl(var(--primary))",
-            }}
-          >
+          <ButtonTT tooltip="Próximo" mode="default" onClick={handleNext} className="text-[0.875rem] leading-[1.25rem] px-8">
             Próximo
           </ButtonTT>
         ) : (
-          <ButtonTT
-            tooltip="Salvar"
-            mode="default"
-            onClick={() => {
-              if (!estaCompleta) {
-                handleNext();
-                return;
-              }
-              setIsConfirmOpen(true);
-            }}
-            className="text-[0.875rem] leading-[1.25rem] px-8"
-            style={{
-              backgroundColor: "hsl(var(--primary))",
-              color: "hsl(var(--primary-foreground))",
-              border: "1px solid hsl(var(--primary))",
-            }}
-          >
+          <ButtonTT tooltip="Salvar" mode="default" onClick={() => setIsConfirmOpen(true)} className="text-[0.875rem] leading-[1.25rem] px-8">
             Enviar
           </ButtonTT>
         )}
@@ -255,14 +219,20 @@ export default function PreConselhoFormulario() {
       <ActionModal
         isOpen={isConfirmOpen}
         setOpen={setIsConfirmOpen}
-        title="Salvar resposta"
-        description="Deseja salvar essa resposta de conselho?"
-        actionButtonLabel="Salvar"
+        title="Tem certeza que deseja enviar?"
+        actionButtonLabel="Enviar"
         onConfirm={() => {
           handleSalvar();
           localStorage.removeItem("preconselho-formulario");
           setIsConfirmOpen(false);
         }}
+      />
+
+      <SucessoEnviarModal
+        isOpen={isSuccessOpen}
+        setOpen={setIsSuccessOpen}
+        onClose={() => setIsSuccessOpen(false)}
+        handleGoHome={handleGoHome}
       />
     </div>
   );

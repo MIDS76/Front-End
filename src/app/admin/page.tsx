@@ -1,19 +1,19 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import turmasData from "@/data/turma.json";
+import { Turma } from "@/utils/types";
 import MedModal from "@/components/modal/medModal";
-import { useEffect, useState } from "react";
-import ConselhosModal from "@/components/modal/conselhosModal";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import useSWR from "swr";
-
-
-import { Page, Turma } from "@/utils/types";
-import ProtectedRoute from "@/components/ProtectedRoute";
 import SearchBar from "@/components/input/searchBar";
-import FiltrosDinamicos from "@/components/filtros/FiltrosDinamicos";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import ListaConselhos from "@/components/modal/listaConselhos";
 import Paginacao from "@/components/paginacao/paginacao";
+import { useAuth } from "@/context/AuthContext";
+import BaixarDocumentosModal from "@/components/modal/BaixarDocumentosModal"; 
 
-export default function LandingPage() {
+export default function AdminPage() {
+  const { user } = useAuth(); 
+
   const [dataAleatoria] = useState(() => {
     const hoje = new Date();
     const diasAleatorios = Math.floor(Math.random() * 90);
@@ -22,67 +22,115 @@ export default function LandingPage() {
     return data.toLocaleDateString();
   });
 
-  const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
   const [paginaAtual, setPaginaAtual] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredTurmas, setFilteredTurmas] = useState<Turma[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [sideModalOpen, setSideModalOpen] = useState(false);
-  const [selectedTurma, setSelectedTurma] = useState({} as Turma);
+  const [selectedTurma, setSelectedTurma] = useState<Turma | null>(null);
 
-  const { data, isLoading, error } = useSWR<Page<Turma>>(
-    `http://localhost:8099/api/turmas/listar?page=${paginaAtual}&size=12&nomeCurso=${searchQuery}&codigoTurma=${searchQuery}`,
-    fetcher
-  );
+  // ADICIONADO
+  const [baixarModalOpen, setBaixarModalOpen] = useState(false);
+  const [conselhoSelecionado, setConselhoSelecionado] = useState<any | null>(null);
 
+  const [screenWidth, setScreenWidth] = useState(0);
+
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Atualiza tamanho da tela
   useEffect(() => {
-    if (data?.content) {
-      setFilteredTurmas(data.content);
-      setTotalPages(data.totalPages);
-    }
-  }, [data]);
+    const updateScreenWidth = () => setScreenWidth(window.innerWidth);
+    updateScreenWidth();
+    window.addEventListener("resize", updateScreenWidth);
 
-  useEffect(() => {
-    setPaginaAtual(0);
-  }, [searchQuery]);
+    return () => {
+      window.removeEventListener("resize", updateScreenWidth);
+    };
+  }, []);
 
+  // Filtro e paginação
   useEffect(() => {
-    if (!data?.content) return;
+    const getTurmasPorPagina = () => {
+      if (sideModalOpen) {
+        if (screenWidth <= 1024) return 4;
+        if (screenWidth <= 1366) return 6;
+        return 12;
+      } else {
+        if (screenWidth <= 1024) return 8;
+        if (screenWidth <= 1366) return 9;
+        return 12;
+      }
+    };
+
+    const turmasPorPagina = getTurmasPorPagina();
+
+    const turmasArray = Object.values(turmasData).map((t) => ({
+      id: t.id,
+      nome: t.nomeCurso,
+      curso: t.codigoTurma,
+      dataInicio: t.dataInicio,
+      dataFinal: t.dataFim,
+    }));
 
     const query = searchQuery.toLowerCase().replaceAll(" ", "");
-    const filtradas = data.content.filter((turma) => {
-      const codigo = turma.codigoTurma?.toLowerCase().replaceAll(" ", "");
-      const curso = turma.nomeCurso?.toLowerCase().replaceAll(" ", "");
-      return codigo.includes(query) || curso.includes(query);
+    const filtradas = turmasArray.filter((turma) => {
+      const codigo = turma.curso.toLowerCase().replaceAll(" ", "");
+      const nome = turma.nome.toLowerCase().replaceAll(" ", "");
+      return codigo.includes(query) || nome.includes(query);
     });
 
-    setFilteredTurmas(filtradas);
-  }, [searchQuery, data]);
+    setTotalPages(Math.ceil(filtradas.length / turmasPorPagina));
+
+    const inicio = paginaAtual * turmasPorPagina;
+    const fim = inicio + turmasPorPagina;
+    setFilteredTurmas(filtradas.slice(inicio, fim));
+  }, [searchQuery, paginaAtual, screenWidth, sideModalOpen]);
+
+  // Handler do Modal Lateral
+  const handleOpenModal = (turma: Turma) => {
+    if (selectedTurma?.id === turma.id) {
+      setSideModalOpen(false);
+      setSelectedTurma(null);
+      return;
+    }
+
+    setSelectedTurma(turma);
+    setSideModalOpen(true);
+  };
+
+  // Função para abrir o modal de baixar documentos
+  const handleBaixarDocumentos = (conselho: any) => {
+    setConselhoSelecionado(conselho);
+    setBaixarModalOpen(true);
+  };
 
   return (
     <ProtectedRoute>
       <main className="w-full flex flex-col">
         <div className="flex flex-row flex-auto">
-
           <section className="w-full max-h-full md:w-3/5 xl:w-3/4 h-full flex flex-col items-start p-4 pt-24 gap-y-4">
-            <h2 className="font-title text-2xl font-bold text-accent-foreground px-4">
-              Todas as turmas
-            </h2>
 
-            <SearchBar
-              className="w-full xl:w-3/5 2xl:w-2/5 px-4"
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              filter
-              filtrosMostrar={{ aluno: false, turma: true, conselho: false }}
-            />
+            {/* AQUI ESTÁ A AJUSTE PERFEITO QUE VOCÊ PEDIU */}
+            <div className="ml-6 w-[calc(100%-3rem)] desktop:w-[35.8%] laptop:w-[47.5%]">
+              <SearchBar
+                texto="Todos os Conselhos"
+                className="w-full" // Ocupa 100% da div pai acima
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                filter
+                filtrosMostrar={{ aluno: false, turma: true, conselho: false }}
+              />
+            </div>
 
-            <ScrollArea className="w-full h-[500px] mt-8">
-              <ul className="grid md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 w-full px-4">
-                <ListaTurmas />
-              </ul>
-            </ScrollArea>
+            <div
+              className={`mt-6 w-full desktop:w-[75%] grid gap-4 px-6 ${
+                sideModalOpen && screenWidth <= 1366
+                  ? "tablet:grid-cols-1 tablet:w-[50%] laptop:grid-cols-2 laptop:w-[49%]"
+                  : "tablet:grid-cols-2 laptop:grid-cols-4"
+              }`}
+            >
+              <ListaTurmas />
+            </div>
 
             <Paginacao
               paginaAtual={paginaAtual}
@@ -91,49 +139,43 @@ export default function LandingPage() {
             />
           </section>
 
-          <section
-            className={`${sideModalOpen ? "pointer-events-auto" : "pointer-events-none"
-              } absolute right-0 top-0 h-screen w-3/4 md:w-2/5 xl:w-1/4 md:flex flex-col items-center justify-center md:bg-accent bg-none overflow-x-hidden`}
-          >
-            <p className="hidden md:block md:absolute bottom-1/2 text-muted-foreground">
-              Selecione uma turma
-            </p>
-            <ConselhosModal
+          <div ref={modalRef}>
+            <ListaConselhos
+              key={selectedTurma?.id}
               turma={selectedTurma}
-              isOpen={sideModalOpen}
-              onClose={() => setSideModalOpen(false)}
+              estaAberto={sideModalOpen}
+              aoFechar={() => setSideModalOpen(false)}
+              onBaixarDocumentos={handleBaixarDocumentos} 
+              role={user?.role ?? ""}
             />
-          </section>
+
+            {/* MODAL DE BAIXAR DOCUMENTOS */}
+            <BaixarDocumentosModal
+              open={baixarModalOpen}
+              onClose={() => setBaixarModalOpen(false)}
+              conselho={conselhoSelecionado}
+              role={user?.role}
+            />
+          </div>
         </div>
       </main>
     </ProtectedRoute>
   );
 
   function ListaTurmas() {
-    if (isLoading || error)
+    if (!filteredTurmas.length)
       return (
-        <MedModal loading courseCode="..." courseName="..." onClick={() => { }}>
-          ...
+        <MedModal loading courseCode="..." courseName="..." onClick={() => {}}>
+          Nenhuma turma encontrada
         </MedModal>
       );
 
-    return filteredTurmas?.map((turma, index) => (
+    return filteredTurmas.map((turma, index) => (
       <MedModal
         key={index}
-        courseCode={turma.codigoTurma}
-        courseName={turma.nomeCurso}
-        onClick={() => {
-          if (sideModalOpen && selectedTurma.id !== turma.id) {
-            setSideModalOpen(false);
-            setTimeout(() => {
-              setSideModalOpen(true);
-              setSelectedTurma(turma);
-            }, 300);
-          } else {
-            setSideModalOpen(true);
-            setSelectedTurma(turma);
-          }
-        }}
+        courseCode={turma.curso}
+        courseName={turma.nome}
+        onClick={() => handleOpenModal(turma)}
       >
         <b>Último conselho:</b> {dataAleatoria}
       </MedModal>

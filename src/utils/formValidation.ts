@@ -62,3 +62,7 @@ export const validateDate = (value: string): string => {
 export const showError = () => {
     return toast.error("Preencha todos os campos corretamente!");
 }
+
+export const hasErrors = (errors: {}): boolean => {
+    return Object.values(errors).some(error => error !== "");
+}

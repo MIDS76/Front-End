@@ -86,10 +86,10 @@ export default function ListCell({
           nome={usuario?.nome}
           email={usuario?.email}
           copy={copy}
-          active={usuario.isActive}
+          active={usuario.ativo ?? true}
         />
         <div className="text-sm text-muted-foreground inline-block">
-          <p className={`${!usuario.isActive ? "text-gray-400" : ""}`}>
+          <p className={`${!usuario.ativo ? "text-gray-400" : ""}`}>
             {(usuario?.role ?? "").toLocaleUpperCase()}
           </p>
         </div>

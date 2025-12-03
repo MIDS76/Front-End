@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FiSearch } from "react-icons/fi";
 import LogLateral from "@/components/sidebar/logLateral";
+import { useAuth } from "@/context/AuthContext";
+import AccessDeniedPage from "@/app/access-denied";
 import ButtonTT from "@/components/button/ButtonTT";
 import { toast } from "sonner";
 import Lista from "@/components/lista/lista";
@@ -69,7 +71,7 @@ export default function RepresentantePage() {
   function handleRemover(idOuNome: string) {
     setSelecionados((prev) =>
       prev.filter(
-        (s) => s.id.toString() !== idOuNome && s.nome !== idOuNome
+        (s) => s.id?.toString() !== idOuNome && s.nome !== idOuNome
       )
     );
   }
@@ -108,6 +110,12 @@ export default function RepresentantePage() {
     }
   }
 
+
+  const { user } = useAuth();
+  
+  if (user?.role !== "pedagogico" && user?.role !== "admin") {
+    return AccessDeniedPage();
+  }
 
   return (
     <div className="flex min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
@@ -195,7 +203,7 @@ export default function RepresentantePage() {
         isOpen={isConfirmOpen}
         setOpen={setIsConfirmOpen}
         title="Deseja liberar pré-conselho?"
-        description="Ao confirmar, todos os dados relacionados ao pré-conselho serão enviados."
+        conteudo="Ao confirmar, todos os dados relacionados ao pré-conselho serão enviados."
         actionButtonLabel="Confirmar"
         onConfirm={handleConfirmarRepresentantes}
       />

@@ -7,35 +7,42 @@ export interface Page<T> {
 }
 
 export interface Turma {
-  id: number;
-  codigoTurma: string;
-  nomeCurso: string;
-  conselhos?: Conselho[];
-  usuarios?: Usuario[];
+  id?: number;
+  nome: string;
+  curso: string;
+  dataInicio: string;
+  dataFinal: string;
 }
 
 export interface Conselho {
   id: number;
-  dataInicio: Date;
-  dataFim: Date;
-  etapa: number;
+  turmaId: number;
+
+  periodoInicio?: string;
+  periodoFim?: string;
+
+  dataInicio: string;
+  dataFim: string;
+
+  status: string;
+  etapa: string;
+
   turma: Turma;
 }
 
 export interface Usuario {
-  id: number;
+  id?: number;
   nome: string;
   email: string;
   role: string;
-  isActive: boolean;
+  ativo?: boolean;
 }
 
 export const USER_ROLES = [
-  { value: "TECNICO_PEDAGOGICO", label: "Técnico Pedagógico" },
-  { value: "SECRETARIA_PEDAGOGICA", label: "Secretaria Pedagógica"},
-  { value: "SUPERVISOR", label: "Supervisor" },
-  { value: "PROFESSOR", label: "Professor" },
-  { value: "ALUNO", label: "Aluno"},
+  { value: "pedagogico", label: "Técnico Pedagógico" },
+  { value: "weg", label: "WEG" },
+  { value: "supervisor", label: "Supervisor" },
+  { value: "professor", label: "Professor" }
 
 ] as const;
 
@@ -47,6 +54,8 @@ export const ACTIVE = [
 export type UserRoles = (typeof USER_ROLES)[number]["value"];
 
 export type UserRoleLabels = (typeof USER_ROLES)[number]["label"];
+
+export type Role = "aluno" | "admin" | "pedagogico";
 
 export const etapas = [
   "Pré conselho",
