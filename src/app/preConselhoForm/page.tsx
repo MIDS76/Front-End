@@ -36,7 +36,6 @@ export type UsuarioApi = {
 
 export default function PreConselhoFormulario() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [pagina, setPagina] = useState(0);
   const [camposErro, setCamposErro] = useState<{ [key: string]: string }>({});
 
@@ -47,7 +46,7 @@ export default function PreConselhoFormulario() {
 
   const { id } = useParams();
 
-  const idPreConselho = 1;
+  const idPreConselho = 2;
 
   const createInitialFormSections = useCallback((data: UsuarioApi[]): CampoFormulario[] => {
     const secoesProfessor = data
@@ -253,7 +252,6 @@ export default function PreConselhoFormulario() {
       toast.success("Pré-conselho salvo com sucesso!");
       localStorage.removeItem("preconselho-formulario");
 
-      setIsSuccessOpen(true);
       setIsConfirmOpen(false);
     } catch (error) {
       console.error("Erro durante o envio do formulário:", error);
@@ -379,14 +377,8 @@ export default function PreConselhoFormulario() {
           handleSalvar();
           localStorage.removeItem("preconselho-formulario");
           setIsConfirmOpen(false);
+          handleGoHome();
         }}
-      />
-
-      <SucessoEnviarModal
-        isOpen={isSuccessOpen}
-        setOpen={setIsSuccessOpen}
-        onClose={() => setIsSuccessOpen(false)}
-        handleGoHome={handleGoHome}
       />
     </div>
   );
