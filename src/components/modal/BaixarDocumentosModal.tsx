@@ -6,9 +6,7 @@ import { FileSpreadsheet } from "lucide-react";
 interface BaixarDocumentosModalProps {
   open: boolean;
   onClose: () => void;
-  conselho: {
-    status: string;
-  } | null;
+  conselho: any | null;
   role: string | undefined;
 }
 

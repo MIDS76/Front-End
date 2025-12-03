@@ -15,6 +15,7 @@ import AvancarEtapaModal from "./avancarEtapaModal";
 
 
 import { FileSpreadsheet } from "lucide-react";
+import BaixarDocumentosModal from "./BaixarDocumentosModal";
 
 
 
@@ -26,7 +27,6 @@ interface ListaConselhosProps {
 
   turma: TurmaType | null;
   role: string;
-  onBaixarDocumentos?: (conselho: ConselhoType) => void;
 }
 
 const converterData = (data: string | Date | null | undefined): string => {
@@ -62,12 +62,12 @@ export default function ListaConselhos({
   aoFechar,
 
   turma,
-  role,
-  onBaixarDocumentos,
+  role
 }: ListaConselhosProps) {
 
   const [modalEtapaAberto, setModalEtapaAberto] = useState(false);
   const [conselhoSelecionado, setConselhoSelecionado] = useState<ConselhoType | null>(null);
+  const [modalDocumentosAberto, setModalDocumentosAberto] = useState(false);
 
   const ordemStatus = ["Não iniciado", "Pré-conselho", "Conselho", "Aguardando resultado", "Resultado"];
 
@@ -110,12 +110,12 @@ export default function ListaConselhos({
     const encontradaJson = turmasData.find((t) => t.id === turma.id);
     const encontrada: TurmaType = encontradaJson
       ? {
-          id: encontradaJson.id,
-          nome: encontradaJson.nomeCurso,
-          curso: encontradaJson.nomeCurso,
-          dataInicio: encontradaJson.dataInicio,
-          dataFinal: encontradaJson.dataFim
-        }
+        id: encontradaJson.id,
+        nome: encontradaJson.nomeCurso,
+        curso: encontradaJson.nomeCurso,
+        dataInicio: encontradaJson.dataInicio,
+        dataFinal: encontradaJson.dataFim
+      }
       : turma;
 
     setTurmaLocal(encontrada);
@@ -134,7 +134,7 @@ export default function ListaConselhos({
         dataInicio: c.periodoInicio,
 
         dataFim: c.periodoFim,
-        
+
         status: mapStatus(c.status),
 
         etapas: mapStatus(c.status),
@@ -231,9 +231,9 @@ export default function ListaConselhos({
             {conselhos.length > 0 ? (
 
               <div className="flex flex-wrap justify-center pt-6 gap-6">
-                
+
                 {conselhos.map((conselho) => {
-                  
+
                   // ===============================================
                   // LÓGICA DE VISIBILIDADE DO BOTÃO CORRIGIDA
                   // ===============================================
@@ -242,22 +242,22 @@ export default function ListaConselhos({
 
                   // LISTAS DE STATUS PERMITIDOS PARA VISUALIZAÇÃO
                   // Nota: Removemos "Pré-conselho" destas listas para sumir com o botão nessa fase.
-                  
+
                   // ADMIN/PEDAGÓGICO: Vê a partir de "Conselho"
                   const listaStatusPre = ["conselho", "aguardando resultado", "resultado"];
-                  
+
                   // WEG: Vê a partir de "Aguardando resultado"
                   const listaStatusFinal = ["aguardando resultado", "resultado"];
 
                   // VERIFICAÇÃO EXATA (para evitar que "pré-conselho" ative "conselho" via includes)
                   // Usamos .some com igualdade estrita ou includes exato na lista
                   const adminPodeVer = !isWeg && listaStatusPre.includes(statusLower);
-                  const wegPodeVer   = isWeg  && listaStatusFinal.includes(statusLower); // Se for WEG, não vê 'conselho'
-                  
+                  const wegPodeVer = isWeg && listaStatusFinal.includes(statusLower); // Se for WEG, não vê 'conselho'
+
                   // Admin vê se status for 'conselho' ou maior. 
                   // WEG só vê se status for 'aguardando' ou maior (pois no 'conselho' ele não tem nada pra baixar).
                   // Na fase 'aguardando/resultado', AMBOS veem.
-                  const deveMostrarBotao = adminPodeVer || (listaStatusFinal.includes(statusLower)); 
+                  const deveMostrarBotao = adminPodeVer || (listaStatusFinal.includes(statusLower));
 
                   return (
                     <Card
@@ -296,9 +296,7 @@ export default function ListaConselhos({
                             onClick={(e) => {
                               e.stopPropagation();
                               setConselhoSelecionado(conselho);
-                              if (onBaixarDocumentos) {
-                                onBaixarDocumentos(conselho);
-                              }
+                              setModalDocumentosAberto(true);
                             }}
                             title="Baixar documentos"
                           >
@@ -382,6 +380,13 @@ export default function ListaConselhos({
         statusProximo={proximoStatus(conselhoSelecionado?.etapas || "")}
         onConfirm={handleAvancarEtapa}
 
+      />
+
+      <BaixarDocumentosModal
+        open={modalDocumentosAberto}
+        onClose={() => setModalDocumentosAberto(false)}
+        conselho={conselhoSelecionado}
+        role={role}
       />
     </>
 
