@@ -1,127 +1,90 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import React, { createContext, useContext, useEffect, useState, ReactNode, useRef } from "react";
 import SockJs from "sockjs-client";
 import Stomp, { Client, Message } from "stompjs";
-import { toast } from "sonner";
 
-interface ChatMessage {
-  sender: string;
-  content: string;
-  timestamp: string;
-  // exemplo de campos extras se houver
-  messageId?: string;
-  roomId?: string;
+// Tipo de Notificação esperado
+interface Notificacao {
+  id: number;
+  titulo: string;
+  mensagem: string;
+  lido: boolean;
+  horario: string;
 }
 
 interface WebSocketContextType {
   stompClient: Client | null;
   isConnected: boolean;
-  subscribeToMessages: (
-    chatRoomId: string,
-    callback: (message: ChatMessage) => void
+  subscribeToNotifications: (
+    callback: (Notification: Notificacao) => void
   ) => void;
-  unsubscribeFromMessages: (chatRoomId: string) => void;
-  messages: Record<string, ChatMessage[]>;
+  disconnect: () => void;
 }
 
-const WebSocketContext = createContext<WebSocketContextType | undefined>(
-  undefined
-);
+const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
 
-export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
-  const socketClient = useRef<Client | null>(null);
+export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
+  const stompClientRef = useRef<Client | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const subscribedChats = useRef<Set<string>>(new Set());
-  const [messages, setMessages] = useState<Record<string, ChatMessage[]>>({});
 
+  // conectar ao WebSocket quando o componente for iniciado
   useEffect(() => {
-    const ws = new SockJs("http://localhost:8099/ws");
-    const stompClient = Stomp.over(ws);
-    socketClient.current = stompClient;
+    const ws = new SockJs("http://localhost:3000/ws");  // URL do WebSocket
+    const client = Stomp.over(ws);
 
-    stompClient.connect(
-      {},
-      () => {
-        setIsConnected(true);
+    stompClientRef.current = client;
 
-        stompClient.subscribe("/topic/notifications", (message: Message) => {
-          const notification = JSON.parse(message.body);
-          toast(notification.mensagem);
-        });
-      },
-      () => {
-        setIsConnected(false);
-      }
-    );
-
-    const currentSubscribedChats = subscribedChats.current;
+    client.connect({}, () => {
+      setIsConnected(true);
+    }, () => {
+      setIsConnected(false);  // Se falhar a conexão
+    });
 
     return () => {
-      if (socketClient.current && isConnected) {
-        socketClient.current.disconnect(() => {
+      if (stompClientRef.current) {
+        stompClientRef.current.disconnect(() => {
           setIsConnected(false);
-          currentSubscribedChats.clear();
+
         });
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const subscribeToMessages = (
-    chatRoomId: string,
-    callback: (message: ChatMessage) => void
+  // Inscrever-se no tópico de notificações do WebSocket
+  const subscribeToNotifications = (
+    callback: (notification: Notificacao) => void
   ) => {
-    if (!socketClient.current || !isConnected) return;
+    if (!stompClientRef.current || !isConnected) return;
 
-    if (subscribedChats.current.has(chatRoomId)) return;
+    if (!isConnected) {
+      setTimeout(() => subscribeToNotifications(callback), 200);
+      return;
+    }
 
-    socketClient.current.subscribe(
-      `/topic/chat-room/${chatRoomId}`,
-      (message: Message) => {
-        const msg: ChatMessage = JSON.parse(message.body);
-
-        setMessages((prevMessages) => ({
-          ...prevMessages,
-          [chatRoomId]: [...(prevMessages[chatRoomId] || []), msg],
-        }));
-
-        callback(msg);
-      }
-    );
-
-    subscribedChats.current.add(chatRoomId);
+    stompClientRef.current.subscribe("/topic/notificacoes", (message: Message) => {
+      const notification: Notificacao = JSON.parse(message.body);
+      callback(notification);
+    });
   };
 
-  const unsubscribeFromMessages = (chatRoomId: string) => {
-    if (
-      socketClient.current &&
-      isConnected &&
-      subscribedChats.current.has(chatRoomId)
-    ) {
-      socketClient.current.unsubscribe(`/topic/chat-room/${chatRoomId}`);
-      subscribedChats.current.delete(chatRoomId);
+  // Desconectar do WebSocket
+  const disconnect = () => {
+    if (stompClientRef.current && isConnected) {
+      stompClientRef.current.disconnect(() => {
+        setIsConnected(false);
+      });
     }
   };
 
   return (
-    <WebSocketContext.Provider
-      value={{
-        stompClient: socketClient.current,
-        isConnected,
-        subscribeToMessages,
-        unsubscribeFromMessages,
-        messages,
-      }}
+    <WebSocketContext.Provider 
+    value={{
+      stompClient: stompClientRef.current,
+      isConnected,
+      subscribeToNotifications, 
+      disconnect
+    }}
     >
       {children}
     </WebSocketContext.Provider>
@@ -131,9 +94,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({
 export const useWebSocket = () => {
   const context = useContext(WebSocketContext);
   if (!context) {
-    throw new Error(
-      "useWebSocket deve ser usado dentro de um WebSocketProvider"
-    );
+    throw new Error("useWebSocket deve ser usado dentro de um WebSocketProvider");
   }
   return context;
 };
