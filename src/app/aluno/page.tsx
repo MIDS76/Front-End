@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
@@ -36,8 +36,8 @@ const feedbackTurmaMock: Feedback = {
 const conselhos: Conselho[] = [
   {
     id: 1,
-    titulo: "MI 78",
-    periodo: "03/2024 - 04/2024",
+    titulo: "03/2024 - 04/2024",
+    periodo: "",
     status: "Concluído",
     feedback: {
       pontosFortes: "Demonstra liderança em projetos de grupo.",
@@ -47,8 +47,8 @@ const conselhos: Conselho[] = [
   },
   {
     id: 2,
-    titulo: "MI 79",
-    periodo: "05/2024 - 06/2024",
+    titulo: "05/2024 - 06/2024",
+    periodo: "",
     status: "Concluído",
     feedback: {
       pontosFortes: "Excelente capacidade analítica.",
@@ -58,8 +58,8 @@ const conselhos: Conselho[] = [
   },
   {
     id: 3,
-    titulo: "MI 80",
-    periodo: "07/2024 - 08/2024",
+    titulo: "07/2024 - 08/2024",
+    periodo: "",
     status: "Em Andamento",
     feedback: null,
   },
@@ -79,10 +79,7 @@ function DevolutivaAluno({ isOpen, onClose, feedbackIndividual, periodo }: any) 
     <aside
       className={cn(
         "fixed top-[3.75rem] right-0 z-50",
-        // --- AJUSTE DE LARGURA AQUI ---
-        // Aumentei consideravelmente as medidas para deixar mais "gordinho"
         "w-[26rem] sm:w-[32rem] md:w-[45rem] lg:w-[55rem] xl:w-[60rem]",
-        
         "h-[calc(100vh-3.75rem)] bg-[#d2dbdc] shadow-2xl border-l border-slate-300 p-[1.25rem]",
         "transform transition-transform duration-300 ease-in-out flex flex-col",
         isOpen ? "translate-x-0" : "translate-x-full"
@@ -125,7 +122,7 @@ function DevolutivaAluno({ isOpen, onClose, feedbackIndividual, periodo }: any) 
                         : "text-white hover:bg-white/10"
                 )}
             >
-            Turma
+              Turma
             </button>
             <button 
                 onClick={() => setTipoVisualizacao("individual")}
@@ -136,7 +133,7 @@ function DevolutivaAluno({ isOpen, onClose, feedbackIndividual, periodo }: any) 
                         : "text-white hover:bg-white/10"
                 )}
             >
-            Individual
+              Individual
             </button>
           </div>
         </div>
@@ -200,25 +197,21 @@ export default function Page() {
           titulo="Meus Conselhos"
           subtitulo="Centro de Gerenciamento de conselhos"
           descricao=""
-          className="shadow-sm border-l-4 border-[#2A5C61] w-[32.5625rem] h-[6.4375rem] mb-[4rem]"
+          className="shadow-sm   w-[32.5625rem] h-[6.4375rem] mb-[4rem]"
         />
       </div>
 
-      {/* LISTA DE CARDS */}
+      {/* LISTA DE MEDMODAL */}
       <div className="flex flex-wrap gap-[1.5rem] ml-[2.5rem]">
         {conselhos.map((c) => (
-          <div 
-            key={c.id} 
-            className="flex-shrink-0"
-            onClick={() => setSelectedConselho(c.id)}
-          >
-            {/* CARD CUSTOMIZADO */}
-            <div className="group cursor-pointer flex flex-col w-[19rem] h-[9.25rem] rounded-[0.625rem] overflow-hidden shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg bg-white">
+          <div key={c.id} className="flex-shrink-0" onClick={() => setSelectedConselho(c.id)}>
+            {/* MEDMODAL CUSTOMIZADO */}
+            <div className="group cursor-pointer flex flex-col w-[19rem] h-[7.50rem] rounded-[0.625rem] overflow-hidden shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg bg-white ">
               <div className="bg-[#2A5C61] p-[1rem] h-[6.4375rem] flex flex-col justify-center gap-[0.25rem] relative overflow-hidden">
                 <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-300" />
-                <h3 className="text-[1.25rem] font-bold text-white tracking-wide">
-                  {c.titulo}
-                </h3>
+                {/* Alteração: O Período fica em cima da data */}
+                <Label className="text-[0.875rem] text-white pt-1">Período</Label>
+                <h3 className="text-[1.25rem] font-bold text-white tracking-wide">{c.titulo}</h3>
                 <span className="text-[0.875rem] text-white/70 font-medium uppercase tracking-wider">
                   {c.periodo}
                 </span>
