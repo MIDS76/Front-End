@@ -180,15 +180,11 @@ export default function ConselhoCoordenacao() {
     localStorage.setItem("conselho-turma", JSON.stringify(feedbackTurma));
   }, [feedbackTurma]);
 
+  // Mantido o fix de salvamento
   const handleChange = (campo: keyof CampoFormulario, valor: string) => {
     const novoFormulario = [...formulario];
-    let idx = pagina;
-    if (usuarioSelecionado) {
-        idx = novoFormulario.findIndex(f => f.titulo === usuarioSelecionado.nome);
-    }
-    
-    if (idx !== -1 && idx < novoFormulario.length) {
-      novoFormulario[idx] = { ...novoFormulario[idx], [campo]: valor };
+    if (pagina >= 0 && pagina < novoFormulario.length) {
+      novoFormulario[pagina] = { ...novoFormulario[pagina], [campo]: valor };
       setFormulario(novoFormulario);
       setErrosCampos((prev) => ({ ...prev, [campo]: false }));
     }
@@ -202,9 +198,8 @@ export default function ConselhoCoordenacao() {
   const validarCamposAluno = () => {
     if (!formulario || formulario.length === 0) return true;
     
-    const secaoAtualForm = usuarioSelecionado
-        ? formulario.find((f) => f.titulo === usuarioSelecionado.nome)
-        : formulario[pagina];
+    // Validar o formulário da PÁGINA ATUAL
+    const secaoAtualForm = formulario[pagina];
 
     if (!secaoAtualForm) return true;
     
@@ -219,7 +214,7 @@ export default function ConselhoCoordenacao() {
 
     if (erros.positivos || erros.melhoria || erros.sugestoes) {
         toast.error("Por favor, preencha todos os campos do aluno atual antes de prosseguir.");
-      return false; 
+        return false;
     }
     return true;
   };
@@ -241,7 +236,7 @@ export default function ConselhoCoordenacao() {
   }
 
   const trocarPagina = (novaPagina: number) => {
-    
+    // BLOQUEIO RESTAURADO: Se tentar avançar, valida antes
     if (novaPagina > pagina) {
         if (!validarCamposAluno()) return; 
     }
@@ -258,6 +253,7 @@ export default function ConselhoCoordenacao() {
   };
   
   const handleTransitionToTurma = () => {
+      // Verifica o último aluno antes de ir para a turma
       if (!validarCamposAluno()) return;
 
       const todosAlunosPreenchidos = formulario.every(
@@ -274,6 +270,7 @@ export default function ConselhoCoordenacao() {
   };
 
   const handleSelecionarUsuario = (usuarioClicado: Usuario) => {
+      // BLOQUEIO RESTAURADO: Impede troca via lista se o atual estiver incompleto
       if (!validarCamposAluno()) return;
 
       const novaPagina = usuarios.findIndex((u) => u.nome === usuarioClicado.nome);
@@ -300,9 +297,7 @@ export default function ConselhoCoordenacao() {
     usuario.nome.toLowerCase().includes(searchQueryUsuarios.toLowerCase())
   );
 
-  const secaoAtual = usuarioSelecionado
-    ? formulario.find((f) => f.titulo === usuarioSelecionado.nome) ?? { titulo: "", positivos: "", melhoria: "", sugestoes: "" }
-    : formulario[pagina] ?? { titulo: "", positivos: "", melhoria: "", sugestoes: "" };
+  const secaoAtual = formulario[pagina] ?? { titulo: "", positivos: "", melhoria: "", sugestoes: "" };
 
   const todosAlunosPreenchidos = formulario.length > 0 && formulario.every(
     (f) => f.positivos.trim() && f.melhoria.trim() && f.sugestoes.trim()
