@@ -1,3 +1,4 @@
+import { UsuarioApi } from "@/app/preConselhoForm/page";
 import api from "@/utils/axios";
 import { AxiosError } from "axios";
 
@@ -123,11 +124,11 @@ export const unidadeCurricular = async () => {
     }
 }
 
-export const listarPreConselhoProfessorPorConselho = async () => {
+export const listarPreConselhoProfessorPorConselho = async (idPreConselho: number) => {
     const controller = new AbortController();
 
     try {
-        const response = await api.get(`/preConselhoProfessor/listar-por-pre-conselho`, { signal: controller.signal });
+        const response = await api.get<UsuarioApi[]>(`/preConselhoProfessor/listar-por-pre-conselho/${idPreConselho}`, { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
