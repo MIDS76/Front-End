@@ -46,7 +46,7 @@ export default function LogLateral({
 
   return (
     <aside
-  className="
+      className="
     relative
     w-[25rem]
     flex-shrink-0
@@ -57,7 +57,7 @@ export default function LogLateral({
     shadow-md
     bg-[hsl(var(--muted))]
   "
->
+    >
 
       {/* Cabeçalho */}
       <div className="bg-[hsl(var(--primary))] p-[1rem]">

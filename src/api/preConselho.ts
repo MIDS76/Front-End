@@ -144,7 +144,7 @@ export const listarProfessores = async () => {
     const controller = new AbortController();
 
     try {
-        const response = await api.get(`/professores/listar`, { signal: controller.signal });
+        const response = await api.get(`/professor/listar`, { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {

@@ -51,7 +51,7 @@ export default function SelecionarTurmaPreConselho() {
     }
 
     localStorage.setItem("turmaSelecionada", JSON.stringify(selected));
-    router.push("/criar/conselho");
+    router.push("/criar/conselho/representante");
   }
 
   return (
