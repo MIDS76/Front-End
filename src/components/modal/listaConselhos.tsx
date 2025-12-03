@@ -3,28 +3,15 @@
 
 
 import { useEffect, useState } from "react";
-
 import { Card } from "@/components/ui/card";
-
 import { cn } from "@/lib/utils";
-
 import { Icon } from "@/components/button/smallButton";
-
 import ButtonTT from "@/components/button/ButtonTT";
-
 import turmasData from "@/data/turma.json";
-
 import conselhosData from "@/data/conselho.json";
-
 import { Turma as TurmaType, Conselho as ConselhoType } from "@/utils/types";
-import { FileSpreadsheet } from "lucide-react";
-
-
-
 import ConfirmarConselhoModal from "./confirmarConselhoModal";
-
 import AvancarEtapaModal from "./avancarEtapaModal";
-
 import BaixarDocumentosModal from "./BaixarDocumentosModal";
 
 
@@ -201,7 +188,7 @@ export default function ListaConselhos({
 
 
   const podeEditar = (status: string) => status !== "Resultado";
-  const existeConselhoAberto = conselhos.some((c) => c.status !== "Resultado");
+  const existeConselhoAberto = conselhos.some((c) => c.etapas !== "Resultado");
 
 
 
@@ -250,7 +237,7 @@ export default function ListaConselhos({
                   // ===============================================
                   // LÓGICA DE VISIBILIDADE DO BOTÃO CORRIGIDA
                   // ===============================================
-                  const statusLower = conselho.status.toLowerCase();
+                  const statusLower = conselho.etapas.toLowerCase();
                   const isWeg = (role || "").trim().toUpperCase() === "WEG";
 
                   // LISTAS DE STATUS PERMITIDOS PARA VISUALIZAÇÃO
@@ -284,7 +271,7 @@ export default function ListaConselhos({
                             {converterData(conselho.dataInicio)} até {converterData(conselho.dataFim)}
                           </div>
                         </div>
-                        {podeEditar(conselho.status) && (
+                        {podeEditar(conselho.etapas) && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -300,7 +287,7 @@ export default function ListaConselhos({
                       <div className="text-foreground px-4 py-3 flex items-center justify-between bg-card">
                         <div className="text-sm">
                           <span className="font-medium">Status:</span>{" "}
-                          <span className="font-normal">{conselho.status}</span>
+                          <span className="font-normal">{conselho.etapas}</span>
                         </div>
 
                         {/* BOTÃO APARECE CONFORME A REGRA */}
@@ -379,11 +366,8 @@ export default function ListaConselhos({
       </aside>
 
       <ConfirmarConselhoModal
-
         open={modalAberto}
-
         onClose={() => setModalAberto(false)}
-
         onConfirm={handleConfirm}
 
       />
@@ -393,13 +377,9 @@ export default function ListaConselhos({
       <AvancarEtapaModal
 
         open={modalEtapaAberto}
-
         onClose={() => setModalEtapaAberto(false)}
-
         statusAtual={conselhoSelecionado?.etapas || ""}
-
         statusProximo={proximoStatus(conselhoSelecionado?.etapas || "")}
-
         onConfirm={handleAvancarEtapa}
 
       />
