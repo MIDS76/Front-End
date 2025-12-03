@@ -21,10 +21,17 @@ export default function FiltrosDinamicos({
   const [subOpen, setSubOpen] = useState<string | null>(null);
   const [cursos, setCursos] = useState<string[]>([]); 
   const [anos, setAnos] = useState<string[]>([]); 
-  const [etapasConselho, setEtapasConselho] = useState<string[]>([]); 
   const [turmas, setTurmas] = useState<any[]>([]);
   const [alunos, setAlunos] = useState<any[]>([]);
   const [dadosFiltrados, setDadosFiltrados] = useState<any[]>([]);
+  const etapasConselhoPadrao = [
+    "Em andamento", 
+    "Resultado", 
+    "Não realizado",
+    "Todos" 
+];
+const [etapasConselho, setEtapasConselho] = useState<string[]>(etapasConselhoPadrao); 
+
 
 
   useEffect(() => {
