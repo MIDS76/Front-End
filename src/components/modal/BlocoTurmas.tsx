@@ -8,18 +8,20 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Turma } from "@/utils/types";
 
 interface BlocoTurmasProps {
-  turmas: Turma[];
-  searchQuery: string;
-  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
-  handleTurmaClick: (id: number) => void;
-  scrollHeight?: string;
-}
-
+    turmas: Turma[];
+    searchQuery: string;
+    setSearchQuery: React.Dispatch<React.SetStateAction<string>>; 
+    handleTurmaClick: (id: number) => void;
+    scrollHeight?: string;
+    onAplicarFiltro: (grupo: string, valor: string) => Promise<void>;
+  }
+  
 export default function BlocoTurmas({
   turmas,
   searchQuery,
   setSearchQuery,
   handleTurmaClick,
+  onAplicarFiltro,
   scrollHeight = "40rem",
 }: BlocoTurmasProps) {
 
@@ -40,10 +42,11 @@ export default function BlocoTurmas({
               setSearchQuery={setSearchQuery}
               filter
               filtrosMostrar={{
-                aluno: false,
+                usuario: false,
                 turma: true,
                 conselho: false,
               }}
+              onSelect={onAplicarFiltro}
             />
           </div>
         }

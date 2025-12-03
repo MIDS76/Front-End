@@ -1,51 +1,86 @@
 "use client";
 
+
+
 import { useEffect, useState } from "react";
+
 import { Card } from "@/components/ui/card";
+
 import { cn } from "@/lib/utils";
+
 import { Icon } from "@/components/button/smallButton";
+
 import ButtonTT from "@/components/button/ButtonTT";
+
 import turmasData from "@/data/turma.json";
+
 import conselhosData from "@/data/conselho.json";
+
 import { Turma as TurmaType, Conselho as ConselhoType } from "@/utils/types";
 import { FileSpreadsheet } from "lucide-react";
 
+
+
 import ConfirmarConselhoModal from "./confirmarConselhoModal";
+
 import AvancarEtapaModal from "./avancarEtapaModal";
 
+import BaixarDocumentosModal from "./BaixarDocumentosModal";
+
+
+
+import { FileSpreadsheet } from "lucide-react";
+
+
+
 interface ListaConselhosProps {
+
   estaAberto: boolean;
+
   aoFechar: () => void;
+
   turma: TurmaType | null;
   role: string;
   onBaixarDocumentos?: (conselho: ConselhoType) => void;
 }
 
 const converterData = (data: string | Date | null | undefined): string => {
+
   if (!data) return "—";
+
   const d = new Date(data);
+
   if (isNaN(d.getTime())) return "—";
+
   return `${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+
 };
 
 // Normaliza os status vindos do banco/json
 const mapStatus = (status: string): string => {
+
   const s = status.toLowerCase();
   if (s.includes("nao") || s.includes("não")) return "Não iniciado";
   if (s.includes("pre")) return "Pré-conselho"; // Atenção aqui
   if (s.includes("cons")) return "Conselho";
+
   if (s.includes("aguard")) return "Aguardando resultado";
   if (s.includes("result") || s.includes("final") || s.includes("conc")) return "Resultado";
   return "Não iniciado";
+
 };
+
+
 
 export default function ListaConselhos({
   estaAberto,
   aoFechar,
+
   turma,
   role,
   onBaixarDocumentos,
 }: ListaConselhosProps) {
+
   const [modalEtapaAberto, setModalEtapaAberto] = useState(false);
   const [conselhoSelecionado, setConselhoSelecionado] = useState<ConselhoType | null>(null);
 
@@ -53,23 +88,38 @@ export default function ListaConselhos({
 
   const proximoStatus = (atual: string) => {
     const index = ordemStatus.indexOf(atual);
+
     return ordemStatus[index + 1] || atual;
   };
 
+
+
   const [conselhos, setConselhos] = useState<ConselhoType[]>([]);
+
   const [turmaLocal, setTurmaLocal] = useState<TurmaType | null>(null);
+
   const [modalAberto, setModalAberto] = useState(false);
 
+
+
   const handleConfirm = () => {
+
     window.location.href = "/criar/conselho";
+
     setModalAberto(false);
+
   };
 
   useEffect(() => {
+
     if (!turma) {
+
       setTurmaLocal(null);
+
       setConselhos([]);
+
       return;
+
     }
 
     const encontradaJson = turmasData.find((t) => t.id === turma.id);
@@ -85,58 +135,102 @@ export default function ListaConselhos({
 
     setTurmaLocal(encontrada);
 
+
+
     const filtrados: ConselhoType[] = conselhosData
+
       .filter((c) => c.turmaId === encontrada.id)
+
       .map((c) => ({
+
         id: c.id,
+
         turmaId: c.turmaId,
         dataInicio: c.periodoInicio,
+
         dataFim: c.periodoFim,
         status: mapStatus(c.status),
+
         etapa: mapStatus(c.status),
         turma: encontrada,
+
       }));
 
+
+
     const concluidos: ConselhoType[] = [];
+
     const emAndamento: ConselhoType[] = [];
 
+
+
     filtrados.forEach((c) => {
-      if (c.status === "Resultado") concluidos.push(c);
+
+      if (c.etapas === "Resultado") concluidos.push(c);
+
       else emAndamento.push(c);
+
     });
 
+
+
     if (emAndamento.length > 1) {
+
       const maisRecente = emAndamento.sort(
         (a, b) => Number(new Date(b.dataInicio)) - Number(new Date(a.dataInicio))
       )[0];
       const ajustados = filtrados.map((c) =>
-        c.id !== maisRecente.id && c.status !== "Resultado"
+
+        c.id !== maisRecente.id && c.etapas !== "Resultado"
+
           ? { ...c, status: "Resultado" }
+
           : c
+
       );
       setConselhos(ajustados);
+
     } else {
+
       setConselhos(filtrados);
+
     }
+
   }, [turma]);
+
+
 
   const podeEditar = (status: string) => status !== "Resultado";
   const existeConselhoAberto = conselhos.some((c) => c.status !== "Resultado");
 
+
+
   const handleAvancarEtapa = () => {
+
     if (!conselhoSelecionado) return;
     const atualizado = conselhos.map((c) =>
+
       c.id === conselhoSelecionado.id
-        ? { ...c, status: proximoStatus(c.status) }
+
+        ? { ...c, status: proximoStatus(c.etapas) }
+
         : c
+
     );
     setConselhos(atualizado);
+
     setModalEtapaAberto(false);
+
   };
 
+
+
   return (
+
     <>
+
       <aside
+
         className={cn(
           "fixed top-[4.5rem] right-0 z-40 flex flex-col w-[30rem] sm:w-[35rem]",
           "transform transition-transform duration-300 ease-in-out",
@@ -146,7 +240,9 @@ export default function ListaConselhos({
       >
         <div className="flex flex-col h-full shadow-xl bg-card border-l">
           <div className="flex-1 overflow-auto px-5 pt-10 bg-background">
+
             {conselhos.length > 0 ? (
+
               <div className="flex flex-wrap justify-center pt-6 gap-6">
                 
                 {conselhos.map((conselho) => {
@@ -227,47 +323,87 @@ export default function ListaConselhos({
                   );
                 })}
               </div>
+
             ) : (
+
               <div className="flex flex-col items-center justify-center h-60 text-muted-foreground font-normal">
+
                 Nenhum conselho cadastrado
+
               </div>
+
             )}
+
           </div>
 
+
+
           <div className="p-6 bg-card mb-16">
+
             <div className="flex justify-center">
+
               <ButtonTT
+
                 disabled={existeConselhoAberto}
+
                 className="text-primary-foreground rounded-md text-base font-medium"
+
                 onClick={() => setModalAberto(true)}
+
                 mode="default"
+
                 tooltip={
+
                   existeConselhoAberto
+
                     ? "Já existe um conselho em andamento"
+
                     : "Criar novo conselho para esta turma"
+
                 }
+
                 type="button"
+
               >
+
                 Criar novo conselho para esta turma
+
               </ButtonTT>
+
             </div>
+
           </div>
+
         </div>
+
       </aside>
 
       <ConfirmarConselhoModal
+
         open={modalAberto}
+
         onClose={() => setModalAberto(false)}
+
         onConfirm={handleConfirm}
+
       />
 
+
+
       <AvancarEtapaModal
+
         open={modalEtapaAberto}
+
         onClose={() => setModalEtapaAberto(false)}
-        statusAtual={conselhoSelecionado?.status || ""}
-        statusProximo={proximoStatus(conselhoSelecionado?.status || "")}
+
+        statusAtual={conselhoSelecionado?.etapas || ""}
+
+        statusProximo={proximoStatus(conselhoSelecionado?.etapas || "")}
+
         onConfirm={handleAvancarEtapa}
+
       />
     </>
+
   );
 }
