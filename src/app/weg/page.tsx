@@ -13,7 +13,7 @@ import BaixarDocumentosModal from "@/components/modal/BaixarDocumentosModal";
 
 
 export default function WegPage() {
-  const { user } = useAuth(); 
+  const { user } = useAuth(); // Pega a role (WEG)
 
   const [dataAleatoria] = useState(() => {
     const hoje = new Date();
@@ -30,12 +30,11 @@ export default function WegPage() {
   const [sideModalOpen, setSideModalOpen] = useState(false);
   const [selectedTurma, setSelectedTurma] = useState<Turma | null>(null);
 
-  // ADICIONADO
+  // Estados para o Modal de Baixar Documentos
   const [baixarModalOpen, setBaixarModalOpen] = useState(false);
   const [conselhoSelecionado, setConselhoSelecionado] = useState<any | null>(null);
 
   const [screenWidth, setScreenWidth] = useState(0);
-
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Atualiza tamanho da tela
@@ -43,10 +42,7 @@ export default function WegPage() {
     const updateScreenWidth = () => setScreenWidth(window.innerWidth);
     updateScreenWidth();
     window.addEventListener("resize", updateScreenWidth);
-
-    return () => {
-      window.removeEventListener("resize", updateScreenWidth);
-    };
+    return () => { window.removeEventListener("resize", updateScreenWidth); };
   }, []);
 
   // Filtro e paginação
@@ -87,24 +83,20 @@ export default function WegPage() {
     setFilteredTurmas(filtradas.slice(inicio, fim));
   }, [searchQuery, paginaAtual, screenWidth, sideModalOpen]);
 
-  // CORREÇÃO DEFINITIVA
   const handleOpenModal = (turma: Turma) => {
     if (selectedTurma?.id === turma.id) {
       setSideModalOpen(false);
       setSelectedTurma(null);
       return;
     }
-
     setSelectedTurma(turma);
     setSideModalOpen(true);
   };
 
-  // Função para abrir o modal de baixar documentos
   const handleBaixarDocumentos = (conselho: any) => {
     setConselhoSelecionado(conselho);
     setBaixarModalOpen(true);
   };
-
 
   return (
     <ProtectedRoute>
@@ -112,14 +104,17 @@ export default function WegPage() {
         <div className="flex flex-row flex-auto">
           <section className="w-full max-h-full md:w-3/5 xl:w-3/4 h-full flex flex-col items-start p-4 pt-24 gap-y-4">
 
-            <SearchBar
-              texto="Todos os Conselhos"
-              className="w-full xl:w-3/5 2xl:w-2/5"
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              filter
-              filtrosMostrar={{ aluno: false, turma: true, conselho: false }}
-            />
+            {/* BARRA DE PESQUISA COM O AJUSTE DE LARGURA */}
+            <div className="ml-6 w-[calc(100%-3rem)] desktop:w-[35.8%] laptop:w-[47.5%]">
+              <SearchBar
+                texto="Todos os Conselhos"
+                className="w-full"
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                filter
+                filtrosMostrar={{ aluno: false, turma: true, conselho: false }}
+              />
+            </div>
 
             <div
               className={`mt-6 w-full desktop:w-[75%] grid gap-4 px-6 ${
@@ -148,7 +143,7 @@ export default function WegPage() {
               role={user?.role ?? ""}
             />
 
-            {/*  MODAL DE BAIXAR DOCUMENTOS */}
+            {/* MODAL DE BAIXAR DOCUMENTOS */}
             <BaixarDocumentosModal
               open={baixarModalOpen}
               onClose={() => setBaixarModalOpen(false)}

@@ -11,9 +11,8 @@ import Paginacao from "@/components/paginacao/paginacao";
 import { useAuth } from "@/context/AuthContext";
 import BaixarDocumentosModal from "@/components/modal/BaixarDocumentosModal"; 
 
-
 export default function PedagogicoPage() {
-  const { user } = useAuth(); // pega a role
+  const { user } = useAuth(); 
 
   const [dataAleatoria] = useState(() => {
     const hoje = new Date();
@@ -30,26 +29,19 @@ export default function PedagogicoPage() {
   const [sideModalOpen, setSideModalOpen] = useState(false);
   const [selectedTurma, setSelectedTurma] = useState<Turma | null>(null);
 
-  // ADICIONADO
   const [baixarModalOpen, setBaixarModalOpen] = useState(false);
   const [conselhoSelecionado, setConselhoSelecionado] = useState<any | null>(null);
 
   const [screenWidth, setScreenWidth] = useState(0);
-
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Atualiza tamanho da tela
   useEffect(() => {
     const updateScreenWidth = () => setScreenWidth(window.innerWidth);
     updateScreenWidth();
     window.addEventListener("resize", updateScreenWidth);
-
-    return () => {
-      window.removeEventListener("resize", updateScreenWidth);
-    };
+    return () => { window.removeEventListener("resize", updateScreenWidth); };
   }, []);
 
-  // Filtro e paginação
   useEffect(() => {
     const getTurmasPorPagina = () => {
       if (sideModalOpen) {
@@ -62,49 +54,36 @@ export default function PedagogicoPage() {
         return 12;
       }
     };
-
     const turmasPorPagina = getTurmasPorPagina();
-
     const turmasArray = Object.values(turmasData).map((t) => ({
-      id: t.id,
-      nome: t.nomeCurso,
-      curso: t.codigoTurma,
-      dataInicio: t.dataInicio,
-      dataFinal: t.dataFim,
+      id: t.id, nome: t.nomeCurso, curso: t.codigoTurma, dataInicio: t.dataInicio, dataFinal: t.dataFim,
     }));
-
     const query = searchQuery.toLowerCase().replaceAll(" ", "");
     const filtradas = turmasArray.filter((turma) => {
       const codigo = turma.curso.toLowerCase().replaceAll(" ", "");
       const nome = turma.nome.toLowerCase().replaceAll(" ", "");
       return codigo.includes(query) || nome.includes(query);
     });
-
     setTotalPages(Math.ceil(filtradas.length / turmasPorPagina));
-
     const inicio = paginaAtual * turmasPorPagina;
     const fim = inicio + turmasPorPagina;
     setFilteredTurmas(filtradas.slice(inicio, fim));
   }, [searchQuery, paginaAtual, screenWidth, sideModalOpen]);
 
-  // CORREÇÃO DEFINITIVA
   const handleOpenModal = (turma: Turma) => {
     if (selectedTurma?.id === turma.id) {
       setSideModalOpen(false);
       setSelectedTurma(null);
       return;
     }
-
     setSelectedTurma(turma);
     setSideModalOpen(true);
   };
 
-  // Função para abrir o modal de baixar documentos
   const handleBaixarDocumentos = (conselho: any) => {
     setConselhoSelecionado(conselho);
     setBaixarModalOpen(true);
   };
-
 
   return (
     <ProtectedRoute>
@@ -112,14 +91,16 @@ export default function PedagogicoPage() {
         <div className="flex flex-row flex-auto">
           <section className="w-full max-h-full md:w-3/5 xl:w-3/4 h-full flex flex-col items-start p-4 pt-24 gap-y-4">
 
-            <SearchBar
-              texto="Todos os Conselhos"
-              className="w-full xl:w-3/5 2xl:w-2/5"
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              filter
-              filtrosMostrar={{ aluno: false, turma: true, conselho: false }}
-            />
+            <div className="ml-6 w-[calc(100%-3rem)] desktop:w-[35.8%] laptop:w-[47.5%]">
+              <SearchBar
+                texto="Todos os Conselhos"
+                className="w-full" // SearchBar ocupa todo o espaço da div pai
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                filter
+                filtrosMostrar={{ aluno: false, turma: true, conselho: false }}
+              />
+            </div>
 
             <div
               className={`mt-6 w-full desktop:w-[75%] grid gap-4 px-6 ${
@@ -144,11 +125,10 @@ export default function PedagogicoPage() {
               turma={selectedTurma}
               estaAberto={sideModalOpen}
               aoFechar={() => setSideModalOpen(false)}
-              onBaixarDocumentos={handleBaixarDocumentos} 
+              onBaixarDocumentos={handleBaixarDocumentos}
               role={user?.role ?? ""}
             />
 
-            {/*  MODAL DE BAIXAR DOCUMENTOS */}
             <BaixarDocumentosModal
               open={baixarModalOpen}
               onClose={() => setBaixarModalOpen(false)}

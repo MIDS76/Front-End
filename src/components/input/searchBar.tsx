@@ -9,6 +9,7 @@ import {
 } from "../ui/dropdown-menu";
 import FiltrosDinamicos from "../filtros/FiltrosDinamicos";
 import React from "react";
+import { cn } from "@/lib/utils"; 
 
 interface SearchBarParams {
   texto?: string;
@@ -37,14 +38,17 @@ export default function SearchBar({
 }: SearchBarParams) {
   return (
     <div
-      className={`flex flex-col items-start justify-center rounded-xl bg-[#FAFAFA] border border-gray-300 px-3 py-2 w-full ${className}`}
+      className={cn(
+        "flex flex-col items-start justify-center rounded-xl bg-[#FAFAFA] border border-gray-300 px-3 py-2 w-full",
+        className
+      )}
     >
       {texto && (
-        <h1 className="text-primary font-bold font-title text-xl mb-1">{texto}</h1>
+        // ALTERAÇÃO AQUI: Mudei de 'text-xl' para 'text-3xl' para ficar maior
+        <h1 className="text-primary font-bold font-title text-3xl mb-1">{texto}</h1>
       )}
       
       <div className="flex flex-row items-center gap-2 w-full">
-        
         <div className="flex-1 flex flex-row items-center border-b-[1px] border-b-[#AAAAAA80]">
           <Input
             placeholder={placeholder}
@@ -58,7 +62,7 @@ export default function SearchBar({
         {filter && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <div className="pb-1"> 
+              <div className="pb-1">
                 <ButtonTT
                   tooltip="Visualizar e aplicar filtros"
                   mode="small"

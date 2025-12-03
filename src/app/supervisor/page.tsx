@@ -11,9 +11,8 @@ import Paginacao from "@/components/paginacao/paginacao";
 import { useAuth } from "@/context/AuthContext";
 import BaixarDocumentosModal from "@/components/modal/BaixarDocumentosModal"; 
 
-
-export default function PedagogicoPage() {
-  const { user } = useAuth(); // pega a role
+export default function SupervisorPage() {
+  const { user } = useAuth(); // Pega o usuário e a role (Supervisor)
 
   const [dataAleatoria] = useState(() => {
     const hoje = new Date();
@@ -30,7 +29,7 @@ export default function PedagogicoPage() {
   const [sideModalOpen, setSideModalOpen] = useState(false);
   const [selectedTurma, setSelectedTurma] = useState<Turma | null>(null);
 
-  // ADICIONADO
+  // Estados para o Modal de Baixar Documentos
   const [baixarModalOpen, setBaixarModalOpen] = useState(false);
   const [conselhoSelecionado, setConselhoSelecionado] = useState<any | null>(null);
 
@@ -87,7 +86,7 @@ export default function PedagogicoPage() {
     setFilteredTurmas(filtradas.slice(inicio, fim));
   }, [searchQuery, paginaAtual, screenWidth, sideModalOpen]);
 
-  // CORREÇÃO DEFINITIVA
+  // Handler para abrir detalhes da turma
   const handleOpenModal = (turma: Turma) => {
     if (selectedTurma?.id === turma.id) {
       setSideModalOpen(false);
@@ -105,21 +104,23 @@ export default function PedagogicoPage() {
     setBaixarModalOpen(true);
   };
 
-
   return (
     <ProtectedRoute>
       <main className="w-full flex flex-col">
         <div className="flex flex-row flex-auto">
           <section className="w-full max-h-full md:w-3/5 xl:w-3/4 h-full flex flex-col items-start p-4 pt-24 gap-y-4">
 
-            <SearchBar
-              texto="Todos os Conselhos"
-              className="w-full xl:w-3/5 2xl:w-2/5"
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              filter
-              filtrosMostrar={{ aluno: false, turma: true, conselho: false }}
-            />
+            {/* BARRA DE PESQUISA COM O AJUSTE DE LARGURA */}
+            <div className="ml-6 w-[calc(100%-3rem)] desktop:w-[35.8%] laptop:w-[47.5%]">
+              <SearchBar
+                texto="Todos os Conselhos"
+                className="w-full"
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                filter
+                filtrosMostrar={{ aluno: false, turma: true, conselho: false }}
+              />
+            </div>
 
             <div
               className={`mt-6 w-full desktop:w-[75%] grid gap-4 px-6 ${
@@ -148,7 +149,7 @@ export default function PedagogicoPage() {
               role={user?.role ?? ""}
             />
 
-            {/*  MODAL DE BAIXAR DOCUMENTOS */}
+            {/* MODAL DE BAIXAR DOCUMENTOS */}
             <BaixarDocumentosModal
               open={baixarModalOpen}
               onClose={() => setBaixarModalOpen(false)}
