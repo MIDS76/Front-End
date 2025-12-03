@@ -2,7 +2,6 @@ import {
   Card,
   CardContent,
   CardHeader,
-  
 } from "../ui/card";
 
 interface MedModalProps {
@@ -35,40 +34,20 @@ export default function MedModal({
       onClick={onClick}
     >
       <CardHeader
-        className={`bg-primary flex-row items-start p-4 pt-2 ${
-          simple ? "rounded-lg h-full w-full" : "rounded-t-lg"
-        } flex justify-between ${
-          loading ? "bg-card/70 dark:bg-muted brightness-95" : ""
-        }`}
+        className={`
+          bg-[#22565F] text-white p-4 
+          ${loading ? "bg-card/70" : ""}
+        `}
       >
-        <div className="pt-2 h-full">
-          <h3
-            className={`font-semibold text-3xl text-card dark:text-card-foreground ${
-              loading ? "text-card/70 dark:text-muted/70" : ""
-            }`}
-          >
-            {courseCode}
-          </h3>
-          <p
-            className={`text-sm mt-3 ${
-              loading
-                ? "text-card/70 dark:text-muted"
-                : "text-background dark:text-card-foreground"
-            }`}
-          >
-            {courseName}
-          </p>
+        <div>
+          <h3 className="text-lg font-bold leading-tight">{courseCode}</h3>
+          <p className="text-xs opacity-90">{courseName}</p>
         </div>
       </CardHeader>
+
       {!simple && (
-        <CardContent
-          className={`flex-1 p-4 ${loading ? "bg-muted rounded-lg" : ""}`}
-        >
-          <div
-            className={`text-sm ${
-              loading ? "text-muted dark:text-muted" : "text-muted-foreground"
-            }`}
-          >
+        <CardContent className="bg-white p-3">
+          <div className="text-xs text-right font-medium text-muted-foreground">
             {children}
           </div>
         </CardContent>
