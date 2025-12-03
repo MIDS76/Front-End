@@ -12,8 +12,6 @@ import conselhosData from "@/data/conselho.json";
 import { Turma as TurmaType, Conselho as ConselhoType } from "@/utils/types";
 import ConfirmarConselhoModal from "./confirmarConselhoModal";
 import AvancarEtapaModal from "./avancarEtapaModal";
-import BaixarDocumentosModal from "./BaixarDocumentosModal";
-
 
 
 import { FileSpreadsheet } from "lucide-react";
@@ -129,16 +127,18 @@ export default function ListaConselhos({
       .filter((c) => c.turmaId === encontrada.id)
 
       .map((c) => ({
-
         id: c.id,
 
-        turmaId: c.turmaId,
+        idTurma: c.turmaId,
+
         dataInicio: c.periodoInicio,
 
         dataFim: c.periodoFim,
+        
         status: mapStatus(c.status),
 
-        etapa: mapStatus(c.status),
+        etapas: mapStatus(c.status),
+
         turma: encontrada,
 
       }));

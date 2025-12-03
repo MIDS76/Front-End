@@ -74,7 +74,7 @@ export default function PedagogicoPage() {
                                     novoMapa[turma.id] = "Em andamento";
                                 }
                             } else {
-                                
+
                                 novoMapa[turma.id] = "Não realizado";
                             }
                         }
@@ -136,10 +136,10 @@ export default function PedagogicoPage() {
 
                         if (valor === "Resultado") {
 
-                            return conselho 
-                            && conselho.etapas === etapaFinalizada 
-                            && conselho.dataFim 
-                            && String(conselho.dataFim).trim().length > 0;
+                            return conselho
+                                && conselho.etapas === etapaFinalizada
+                                && conselho.dataFim
+                                && String(conselho.dataFim).trim().length > 0;
 
                         } else if (valor === "Em andamento") {
                             return conselho?.etapas && (etapasEmAndamento.includes(conselho.etapas));
@@ -152,9 +152,9 @@ export default function PedagogicoPage() {
                     });
                 }
 
-                
+
             } else {
-              
+
                 dadosNovos = await buscarTurmas() || [];
             }
 
@@ -256,20 +256,22 @@ export default function PedagogicoPage() {
             <main className="w-full flex flex-col">
                 <div className="flex flex-row flex-auto">
                     <section className="w-full max-h-full md:w-3/5 xl:w-3/4 h-full flex flex-col items-start p-4 pt-24 gap-y-4">
-                        <SearchBar
-                            texto="Todos os Conselhos"
-                            className="w-full xl:w-3/5 2xl:w-2/5"
-                            searchQuery={searchQuery}
-                            setSearchQuery={setSearchQuery}
-                            filter
-                            filtrosMostrar={{ usuario: false, turma: true, conselho: true }}
-                            onSelect={handleAplicarFiltro}
-                        />
+                        <div className="ml-6 w-[calc(100%-3rem)] desktop:w-[35.8%] laptop:w-[47.5%]">
+                            <SearchBar
+                                texto="Todos os Conselhos"
+                                className="w-full xl:w-3/5 2xl:w-2/5"
+                                searchQuery={searchQuery}
+                                setSearchQuery={setSearchQuery}
+                                filter
+                                filtrosMostrar={{ usuario: false, turma: true, conselho: true }}
+                                onSelect={handleAplicarFiltro}
+                            />
+                        </div>
 
                         <div
                             className={`mt-6 w-full desktop:w-[75%] grid gap-4 px-6 ${sideModalOpen && screenWidth <= 1366
-                                    ? "tablet:grid-cols-1 tablet:w-[50%] laptop:grid-cols-2 laptop:w-[49%]"
-                                    : "tablet:grid-cols-2 laptop:grid-cols-4"
+                                ? "tablet:grid-cols-1 tablet:w-[50%] laptop:grid-cols-2 laptop:w-[49%]"
+                                : "tablet:grid-cols-2 laptop:grid-cols-4"
                                 }`}
                         >
                             <ListaTurmas />
@@ -291,6 +293,7 @@ export default function PedagogicoPage() {
                             turma={selectedTurma}
                             estaAberto={sideModalOpen}
                             aoFechar={() => setSideModalOpen(false)}
+                            role="PEDAGOGICO"
                         />
                     </div>
                 </div>
