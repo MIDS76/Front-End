@@ -77,28 +77,15 @@ export const conselhoAluno = async (feedbackAluno: {
 
 }
 
-export const listarConselhosPorTurma = async (idTurma: number): Promise<Conselho[]> => {
-    const controller = new AbortController();
-
+export const listarConselhosPorTurma = async (idTurma: number) => {
     try {
-        const url = `/conselhos/listarConselhorPorTurma/${idTurma}`;
+        const response = await api.get<Conselho[]>(`/conselhos/listarConselhorPorTurma/${idTurma}`, { signal: controller.signal });
 
-        const response = await api.get<Conselho[]>(url, { signal: controller.signal });
-
-        if (response.data && Array.isArray(response.data)) {
-            return response.data;
-        }
-
-        console.warn(`API retornou sucesso (200), mas a lista de conselhos para turma ${idTurma} está vazia ou mal formatada.`);
-        return [];
-
+        return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
-            console.error(`ERRO API ${err.response?.status} ao buscar conselhos:`, err.message);
-        } else {
-            console.error("Erro desconhecido ao buscar conselhos:", err);
+            console.log(err.response?.status);
         }
-        return [];
     }
 }
 

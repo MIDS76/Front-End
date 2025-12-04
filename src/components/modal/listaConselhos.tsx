@@ -15,6 +15,7 @@ import AvancarEtapaModal from "./avancarEtapaModal";
 
 import { FileSpreadsheet } from "lucide-react";
 import BaixarDocumentosModal from "./BaixarDocumentosModal";
+import { Conselho, listarConselhosPorTurma } from "@/api/conselho";
 
 
 
@@ -59,7 +60,6 @@ const mapStatus = (status: string): string => {
 export default function ListaConselhos({
   estaAberto,
   aoFechar,
-
   turma,
   role
 }: ListaConselhosProps) {
@@ -92,53 +92,9 @@ export default function ListaConselhos({
 
   };
 
-  useEffect(() => {
-
-    if (!turma) {
-
-      setTurmaLocal(null);
-
-      setConselhos([]);
-
-      return;
-
-    }
-
-    const encontradaJson = turmasData.find((t) => t.id === turma.id);
-    const encontrada: TurmaType = encontradaJson
-      ? {
-        id: encontradaJson.id,
-        nome: encontradaJson.nomeCurso,
-        curso: encontradaJson.nomeCurso,
-        dataInicio: encontradaJson.dataInicio,
-        dataFinal: encontradaJson.dataFim
-      }
-      : turma;
-
-    setTurmaLocal(encontrada);
-
-
-
-    const filtrados: ConselhoType[] = conselhosData
-
-      .filter((c) => c.turmaId === encontrada.id)
-
-      .map((c) => ({
-        id: c.id,
-
-        idTurma: c.turmaId,
-
-        dataInicio: c.periodoInicio,
-
-        dataFim: c.periodoFim,
-
-        status: mapStatus(c.status),
-
-        etapas: mapStatus(c.status),
-
-        turma: encontrada,
-
-      }));
+// arrumar aqui para buscar as turmas e conselhos corretamente
+  useEffect(()  => {
+    const conselhos: Conselho[] = await listarConselhosPorTurma(turma.id);
 
 
 
