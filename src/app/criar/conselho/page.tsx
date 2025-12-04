@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import ActionModal from "@/components/modal/actionModal";
 import { listarUnidadeCurricular, listarProfessores, preConselhoProfessor } from "@/api/preConselho";
 import { UnidadeCurricular, Usuario } from "@/utils/types";
-import { atualizarEtapa } from "@/api/conselho";
+import { criarConselho, atualizarEtapa } from "@/api/conselho";
 
 export default function ConselhoPage() {
   const router = useRouter();
@@ -27,6 +27,22 @@ export default function ConselhoPage() {
   const [UnidadeCurriculares, setUnidadeCurriculares] = useState<UnidadeCurricular[]>([]);
   const [usuario, setUsuario] = useState<Usuario[]>([]);
   const [conselhoId, setConselho] = useState<number | null>(null);
+  const [turmaSelecionada, setTurmaSelecionada] = useState<{ id: number; nome: string } | null>(null);
+  const [representante1, setIdRepresentante1] = useState<{ id: number } | null>(null);
+  const [representante2, setIdRepresentante2] = useState<{ id: number } | null>(null);
+
+  // buscar os representantes da pagina anterior para salvar o conselho
+  useEffect(() => {
+    const representante1 = localStorage.getItem("representante1");
+    const representante2 = localStorage.getItem("representante2");
+
+    if (representante1 && representante2) {
+      setIdRepresentante1(JSON.parse(representante1));
+      setIdRepresentante2(JSON.parse(representante2));
+    } else {
+      toast.error("Nenhum representante encontrado.");
+    }
+  }, []);
 
   useEffect(() => {
     const c = localStorage.getItem("idConselho");
@@ -34,6 +50,15 @@ export default function ConselhoPage() {
       setConselho(Number(JSON.parse(c)));
     } else {
       toast.error("Nenhum conselho encontrado.");
+    }
+  }, []);
+
+  useEffect(() => {
+    const t = localStorage.getItem("turmaSelecionada");
+    if (t) {
+      setTurmaSelecionada(JSON.parse(t));
+    } else {
+      toast.error("Nenhuma turma selecionada.");
     }
   }, []);
 
@@ -167,18 +192,47 @@ export default function ConselhoPage() {
   // Confirmar as unidades e professores
   async function handleConfirmarUcProfessores() {
     try {
-      if (!conselhoId) {
-        toast.error("O Conselho não foi encontrado.");
+      if (!turmaSelecionada) {
+        toast.error("Turma não encontrada.")
         return;
       }
-      console.log("id conselho" + conselhoId);
 
-      await atualizarEtapa(conselhoId, "PRE_CONSELHO");
+      if (!representante1 || !representante2) {
+        toast.error("Representantes não encontrados.");
+        return;
+      }
+
+      const idTurma = turmaSelecionada.id;
+      const idRepresentante1 = representante1!.id;
+      const idRepresentante2 = representante2!.id;
+
+      const idPedagogico = 6;
+
+      const conselhoCriado = await criarConselho({
+        idTurma,
+        idRepresentante1,
+        idRepresentante2,
+        idPedagogico
+      });
+
+      if (!conselhoCriado) {
+        toast.error("Erro ao criar o conselho.");
+        return;
+      }
+
+      localStorage.setItem("idConselho", JSON.stringify(conselhoCriado.id));
+
+      toast.success("Conselho criado com sucesso!");
+
+      await atualizarEtapa(conselhoCriado.id, "PRE_CONSELHO");
       console.log(atualizarEtapa);
+
+      // parei aqui 04/12 - ultimo commit "feat: ajustes na integração de criar conselho na fase final"
 
       toast.success("Pré-conselho liberado com sucesso");
 
-      localStorage.removeItem("representantes-selecionados");
+      localStorage.removeItem("representante1");
+      localStorage.removeItem("representante2");
       localStorage.removeItem("associacoes");
       localStorage.removeItem("preconselho-formulario");
 

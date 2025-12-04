@@ -119,37 +119,10 @@ export default function RepresentantePage() {
       return;
     }
 
-    const idTurma = turmaSelecionada.id;
-    const idRepresentante1 = selecionados[0].id!;
-    const idRepresentante2 = selecionados[1].id!;
+    localStorage.setItem("representante1", JSON.stringify(selecionados[0].id));
+    localStorage.setItem("representante2", JSON.stringify(selecionados[1].id));
 
-    const idPedagogico = 6;
-
-    try {
-      const conselhoCriado = await criarConselho({
-        idTurma,
-        idRepresentante1,
-        idRepresentante2,
-        idPedagogico
-      });
-
-      if (!conselhoCriado) {
-        toast.error("Erro ao criar conselho.");
-        return;
-      }
-
-      localStorage.setItem("idConselho", JSON.stringify(conselhoCriado.id));
-
-      toast.success("Conselho criado com sucesso!");
-
-      setTimeout(() => {
-        router.push("/criar/conselho");
-      }, 10);
-
-    } catch (error) {
-      console.error(error);
-      toast.error("Erro inesperado ao criar conselho.");
-    }
+    router.push("/criar/conselho")
   }
 
   return (
