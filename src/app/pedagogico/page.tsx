@@ -24,7 +24,6 @@ export default function PedagogicoPage() {
 
     const [filtroAtivoKey, setFiltroAtivoKey] = useState(0);
 
-
     const [paginaAtual, setPaginaAtual] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
     const [totalPages, setTotalPages] = useState(0);
@@ -53,6 +52,7 @@ export default function PedagogicoPage() {
                 setPaginaAtual(0);
 
                 if (turmasArray?.length) {
+                    
                     const promises = turmasArray.map(turma => {
                         if (typeof turma.id === 'number' && turma.id > 0) {
                             return buscarUltimoConselhoPorTurma(turma.id);

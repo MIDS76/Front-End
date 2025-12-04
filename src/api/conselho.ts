@@ -103,19 +103,13 @@ export const listarConselhosPorTurma = async (idTurma: number): Promise<Conselho
 }
 
 export const buscarUltimoConselhoPorTurma = async (idTurma: number) => {
-    const controller = new AbortController();
-
     try {
-        const url = `/conselhos/buscarConselhoPorTurma/${idTurma}`;
+        const response = await api.get<Conselho>(`/conselhos/buscarConselhoPorTurma/${idTurma}`, { signal: controller.signal });
 
-        const response = await api.get<Conselho>(url, { signal: controller.signal });
-        console.log(response.data);
         return response.data;
-
     } catch (err) {
         if (err instanceof AxiosError) {
-            console.error(`ERRO API ${err.response?.status} ao buscar último conselho:`, err.message);
+            console.log(err.response?.status);
         }
-        console.error("Erro desconhecido ao buscar último conselho:", err);
     }
 }
