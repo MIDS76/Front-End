@@ -40,6 +40,12 @@ export interface Aluno extends Usuario {
   statusAtividadeAluno: boolean;
 }
 
+export interface AlunoTurmaResponse {
+  statusTurma: boolean;
+  nomeTurma: string;
+  alunos: Aluno[]; 
+}
+
 export const USER_ROLES = [
   { value: "pedagogico", label: "Técnico Pedagógico" },
   { value: "weg", label: "WEG" },

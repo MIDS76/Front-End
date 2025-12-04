@@ -1,5 +1,5 @@
 import api from "@/utils/axios";
-import { Turma, Usuario } from "@/utils/types";
+import { Turma, Usuario, AlunoTurmaResponse } from "@/utils/types";
 import { AxiosError } from "axios";
 
 const controller = new AbortController();
@@ -72,9 +72,11 @@ export const associarAlunosTurma = async (alunoTurma: {
 export const buscarAlunosTurma = async (idTurma: number) => {
 
     try {
-        const response = await api.get<Usuario[]>(`/aluno-turma/listarAlunosPorTurma/${idTurma}`, { signal: controller.signal });
+        const response = await api.get<AlunoTurmaResponse[]>(`/aluno-turma/listarAlunosPorTurma/${idTurma}`, { signal: controller.signal });
 
-        return response.data;
+        if (Array.isArray(response.data) && response.data.length > 0) {
+            return response.data[0].alunos;
+        }
     } catch (err) {
         if (err instanceof AxiosError) {
             console.log(err.response?.status);

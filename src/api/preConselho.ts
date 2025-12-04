@@ -35,6 +35,7 @@ export const preConselhoSupervisao = async (supervisao: {
     }
 }
 
+// utilizar para criar quando criar uc/professor na criação do conselho
 export const preConselhoProfessor = async (professor: {
     idPreConselho: number;
     idUnidadeCurricular: number;
@@ -46,7 +47,7 @@ export const preConselhoProfessor = async (professor: {
     const controller = new AbortController();
 
     try {
-        const response = await api.post(`/preConselhoSupervisao/criar`, professor, { signal: controller.signal });
+        const response = await api.post(`/preConselhoProfessor/criar`, professor, { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {

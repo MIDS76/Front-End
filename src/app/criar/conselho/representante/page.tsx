@@ -12,6 +12,7 @@ import Lista from "@/components/lista/lista";
 import { Aluno, Usuario } from "@/utils/types";
 import InfoCard from "@/components/card/cardTituloTelas";
 import { buscarAlunosTurma } from "@/api/turmas";
+import { criarConselho } from "@/api/conselho";
 
 export default function RepresentantePage() {
   const router = useRouter();
@@ -19,34 +20,38 @@ export default function RepresentantePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [aluno, setAluno] = useState<Aluno[]>([]);
+  const [turmaSelecionada, setTurmaSelecionada] = useState<{ id: number; nome: string } | null>(null);
+
+  useEffect(() => {
+    const t = localStorage.getItem("turmaSelecionada");
+    if (t) {
+      setTurmaSelecionada(JSON.parse(t));
+    } else {
+      toast.error("Nenhuma turma selecionada.");
+    }
+  }, []);
 
   useEffect(() => {
     const carregarAlunos = async () => {
-      const turmaSelecionada = localStorage.getItem("turmaSelecionada");
-
-      if (turmaSelecionada) {
-        const { id } = JSON.parse(turmaSelecionada);
-        const data = await buscarAlunosTurma(id);
-
-        console.log("Dados recebidos:", JSON.stringify(data, null, 2));
-
-        if (!data) {
-          toast.error("Erro ao carregar alunos.");
-          return;
-        }
-
-        setAluno(data.alunos); 
-      } else {
-        toast.error("Nenhuma turma selecionada.");
+      if (!turmaSelecionada) {
+        return;
       }
+
+      const alunos = await buscarAlunosTurma(turmaSelecionada.id);
+      console.log("Recebido de buscarAlunosTurma:", alunos);
+
+      if (alunos) {
+        setAluno(alunos);
+      } else {
+        toast.error("Erro ao carregar alunos.");
+      }
+
     };
     carregarAlunos();
-  }, []);
+  }, [turmaSelecionada]);
 
 
-  const alunosAtivos: Usuario[] = aluno.filter((a) => {
-    a.statusAtividadeAluno
-  });
+  const alunosAtivos: Usuario[] = aluno.filter((a) => a.statusAtividadeAluno);
 
   console.log(alunosAtivos);
 
@@ -103,18 +108,48 @@ export default function RepresentantePage() {
     return AccessDeniedPage();
   }
 
-  function handleProximoPasso() {
+  async function handleProximoPasso() {
     if (selecionados.length < 2) {
       toast.error("Selecione dois representantes antes de prosseguir.");
       return;
     }
 
-    // localStorage.setItem("conselhoSalvos", JSON.stringify(selecionados));
+    if (!turmaSelecionada) {
+      toast.error("Turma não encontrada.")
+      return;
+    }
 
-    setTimeout(() => {
-      router.push("/criar/conselho");
-    }, 10);
+    const idTurma = turmaSelecionada.id;
+    const idRepresentante1 = selecionados[0].id!;
+    const idRepresentante2 = selecionados[1].id!;
 
+    const idPedagogico = 6;
+
+    try {
+      const conselhoCriado = await criarConselho({
+        idTurma,
+        idRepresentante1,
+        idRepresentante2,
+        idPedagogico
+      });
+
+      if (!conselhoCriado) {
+        toast.error("Erro ao criar conselho.");
+        return;
+      }
+
+      localStorage.setItem("idConselho", JSON.stringify(conselhoCriado.id));
+
+      toast.success("Conselho criado com sucesso!");
+
+      setTimeout(() => {
+        router.push("/criar/conselho");
+      }, 10);
+
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro inesperado ao criar conselho.");
+    }
   }
 
   return (
@@ -127,7 +162,7 @@ export default function RepresentantePage() {
           {/* CABEÇALHO */}
           <div className="flex justify-center mt-[1.5rem]">
             <InfoCard
-              titulo="Conselho da Turma MI 76"
+              titulo={`Conselho da Turma ${turmaSelecionada?.nome}`}
               descricao="Selecione os representantes da turma"
               className="w-[48.5rem] mb-6"
             />

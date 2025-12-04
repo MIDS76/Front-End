@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { FiSearch } from "react-icons/fi";
 import LogLateral from "@/components/sidebar/logLateral";
@@ -10,8 +10,9 @@ import InfoCard from "@/components/card/cardTituloTelas";
 import ButtonTT from "@/components/button/ButtonTT";
 import { toast } from "sonner";
 import ActionModal from "@/components/modal/actionModal";
-import { listarUnidadeCurricular, listarProfessores } from "@/api/preConselho";
+import { listarUnidadeCurricular, listarProfessores, preConselhoProfessor } from "@/api/preConselho";
 import { UnidadeCurricular, Usuario } from "@/utils/types";
+import { atualizarEtapa } from "@/api/conselho";
 
 export default function ConselhoPage() {
   const router = useRouter();
@@ -25,6 +26,16 @@ export default function ConselhoPage() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [UnidadeCurriculares, setUnidadeCurriculares] = useState<UnidadeCurricular[]>([]);
   const [usuario, setUsuario] = useState<Usuario[]>([]);
+  const [conselhoId, setConselho] = useState<number | null>(null);
+
+  useEffect(() => {
+    const c = localStorage.getItem("idConselho");
+    if (c) {
+      setConselho(Number(JSON.parse(c)));
+    } else {
+      toast.error("Nenhum conselho encontrado.");
+    }
+  }, []);
 
   // Carregar unidade curricular ao iniciar
   useEffect(() => {
@@ -118,7 +129,7 @@ export default function ConselhoPage() {
         )
     );
 
-    if (combinacoesExistentes){
+    if (combinacoesExistentes) {
       toast.error("Esta combinação de unidade e professor já foi adicionada!");
       return;
     }
@@ -149,28 +160,45 @@ export default function ConselhoPage() {
   function handleProximoPasso() {
     // localStorage.setItem("conselhoSalvos", JSON.stringify(salvos));
 
+
     setIsConfirmOpen(true);
   }
 
   // Confirmar as unidades e professores
-  function handleConfirmarUcProfessores() {
+  async function handleConfirmarUcProfessores() {
     try {
+      if (!conselhoId) {
+        toast.error("O Conselho não foi encontrado.");
+        return;
+      }
+      console.log("id conselho" + conselhoId);
+
+      await atualizarEtapa(conselhoId, "PRE_CONSELHO");
+      console.log(atualizarEtapa);
+
+      toast.success("Pré-conselho liberado com sucesso");
+
       localStorage.removeItem("representantes-selecionados");
       localStorage.removeItem("associacoes");
       localStorage.removeItem("preconselho-formulario");
 
-      const role = localStorage.getItem("user-role");
+      function normalizeRole(str: string) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      }
+
+      const role = normalizeRole(localStorage.getItem("user-role") || "");
 
       const rotasPorRole: Record<string, string> = {
-        "Aluno": "/aluno",
-        "Coordenação pedagógica": "/pedagogico",
-        "Administrador": "/admin",
+        "aluno": "/aluno",
+        "coordenacao pedagogica": "/pedagogico",
+        "administrador": "/admin",
       };
 
-      const rotaInicial = rotasPorRole[role ?? ""] || "/";
-      router.push(rotaInicial);
+      router.push(rotasPorRole[role] || "/admin");
+
     } catch (e) {
       console.error("Erro ao limpar localStorage:", e);
+      toast.error("Erro ao liberar o pré-conselho.");
     } finally {
       setIsConfirmOpen(false);
     }
