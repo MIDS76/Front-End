@@ -1,0 +1,410 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation"; 
+import { toast } from "sonner";
+
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import ActionModal from "@/components/modal/actionModal";
+import ButtonTT from "@/components/button/ButtonTT";
+import InfoCard from "@/components/card/cardTituloTelas";
+import UserInfo from "@/components/lista/userInfo";
+import Lista from "@/components/lista/lista";
+import AccessDeniedPage from "../access-denied"; 
+
+import { useAuth } from "@/context/AuthContext";
+import { validateRequired } from "@/utils/formValidation";
+import { Usuario, Turma } from "@/utils/types"; 
+import { buscarAlunosPorTurma } from "@/api/alunos"; 
+import { buscarTurmas } from "@/api/turmas"; 
+import { criarFeedbackAluno, criarFeedbackTurma } from "@/api/feedback"; 
+
+type CampoFormulario = {
+    titulo: string; 
+    positivos: string;
+    melhoria: string;
+    sugestoes: string;
+};
+
+export default function ConselhoCoordenacao() {
+    const router = useRouter();
+    
+    //id da turma
+    const turmaId = 2; 
+
+    const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+    const [turma, setTurma] = useState<Turma | undefined>(undefined); 
+    const [formulario, setFormulario] = useState<CampoFormulario[]>([]);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [pagina, setPagina] = useState(0);
+    const [searchQueryUsuarios, setSearchQueryUsuarios] = useState("");
+    const [usuarioSelecionado, setUsuarioSelecionado] = useState<Usuario | null>(null);
+    const [isLoading, setIsLoading] = useState(true); 
+    const [errosCampos, setErrosCampos] = useState<Record<keyof CampoFormulario, boolean>>({
+        titulo: false, positivos: false, melhoria: false, sugestoes: false,
+    });
+
+    const campos: (keyof CampoFormulario)[] = ["positivos", "melhoria", "sugestoes"];
+
+  
+    const validarCampos = useCallback(() => {
+        if (!formulario || formulario.length === 0 || pagina >= formulario.length) return true;
+        const secaoAtual = formulario[pagina] ?? { positivos: "", melhoria: "", sugestoes: "", titulo: "" };
+        
+        const erros = {
+            titulo: false,
+            positivos: validateRequired(secaoAtual.positivos, "Pontos positivos") !== "",
+            melhoria: validateRequired(secaoAtual.melhoria, "Pontos de melhoria") !== "",
+            sugestoes: validateRequired(secaoAtual.sugestoes, "Sugestões") !== "",
+        } as Record<keyof CampoFormulario, boolean>;
+        setErrosCampos(erros);
+
+        if (erros.positivos || erros.melhoria || erros.sugestoes) {
+            const firstErrorField = campos.find(c => erros[c]);
+            if (firstErrorField) {
+                const label = firstErrorField === "positivos" ? "Pontos positivos" : firstErrorField === "melhoria" ? "Pontos de melhoria" : "Sugestões";
+                toast.error(`O campo '${label}' é obrigatório para este aluno.`);
+            }
+            return false;
+        }
+        return true;
+    }, [formulario, pagina]);
+
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            
+            if (!turmaId || isNaN(turmaId) || turmaId <= 0) {
+                console.error("ID da turma fixo está inválido.");
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                const alunosDaTurmaBrutos = await buscarAlunosPorTurma(turmaId);
+                
+                const alunosPadronizados: Usuario[] = (alunosDaTurmaBrutos || []).map((alunoBruto: any) => ({
+                    id: alunoBruto.id,
+                    nome: alunoBruto.nome,
+                    email: alunoBruto.email,
+                    isActive: alunoBruto.statusAtividadeAluno, 
+                    role: "ALUNO", 
+                }));
+                
+        
+                const alunosAtivos: Usuario[] = alunosPadronizados.filter((u) => u.role === "ALUNO" && u.isActive);
+                setUsuarios(alunosAtivos);
+                
+              
+                const turmasArray = await buscarTurmas();
+                const turmaEncontrada = turmasArray?.find((t) => t.id === turmaId);
+                setTurma(turmaEncontrada);
+
+                
+                const chaveLocalStorage = `conselho-formulario-${turmaId}`;
+                const salvoRaw = localStorage.getItem(chaveLocalStorage);
+                
+                const inicial: CampoFormulario[] = alunosAtivos.map((aluno) => ({
+                    titulo: aluno.nome,
+                    positivos: "", melhoria: "", sugestoes: "",
+                }));
+
+                const initialForm = inicial;
+
+                if (salvoRaw) {
+                    try {
+                        const salvo: CampoFormulario[] = JSON.parse(salvoRaw);
+                        const alinhado = alunosAtivos.map((aluno) => {
+                            const achado = salvo.find((s) => s.titulo === aluno.nome);
+                            return achado ?? { titulo: aluno.nome, positivos: "", melhoria: "", sugestoes: "" };
+                        });
+                        setFormulario(alinhado);
+                        localStorage.setItem(chaveLocalStorage, JSON.stringify(alinhado));
+                    } catch {
+                        setFormulario(initialForm);
+                        localStorage.setItem(chaveLocalStorage, JSON.stringify(initialForm));
+                    }
+                } else {
+                    setFormulario(initialForm);
+                }
+                
+                setPagina(0);
+                setUsuarioSelecionado(alunosAtivos[0] ?? null);
+                
+            } catch (error) {
+                console.error("Erro ao carregar dados:", error);
+                toast.error("Falha ao carregar alunos e turma.");
+                setUsuarios([]);
+                setFormulario([]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [turmaId]); 
+
+  
+    useEffect(() => {
+        if (formulario.length > 0 && turmaId) {
+            const chaveLocalStorage = `conselho-formulario-${turmaId}`;
+            localStorage.setItem(chaveLocalStorage, JSON.stringify(formulario));
+        }
+    }, [formulario, turmaId]);
+
+
+    const handleChange = (campo: keyof CampoFormulario, valor: string) => {
+        const novoFormulario = [...formulario];
+        const idx = Math.max(0, Math.min(pagina, novoFormulario.length - 1));
+        novoFormulario[idx] = { ...novoFormulario[idx], [campo]: valor };
+        setFormulario(novoFormulario);
+        setErrosCampos((prev) => ({ ...prev, [campo]: false }));
+    };
+    
+    const trocarPagina = (novaPagina: number) => {
+        if (novaPagina < 0 || novaPagina >= formulario.length) return;
+        if (!validarCampos()) return;
+        setPagina(novaPagina);
+        setUsuarioSelecionado(usuarios[novaPagina] ?? null);
+    };
+    
+    const handleConcluir = async () => {
+        if (!validarCampos()) return;
+        
+        if (!turmaId) {
+            toast.error("ID da turma não está disponível para salvar.");
+            return;
+        }
+
+        try {
+            for (const [index, feedback] of formulario.entries()) {
+                const aluno = usuarios[index];
+                if (!aluno?.id) continue; 
+
+                const dadosFeedbackAluno = {
+                    turmaId: turmaId,
+                    alunoId: aluno.id, 
+                    pontosPositivos: feedback.positivos,
+                    pontosMelhoria: feedback.melhoria,
+                    sugestoes: feedback.sugestoes,
+                };
+                
+                await criarFeedbackAluno(dadosFeedbackAluno);
+            }
+
+            const dadosFeedbackTurma = {
+                turmaId: turmaId,
+                dataConclusao: new Date().toISOString(),
+            };
+            
+            await criarFeedbackTurma(dadosFeedbackTurma);
+            
+            toast.success("Conselho concluído e salvo com sucesso!");
+            localStorage.removeItem(`conselho-formulario-${turmaId}`); 
+
+            const usuarioJson = localStorage.getItem("user");
+            if (usuarioJson) {
+                const usuario = JSON.parse(usuarioJson);
+                if (usuario && usuario.perfil) {
+                    setTimeout(() => router.push(`/${usuario.perfil}`), 800);
+                }
+            }
+            
+        } catch (error) {
+            console.error("Erro ao salvar feedback:", error);
+            toast.error("Falha ao salvar o conselho. Verifique as chamadas de API.");
+        }
+    };
+
+    const alunosFiltrados = usuarios.filter((usuario) =>
+        usuario.nome.toLowerCase().includes(searchQueryUsuarios.toLowerCase())
+    );
+
+    const secaoAtual = usuarioSelecionado
+        ? formulario.find((f) => f.titulo === usuarioSelecionado.nome) ?? { titulo: "", positivos: "", melhoria: "", sugestoes: "" }
+        : formulario[pagina] ?? { titulo: "", positivos: "", melhoria: "", sugestoes: "" };
+
+    const todosPreenchidos = formulario.length > 0 && formulario.every(
+        (f) => f.positivos.trim() && f.melhoria.trim() && f.sugestoes.trim()
+    );
+
+    const { user } = useAuth();
+    
+    if (user?.role !== "pedagogico" && user?.role !== "admin") {
+        return AccessDeniedPage();
+    }
+    
+    if (isLoading) {
+        return (
+            <div className="w-screen h-screen flex items-center justify-center" style={{ backgroundColor: "hsl(var(--background))", color: "hsl(var(--foreground))" }}>
+                <p className="text-xl animate-pulse">
+                    Carregando dados da turma ID **{turmaId}**...
+                </p>
+            </div>
+        );
+    }
+    
+    if (!turma || alunosFiltrados.length === 0) {
+        return (
+            <div className="w-screen h-screen flex items-center justify-center p-8" style={{ backgroundColor: "hsl(var(--background))", color: "hsl(var(--foreground))" }}>
+                <div className="text-center">
+                    <p className="text-2xl font-bold text-red-500 mb-4">
+                        Erro ao carregar Turma
+                    </p>
+                    <p className="text-lg">
+                        A Turma ID **{turmaId}** não foi encontrada ou não possui alunos ativos para avaliação.
+                    </p>
+                    <p className="text-md mt-4 text-muted-foreground">
+                        **Ação:** Verifique o log do console e o backend.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+   
+    return (
+        <div
+            className="w-screen h-screen flex flex-col items-center justify-center overflow-hidden px-8"
+            style={{ backgroundColor: "hsl(var(--background))", color: "hsl(var(--foreground))" }}
+        >
+            <div className="flex w-full max-w-[100rem] justify-center gap-8">
+                {/* Primeira div - Lista de alunos */}
+                <div className="flex flex-col w-full max-w-[46.875rem] gap-4">
+                    <InfoCard
+                        titulo={turma.nome ?? `Turma ID ${turmaId}`}
+                        descricao={turma.curso ?? "Carregando..."} 
+                    />
+                    <div
+                        className="w-full h-[32rem] rounded-2xl shadow-inner overflow-hidden border"
+                        style={{
+                            backgroundColor: "hsl(var(--background))",
+                            borderColor: "hsl(var(--border))",
+                        }}
+                    >
+                        <ScrollArea className="h-full w-full p-2">
+                            <Lista
+                                usuarios={alunosFiltrados}
+                                tipo="limpa"
+                                isDialogOpen={false}
+                                setIsDialogOpen={() => { }}
+                                className="flex flex-col gap-2"
+                                onSelect={(usuarioClicado: Usuario) => {
+                                    if (!validarCampos()) return;
+                                    const novaPagina = usuarios.findIndex((u) => u.nome === usuarioClicado.nome);
+                                    if (novaPagina !== -1) {
+                                        setPagina(novaPagina);
+                                        setUsuarioSelecionado(usuarioClicado);
+                                    }
+                                }}
+                                usuarioSelecionado={usuarioSelecionado}
+                            />
+                        </ScrollArea>
+                    </div>
+                </div>
+
+                {/* Segunda div - Formulário e botões */}
+                <div className="flex flex-col w-full max-w-[46.875rem]">
+                    <div
+                        className="rounded-3xl shadow p-6 w-full flex flex-col gap-6 flex-grow"
+                        style={{ backgroundColor: "hsl(var(--card))", color: "hsl(var(--card-foreground))" }}
+                    >
+                        {usuarioSelecionado && (
+                            <div className="flex flex-row items-center gap-4 mt-2 scale-105 origin-left">
+                                <UserInfo
+                                    nome={usuarioSelecionado.nome}
+                                    email={usuarioSelecionado.email}
+                                    copy={false}
+                                    active={usuarioSelecionado.isActive ? true : false}
+                                />
+                            </div>
+                        )}
+
+                        <div className="mt-6 pl-2 pr-4 space-y-6 flex-grow">
+                            {campos.map((campo) => {
+                                const isError = errosCampos[campo] === true;
+                                return (
+                                    <div key={campo}>
+                                        <Label className="text-sm font-semibold" style={{ color: "hsl(var(--card-foreground))" }}>
+                                            {campo === "positivos" ? "Pontos positivos" : campo === "melhoria" ? "Pontos de melhoria" : "Sugestões"}
+                                        </Label>
+                                        <Textarea
+                                            placeholder={`Insira aqui os ${campo}...`}
+                                            className="mt-2 resize-none"
+                                            style={{
+                                                backgroundColor: "hsl(var(--popover))",
+                                                color: "hsl(var(--popover-foreground))",
+                                                border: isError ? "2px solid hsl(var(--destructive))" : "1px solid hsl(var(--border))",
+                                                borderRadius: "var(--radius)",
+                                                minHeight: "4.5rem",
+                                            }}
+                                            value={secaoAtual[campo]}
+                                            onChange={(e) => handleChange(campo, e.target.value)}
+                                        />
+                                        {isError && (
+                                            <p className="text-sm mt-1" style={{ color: "hsl(var(--destructive))" }}>
+                                                Este campo é obrigatório!
+                                            </p>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Botões */}
+                    <div className="flex justify-between items-center pt-6 w-full">
+                        <div className="flex gap-4">
+                            <ButtonTT
+                                tooltip="Anterior"
+                                mode="default"
+                                onClick={() => trocarPagina(pagina - 1)}
+                                disabled={pagina === 0}
+                                className="text-sm px-8"
+                                style={{ opacity: pagina === 0 ? 0.5 : 1, cursor: pagina === 0 ? "not-allowed" : "pointer", }}
+                            >
+                                Anterior
+                            </ButtonTT>
+
+                            <ButtonTT
+                                tooltip="Próximo"
+                                mode="default"
+                                onClick={() => trocarPagina(pagina + 1)}
+                                disabled={pagina === formulario.length - 1}
+                                className="text-sm px-8"
+                                style={{ opacity: pagina === formulario.length - 1 ? 0.5 : 1, cursor: pagina === formulario.length - 1 ? "not-allowed" : "pointer", }}
+                            >
+                                Próximo
+                            </ButtonTT>
+                        </div>
+
+                        <ButtonTT
+                            tooltip="Concluir"
+                            mode="default"
+                            disabled={!todosPreenchidos}
+                            onClick={() => setIsConfirmOpen(true)}
+                            className="text-sm px-8"
+                            style={{ opacity: !todosPreenchidos ? 0.5 : 1, cursor: !todosPreenchidos ? "not-allowed" : "pointer", }}
+                        >
+                            Próximo passo
+                        </ButtonTT>
+                    </div>
+                </div>
+            </div>
+
+            <ActionModal
+                isOpen={isConfirmOpen}
+                setOpen={setIsConfirmOpen}
+                title="Concluir conselho"
+                actionButtonLabel="Concluir"
+                onConfirm={() => {
+                    handleConcluir();
+                    setIsConfirmOpen(false);
+                }}
+            />
+        </div>
+    );
+}
