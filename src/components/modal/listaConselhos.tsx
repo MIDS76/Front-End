@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { Icon } from "@/components/button/smallButton";
 import ButtonTT from "@/components/button/ButtonTT";
 import turmasData from "@/data/turma.json";
-import conselhosData from "@/data/conselho.json";
 import { Turma as TurmaType, Conselho as ConselhoType } from "@/utils/types";
 import ConfirmarConselhoModal from "./confirmarConselhoModal";
 import AvancarEtapaModal from "./avancarEtapaModal";
@@ -76,8 +75,6 @@ export default function ListaConselhos({
 
     return ordemStatus[index + 1] || atual;
   };
-
-
 
   const [conselhos, setConselhos] = useState<ConselhoType[]>([]);
 
