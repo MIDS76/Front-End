@@ -55,6 +55,8 @@ export const conselhoTurma = async (feedbackTurma: {
     }
 }
 
+
+
 export const conselhoAluno = async (feedbackAluno: {
     idConselho: number;
     idPedagogico: number;
@@ -85,6 +87,20 @@ export const listarConselhosPorTurma = async (idTurma: number) => {
     } catch (err) {
         if (err instanceof AxiosError) {
             console.log(err.response?.status);
+        }
+    }
+}
+
+export const atualizarEtapa = async (idConselho: number) => {
+    const controller = new AbortController();
+
+    try {
+        const response = await api.patch(`/conselhos/atualizar/${idConselho}/etapa`, { signal: controller.signal });
+        return response.data;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.log(err.response?.status);
+            console.log(err.response?.data);
         }
     }
 }
