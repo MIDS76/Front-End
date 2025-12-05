@@ -91,11 +91,12 @@ export const listarConselhosPorTurma = async (idTurma: number) => {
     }
 }
 
-export const atualizarEtapa = async (idConselho: number) => {
+export const atualizarEtapa = async (idConselho: number, novaEtapa: string) => {
     const controller = new AbortController();
 
     try {
-        const response = await api.patch(`/conselhos/atualizar/${idConselho}/etapa`, { signal: controller.signal });
+        const response = await api.patch(`/conselhos/atualizar/${idConselho}/etapa`, { novaEtapa: novaEtapa}, { signal: controller.signal });
+        console.log(response.data);
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {

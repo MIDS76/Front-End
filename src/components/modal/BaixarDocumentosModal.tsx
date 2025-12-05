@@ -20,7 +20,7 @@ export default function BaixarDocumentosModal({
 
   // 1. NORMALIZAÇÃO DO STATUS
   // Converte o status para minúsculo para facilitar a comparação (evita erro de 'Pré-Conselho' vs 'Pré-conselho')
-  const statusOriginal = conselho.status ?? "";
+  const statusOriginal = conselho.etapas?? "";
   const statusLower = statusOriginal.toLowerCase();
 
   // 2. NORMALIZAÇÃO DA ROLE
