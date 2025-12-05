@@ -59,7 +59,7 @@
     "@next/swc-win32-x64-msvc": "^15.2.3",
     "@types/js-cookie": "^3.0.6",
     "@types/node": "20.17.23",
-    "@types/papaparse": "^5.5.0",
+    "@types/papaparse": "^5.5.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@types/sockjs-client": "^1.5.4",
