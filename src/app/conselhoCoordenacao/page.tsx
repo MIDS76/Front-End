@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { Textarea } from "@/components/ui/textarea";
@@ -12,18 +12,16 @@ import ButtonTT from "@/components/button/ButtonTT";
 import InfoCard from "@/components/card/cardTituloTelas";
 import UserInfo from "@/components/lista/userInfo";
 import Lista from "@/components/lista/lista";
-import AccessDeniedPage from "../access-denied"; 
+import AccessDeniedPage from "../access-denied";
 import { useAuth } from "@/context/AuthContext";
 import { validateRequired } from "@/utils/formValidation";
-import { Usuario, Turma } from "@/utils/types"; 
-
-import { buscarAlunosPorTurma } from "@/api/alunos"; 
-import { buscarTurmas } from "@/api/turmas"; 
-import { criarFeedbackAluno, criarFeedbackTurma } from "@/api/feedback"; 
-
+import { Usuario, Turma } from "@/utils/types";
+import { buscarAlunosPorTurma } from "@/api/alunos";
+import { buscarTurmaPorConselho } from "@/api/conselho"; 
+import { criarFeedbackAluno, criarFeedbackTurma } from "@/api/feedback";
 
 type CampoFormulario = {
-    titulo: string; 
+    titulo: string;
     positivos: string;
     melhoria: string;
     sugestoes: string;
@@ -45,14 +43,14 @@ const FeedbackTurmaCard = ({
     handleChange: (campo: keyof FeedbackTurma, valor: string) => void;
     erros: Record<keyof FeedbackTurma, boolean>;
 }) => {
-    
+
     const camposTurma: (keyof FeedbackTurma)[] = ["positivosTurma", "melhoriaTurma", "sugestoesTurma"];
-    
+
     return (
         <div className="mt-6 pl-2 pr-4 space-y-6 flex-grow">
             {camposTurma.map((campo) => {
                 const isError = erros[campo] === true;
-                
+
                 let labelText = "";
                 if (campo === "positivosTurma") labelText = "Pontos positivos da Turma";
                 else if (campo === "melhoriaTurma") labelText = "Pontos de melhoria da Turma";
@@ -66,10 +64,10 @@ const FeedbackTurmaCard = ({
                         <Textarea
                             placeholder={`Insira aqui os ${labelText}...`}
                             className="mt-2 resize-none"
-                            style={{ 
+                            style={{
                                 backgroundColor: "hsl(var(--popover))",
                                 color: "hsl(var(--popover-foreground))",
-                                border: isError ? "2px solid hsl(var(--destructive))" : "1px solid hsl(var(--border))", 
+                                border: isError ? "2px solid hsl(var(--destructive))" : "1px solid hsl(var(--border))",
                                 borderRadius: "var(--radius)",
                                 minHeight: "4.5rem",
                             }}
@@ -87,19 +85,22 @@ const FeedbackTurmaCard = ({
 
 export default function ConselhoCoordenacao() {
     const router = useRouter();
-    
-    const turmaId = 2; 
+
+    const { user } = useAuth();
+
+    // VARIÁVEL DE ENTRADA É O ID DO CONSELHO
+    const idConselho = 5; // AQUI ENTRA O ID DO CONSELHO RECEBIDO, EX: 5
 
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-    const [turma, setTurma] = useState<Turma | undefined>(undefined); 
+    const [turma, setTurma] = useState<Turma | undefined>(undefined);
     const [formulario, setFormulario] = useState<CampoFormulario[]>([]);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [pagina, setPagina] = useState(0);
     const [searchQueryUsuarios, setSearchQueryUsuarios] = useState("");
     const [usuarioSelecionado, setUsuarioSelecionado] = useState<Usuario | null>(null);
-    const [isLoading, setIsLoading] = useState(true); 
-    
-    const [exibirFeedbackTurma, setExibirFeedbackTurma] = useState(false); 
+    const [isLoading, setIsLoading] = useState(true);
+
+    const [exibirFeedbackTurma, setExibirFeedbackTurma] = useState(false);
     const [feedbackTurma, setFeedbackTurma] = useState<FeedbackTurma>({
         positivosTurma: "",
         melhoriaTurma: "",
@@ -117,19 +118,19 @@ export default function ConselhoCoordenacao() {
 
     const camposAluno: (keyof CampoFormulario)[] = ["positivos", "melhoria", "sugestoes"];
 
- 
+
     const validarCamposAluno = useCallback(() => {
         if (!formulario || formulario.length === 0 || pagina >= formulario.length) return true;
         const secaoAtual = formulario[pagina] ?? { positivos: "", melhoria: "", sugestoes: "", titulo: "" };
-        
+
         const erros = {
             titulo: false,
             positivos: validateRequired(secaoAtual.positivos, "Pontos positivos") !== "",
             melhoria: validateRequired(secaoAtual.melhoria, "Pontos de melhoria") !== "",
             sugestoes: validateRequired(secaoAtual.sugestoes, "Sugestões") !== "",
         } as Record<keyof CampoFormulario, boolean>;
-        
-        setErrosCampos(erros); 
+
+        setErrosCampos(erros);
 
         if (erros.positivos || erros.melhoria || erros.sugestoes) {
             const firstErrorField = camposAluno.find(c => erros[c]);
@@ -141,14 +142,14 @@ export default function ConselhoCoordenacao() {
         }
         return true;
     }, [formulario, pagina, camposAluno]);
-    
+
     const validarCamposTurma = useCallback(() => {
         const erros = {
             positivosTurma: validateRequired(feedbackTurma.positivosTurma, "Pontos positivos da Turma") !== "",
             melhoriaTurma: validateRequired(feedbackTurma.melhoriaTurma, "Pontos de melhoria da Turma") !== "",
             sugestoesTurma: validateRequired(feedbackTurma.sugestoesTurma, "Sugestões para a Turma") !== "",
         } as Record<keyof FeedbackTurma, boolean>;
-        
+
         setErrosTurma(erros);
 
         if (erros.positivosTurma || erros.melhoriaTurma || erros.sugestoesTurma) {
@@ -162,17 +163,17 @@ export default function ConselhoCoordenacao() {
         const novoFormulario = [...formulario];
         const idx = Math.max(0, Math.min(pagina, novoFormulario.length - 1));
         if (idx >= 0 && idx < novoFormulario.length) {
-             novoFormulario[idx] = { ...novoFormulario[idx], [campo]: valor };
-             setFormulario(novoFormulario);
-             setErrosCampos((prev) => ({ ...prev, [campo]: false }));
+            novoFormulario[idx] = { ...novoFormulario[idx], [campo]: valor };
+            setFormulario(novoFormulario);
+            setErrosCampos((prev) => ({ ...prev, [campo]: false }));
         }
     };
-    
+
     const handleChangeTurma = (campo: keyof FeedbackTurma, valor: string) => {
         setFeedbackTurma((prev) => ({ ...prev, [campo]: valor }));
         setErrosTurma((prev) => ({ ...prev, [campo]: false }));
     };
-    
+
     const handleTransitionToTurma = () => {
         if (!validarCamposAluno()) return;
 
@@ -184,21 +185,21 @@ export default function ConselhoCoordenacao() {
             toast.error("Você deve preencher todos os feedbacks dos alunos antes de passar para o Feedback da Turma.");
             return;
         }
-        
-        setExibirFeedbackTurma(true); 
+
+        setExibirFeedbackTurma(true);
         setUsuarioSelecionado(null);
-        setPagina(formulario.length); 
+        setPagina(formulario.length);
     };
 
     const trocarPagina = (novaPagina: number) => {
         if (novaPagina > pagina && !exibirFeedbackTurma) {
             if (!validarCamposAluno()) return;
         }
-        
+
         if (novaPagina === formulario.length) {
-            return; 
+            return;
         }
-        
+
         if (novaPagina >= 0 && novaPagina < formulario.length) {
             setExibirFeedbackTurma(false);
             setPagina(novaPagina);
@@ -206,57 +207,68 @@ export default function ConselhoCoordenacao() {
             setErrosCampos({ titulo: false, positivos: false, melhoria: false, sugestoes: false });
         }
     };
-    
+
     const handleSelecionarUsuario = (usuarioClicado: Usuario) => {
         if (!exibirFeedbackTurma && usuarioSelecionado && !validarCamposAluno()) return;
-        
+
         const novaPagina = usuarios.findIndex((u) => u.nome === usuarioClicado.nome);
-        
+
         if (novaPagina !== -1) {
-            setExibirFeedbackTurma(false); 
+            setExibirFeedbackTurma(false);
             setPagina(novaPagina);
             setUsuarioSelecionado(usuarioClicado);
             setErrosCampos({ titulo: false, positivos: false, melhoria: false, sugestoes: false });
         }
     };
-    
+
+
+
     const handleConcluir = async () => {
-        if (!validarCamposTurma()) return; 
-        
-        if (!turmaId) {
-            toast.error("ID da turma não está disponível para salvar.");
+        if (!validarCamposTurma()) return;
+
+        if (!idConselho) {
+            toast.error("ID do Conselho não está disponível para salvar. Recarregue a página.");
+            return;
+        }
+
+        const idPedagogico = user?.id;
+
+        if (!idPedagogico) {
+            toast.error("ID do usuário pedagógico não encontrado. Faça login novamente.");
             return;
         }
 
         try {
             for (const [index, feedback] of formulario.entries()) {
                 const aluno = usuarios[index];
-                if (!aluno?.id) continue; 
+                if (!aluno?.id) continue;
 
                 const dadosFeedbackAluno = {
-                    turmaId: turmaId,
-                    alunoId: aluno.id, 
+                    idConselho: idConselho,
+                    idAluno: aluno.id,
                     pontosPositivos: feedback.positivos,
                     pontosMelhoria: feedback.melhoria,
-                    sugestoes: feedback.sugestoes,
+                    sugestao: feedback.sugestoes,
+                    idPedagogico: idPedagogico,
                 };
-                
+
                 await criarFeedbackAluno(dadosFeedbackAluno);
             }
-            
+
             const dadosFeedbackTurma = {
-                turmaId: turmaId,
-                dataConclusao: new Date().toISOString(),
-                positivosTurma: feedbackTurma.positivosTurma,
+                idConselho: idConselho,
+                pontosPositivos: feedbackTurma.positivosTurma,
                 pontosMelhoria: feedbackTurma.melhoriaTurma,
-                sugestoes: feedbackTurma.sugestoesTurma,
+                sugestao: feedbackTurma.sugestoesTurma,
+                idPedagogico: idPedagogico,
             };
-            
+
+
             await criarFeedbackTurma(dadosFeedbackTurma);
-            
+
             toast.success("Conselho concluído e salvo com sucesso!");
-            localStorage.removeItem(`conselho-formulario-${turmaId}`); 
-            localStorage.removeItem(`conselho-turma-${turmaId}`); 
+            localStorage.removeItem(`conselho-formulario-${idConselho}`);
+            localStorage.removeItem(`conselho-turma-${idConselho}`);
 
             const usuarioJson = localStorage.getItem("user");
             if (usuarioJson) {
@@ -265,7 +277,7 @@ export default function ConselhoCoordenacao() {
                     setTimeout(() => router.push(`/${usuario.perfil}`), 800);
                 }
             }
-            
+
         } catch (error) {
             toast.error("Falha ao salvar o conselho.");
         }
@@ -274,39 +286,48 @@ export default function ConselhoCoordenacao() {
     useEffect(() => {
         const fetchData = async () => {
             setIsLoading(true);
-            
-            if (!turmaId || isNaN(turmaId) || turmaId <= 0) {
+
+            if (!idConselho || isNaN(idConselho) || idConselho <= 0) {
                 setIsLoading(false);
                 return;
             }
 
             try {
+                const turmaEncontrada = await buscarTurmaPorConselho(idConselho);
+                
+                if (!turmaEncontrada || !turmaEncontrada.id) {
+                    toast.error("Turma não encontrada para este Conselho.");
+                    setTurma(undefined);
+                    setUsuarios([]);
+                    setIsLoading(false);
+                    return;
+                }
+                
+                setTurma(turmaEncontrada);
+                const turmaId = turmaEncontrada.id;
+
                 const alunosDaTurmaBrutos = await buscarAlunosPorTurma(turmaId);
                 const alunosPadronizados: Usuario[] = (alunosDaTurmaBrutos || []).map((alunoBruto: any) => ({
                     id: alunoBruto.id,
                     nome: alunoBruto.nome,
                     email: alunoBruto.email,
-                    isActive: alunoBruto.statusAtividadeAluno, 
-                    role: "ALUNO", 
+                    isActive: alunoBruto.statusAtividadeAluno,
+                    role: "ALUNO",
                 }));
                 const alunosAtivos: Usuario[] = alunosPadronizados.filter((u) => u.role === "ALUNO" && u.isActive);
                 setUsuarios(alunosAtivos);
-                
-                const turmasArray = await buscarTurmas();
-                const turmaEncontrada = turmasArray?.find((t) => t.id === turmaId);
-                setTurma(turmaEncontrada);
 
-                const chaveLocalStorageAlunos = `conselho-formulario-${turmaId}`;
-                const chaveLocalStorageTurma = `conselho-turma-${turmaId}`;
+                const chaveLocalStorageAlunos = `conselho-formulario-${idConselho}`;
+                const chaveLocalStorageTurma = `conselho-turma-${idConselho}`;
                 const salvoRawAlunos = localStorage.getItem(chaveLocalStorageAlunos);
                 const salvoRawTurma = localStorage.getItem(chaveLocalStorageTurma);
-                
+
                 const inicialAlunos: CampoFormulario[] = alunosAtivos.map((aluno) => ({
                     titulo: aluno.nome,
                     positivos: "", melhoria: "", sugestoes: "",
                 }));
                 let formulariosAlinhados = inicialAlunos;
-                
+
                 if (salvoRawAlunos) {
                     try {
                         const salvo: CampoFormulario[] = JSON.parse(salvoRawAlunos);
@@ -314,22 +335,22 @@ export default function ConselhoCoordenacao() {
                             const achado = salvo.find((s) => s.titulo === aluno.nome);
                             return achado ?? { titulo: aluno.nome, positivos: "", melhoria: "", sugestoes: "" };
                         });
-                    } catch {}
+                    } catch { }
                 }
                 setFormulario(formulariosAlinhados);
-                
+
                 let feedbackTurmaInicial = { positivosTurma: "", melhoriaTurma: "", sugestoesTurma: "" };
                 if (salvoRawTurma) {
                     try {
                         feedbackTurmaInicial = JSON.parse(salvoRawTurma);
-                    } catch {}
+                    } catch { }
                 }
                 setFeedbackTurma(feedbackTurmaInicial);
 
                 const primeiroAlunoIncompletoIndex = formulariosAlinhados.findIndex(
                     (f) => !f.positivos.trim() || !f.melhoria.trim() || !f.sugestoes.trim()
                 );
-                
+
                 let initialPage = 0;
                 let initialUsuario: Usuario | null = null;
                 let initialExibirTurma = false;
@@ -349,7 +370,7 @@ export default function ConselhoCoordenacao() {
                 setUsuarioSelecionado(initialUsuario);
 
             } catch (error) {
-                toast.error("Falha ao carregar alunos e turma.");
+                toast.error("Falha ao carregar dados. Verifique a conexão com a API.");
                 setUsuarios([]);
                 setFormulario([]);
             } finally {
@@ -358,31 +379,31 @@ export default function ConselhoCoordenacao() {
         };
 
         fetchData();
-    }, [turmaId]); 
+    }, [idConselho]); 
 
- 
+
     useEffect(() => {
-        if (formulario.length > 0 && turmaId) {
-            localStorage.setItem(`conselho-formulario-${turmaId}`, JSON.stringify(formulario));
+        if (formulario.length > 0 && idConselho) {
+            localStorage.setItem(`conselho-formulario-${idConselho}`, JSON.stringify(formulario));
         }
-    }, [formulario, turmaId]);
-    
+    }, [formulario, idConselho]);
+
     useEffect(() => {
-        if (turmaId) {
-            localStorage.setItem(`conselho-turma-${turmaId}`, JSON.stringify(feedbackTurma));
+        if (idConselho) {
+            localStorage.setItem(`conselho-turma-${idConselho}`, JSON.stringify(feedbackTurma));
         }
-    }, [feedbackTurma, turmaId]);
+    }, [feedbackTurma, idConselho]);
 
 
     const isAlunoAtualPreenchido = useMemo(() => {
         if (exibirFeedbackTurma || !usuarioSelecionado) return true;
         if (!formulario || formulario.length === 0 || pagina >= formulario.length) return true;
-        
+
         const secaoAtual = formulario[pagina] ?? { positivos: "", melhoria: "", sugestoes: "", titulo: "" };
-        
-        return secaoAtual.positivos.trim() !== "" && 
-               secaoAtual.melhoria.trim() !== "" && 
-               secaoAtual.sugestoes.trim() !== "";
+
+        return secaoAtual.positivos.trim() !== "" &&
+            secaoAtual.melhoria.trim() !== "" &&
+            secaoAtual.sugestoes.trim() !== "";
 
     }, [formulario, pagina, exibirFeedbackTurma, usuarioSelecionado]);
 
@@ -393,25 +414,25 @@ export default function ConselhoCoordenacao() {
         );
     }, [usuarios, searchQueryUsuarios]);
 
-    const secaoAtual = exibirFeedbackTurma 
-        ? { titulo: "", positivos: "", melhoria: "", sugestoes: "" } 
+    const secaoAtual = exibirFeedbackTurma
+        ? { titulo: "", positivos: "", melhoria: "", sugestoes: "" }
         : (usuarioSelecionado
-        ? formulario.find((f) => f.titulo === usuarioSelecionado.nome) ?? { titulo: "", positivos: "", melhoria: "", sugestoes: "" }
-        : formulario[pagina] ?? { titulo: "", positivos: "", melhoria: "", sugestoes: "" });
+            ? formulario.find((f) => f.titulo === usuarioSelecionado.nome) ?? { titulo: "", positivos: "", melhoria: "", sugestoes: "" }
+            : formulario[pagina] ?? { titulo: "", positivos: "", melhoria: "", sugestoes: "" });
 
     const todosAlunosPreenchidos = useMemo(() => {
         return formulario.length > 0 && formulario.every(
             (f) => f.positivos.trim() && f.melhoria.trim() && f.sugestoes.trim()
         );
     }, [formulario]);
-    
+
     const todosTurmaPreenchidos = useMemo(() => {
         return feedbackTurma.positivosTurma.trim() && feedbackTurma.melhoriaTurma.trim() && feedbackTurma.sugestoesTurma.trim();
     }, [feedbackTurma]);
 
     const proximoDesabilitado = exibirFeedbackTurma || !isAlunoAtualPreenchido || pagina === formulario.length - 1;
-    
-    const enviarDesabilitado = exibirFeedbackTurma 
+
+    const enviarDesabilitado = exibirFeedbackTurma
         ? !todosTurmaPreenchidos
         : !todosAlunosPreenchidos;
 
@@ -420,13 +441,12 @@ export default function ConselhoCoordenacao() {
         color: "hsl(var(--primary-foreground))",
         border: `1px solid hsl(var(--primary))`,
     };
-    
-    const { user } = useAuth();
-    
+
+
     if (user?.role !== "pedagogico" && user?.role !== "admin") {
         return AccessDeniedPage();
     }
-    
+
     if (isLoading) {
         return (
             <div className="w-screen h-screen flex items-center justify-center" style={{ backgroundColor: "hsl(var(--background))", color: "hsl(var(--foreground))" }}>
@@ -436,7 +456,7 @@ export default function ConselhoCoordenacao() {
             </div>
         );
     }
-    
+
     if (!turma || usuarios.length === 0) {
         return (
             <div className="w-screen h-screen flex items-center justify-center p-8" style={{ backgroundColor: "hsl(var(--background))", color: "hsl(var(--foreground))" }}>
@@ -452,14 +472,14 @@ export default function ConselhoCoordenacao() {
         );
     }
 
-    
+
     return (
         <div
             className="w-screen h-screen flex flex-col items-center justify-center overflow-auto lg:overflow-hidden px-4 xl:px-8 py-4 lg:py-0"
             style={{ backgroundColor: "hsl(var(--background))", color: "hsl(var(--foreground))" }}
         >
             <div className="flex w-full max-w-[100rem] justify-center gap-4 xl:gap-8">
-                
+
                 <div className="flex flex-col flex-1 max-w-[46.875rem] min-w-0 gap-4">
                     <InfoCard
                         titulo={turma?.curso ?? "JGS - AI MIDS 2024/1 INT1"}
@@ -473,7 +493,7 @@ export default function ConselhoCoordenacao() {
                             borderColor: "hsl(var(--border))",
                         }}
                     >
-                        <input 
+                        <input
                             type="text"
                             placeholder="Buscar um usuário"
                             value={searchQueryUsuarios}
@@ -492,7 +512,7 @@ export default function ConselhoCoordenacao() {
                                 isDialogOpen={false}
                                 setIsDialogOpen={() => { }}
                                 className="flex flex-col gap-2"
-                                onSelect={handleSelecionarUsuario} 
+                                onSelect={handleSelecionarUsuario}
                                 usuarioSelecionado={usuarioSelecionado}
                             />
                         </ScrollArea>
@@ -500,24 +520,24 @@ export default function ConselhoCoordenacao() {
                 </div>
 
                 <div className="flex flex-col flex-1 max-w-[46.875rem] min-w-0">
-                    
+
                     <div
                         className="rounded-3xl shadow p-6 w-full flex flex-col gap-6 flex-grow"
                         style={{ backgroundColor: "hsl(var(--card))", color: "hsl(var(--card-foreground))" }}
                     >
                         <div className="flex flex-row items-start justify-between gap-4 mt-2 scale-105 origin-left">
-                            
+
                             <div className="flex-shrink-0">
                                 {!exibirFeedbackTurma && usuarioSelecionado && (
                                     <UserInfo
                                         nome={usuarioSelecionado.nome}
                                         email={usuarioSelecionado.email}
                                         copy={false}
-                                        active={usuarioSelecionado.isActive}
+                                        active={usuarioSelecionado.isActive ?? true}
                                     />
                                 )}
                             </div>
-                            
+
                             {exibirFeedbackTurma && (
                                 <div className="flex flex-col flex-shrink-0 w-full">
                                     <div className="flex justify-between items-start">
@@ -529,10 +549,10 @@ export default function ConselhoCoordenacao() {
                         </div>
 
                         {exibirFeedbackTurma ? (
-                            <FeedbackTurmaCard 
-                                feedback={feedbackTurma} 
-                                handleChange={handleChangeTurma} 
-                                erros={errosTurma} 
+                            <FeedbackTurmaCard
+                                feedback={feedbackTurma}
+                                handleChange={handleChangeTurma}
+                                erros={errosTurma}
                             />
                         ) : (
                             <div className="mt-6 pl-2 pr-4 space-y-6 flex-grow">
@@ -570,26 +590,26 @@ export default function ConselhoCoordenacao() {
 
                     <div className="flex justify-between items-center pt-6 w-full">
                         <div className="flex gap-4">
-                            
+
                             <ButtonTT
                                 tooltip="Anterior"
                                 mode="default"
                                 onClick={() => {
                                     if (exibirFeedbackTurma) {
                                         setExibirFeedbackTurma(false);
-                                        setPagina(formulario.length - 1); 
+                                        setPagina(formulario.length - 1);
                                         setUsuarioSelecionado(usuarios[formulario.length - 1] ?? null);
                                     } else {
                                         trocarPagina(pagina - 1);
                                     }
                                 }}
-                                disabled={!exibirFeedbackTurma && pagina === 0} 
+                                disabled={!exibirFeedbackTurma && pagina === 0}
                                 className="text-sm px-8"
                                 style={{
                                     backgroundColor: "hsl(var(--card))",
                                     color: "hsl(var(--foreground))",
                                     border: "1px solid hsl(var(--border))",
-                                    opacity: (!exibirFeedbackTurma && pagina === 0) ? 0.5 : 1, 
+                                    opacity: (!exibirFeedbackTurma && pagina === 0) ? 0.5 : 1,
                                     cursor: (!exibirFeedbackTurma && pagina === 0) ? "not-allowed" : "pointer",
                                 }}
                             >
@@ -600,10 +620,10 @@ export default function ConselhoCoordenacao() {
                                 tooltip="Próximo aluno"
                                 mode="default"
                                 onClick={() => trocarPagina(pagina + 1)}
-                                disabled={proximoDesabilitado} 
+                                disabled={proximoDesabilitado}
                                 className="text-sm px-8"
                                 style={{
-                                    ...proximoButtonColor, 
+                                    ...proximoButtonColor,
                                     opacity: (proximoDesabilitado) ? 0.5 : 1,
                                     cursor: (proximoDesabilitado) ? "not-allowed" : "pointer",
                                 }}
@@ -615,7 +635,7 @@ export default function ConselhoCoordenacao() {
                         <ButtonTT
                             tooltip={exibirFeedbackTurma ? "Enviar Conselho" : (todosAlunosPreenchidos ? "Passar para Feedback da Turma" : "Preencha todos os alunos antes de avançar")}
                             mode="default"
-                            onClick={() => exibirFeedbackTurma ? setIsConfirmOpen(true) : handleTransitionToTurma()} 
+                            onClick={() => exibirFeedbackTurma ? setIsConfirmOpen(true) : handleTransitionToTurma()}
                             disabled={enviarDesabilitado}
                             className="text-sm px-8"
                             style={{

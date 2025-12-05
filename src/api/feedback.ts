@@ -1,35 +1,71 @@
 import api from "@/utils/axios";
 import { AxiosError } from "axios";
 
+type DadosFeedbackAluno = {
+    idConselho: number,
+    idAluno: number,
+    pontosPositivos: string,
+    pontosMelhoria: string,
+    sugestao: string,
+    idPedagogico: number,
+};
 
-export const criarFeedbackAluno = async (ordem: string) => {
-    const controller = new AbortController();
+type DadosFeedbackTurma = {
+    idConselho: number,
+    pontosPositivos: string,
+    pontosMelhoria: string,
+    sugestao: string,
+    idPedagogico: number,
+};
+
+export const criarFeedbackAluno = async (dados: DadosFeedbackAluno) => {
+
+    if (!dados.idPedagogico) {
+        throw new Error("ID do usuário pedagógico (idPedagogico) não foi fornecido.");
+    }
+
+    const payload = {
+        idConselho: dados.idConselho,
+        idPedagogico: dados.idPedagogico,
+        idAluno: dados.idAluno,
+        pontosPositivos: dados.pontosPositivos,
+        pontosMelhoria: dados.pontosMelhoria,
+        sugestao: dados.sugestao,
+    };
 
     try {
-        const response = await api.get(`/turmas/ordemAlfabetica?ordem=${ordem}`, { signal: controller.signal });
-        console.log(response.data);
+        const response = await api.post("/conselhoAlunosFeedbacks/criar", payload);
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
-            console.log(err.response?.status);
-            console.log(err.response?.data);
+            throw new Error(err.response?.data?.message || `Falha ao criar feedback do aluno. Status: ${err.response?.status}`);
         }
+        throw err;
     }
-}
+};
 
-export const criarFeedbackTurma = async () => {
-    const controller = new AbortController();
-  
-    try {
-      const response = await api.get("/turmas/listarCursos", {
-        signal: controller.signal,
-      });
-      return response.data;
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        console.error(err.response?.status);
-        console.error(err.response?.data);
-      }
-      return [];
+export const criarFeedbackTurma = async (dados: DadosFeedbackTurma) => {
+
+
+    if (!dados.idPedagogico) {
+        throw new Error("ID do usuário pedagógico (idPedagogico) não foi fornecido.");
     }
-  };
+
+    const payload = {
+        idConselho: dados.idConselho,
+        idPedagogico: dados.idPedagogico,
+        pontosPositivos: dados.pontosPositivos,
+        pontosMelhoria: dados.pontosMelhoria,
+        sugestao: dados.sugestao,
+    };
+
+    try {
+        const response = await api.post("/conselhoTurmasFeedback/criar", payload);
+        return response.data;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            throw new Error(err.response?.data?.message || `Falha ao criar feedback da turma. Status: ${err.response?.status}`);
+        }
+        throw err;
+    }
+};
