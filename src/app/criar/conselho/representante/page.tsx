@@ -59,17 +59,17 @@ export default function RepresentantePage() {
     aluno.nome.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // useEffect(() => {
-  //   const dadosSalvos = localStorage.getItem("representantes-selecionados");
+  useEffect(() => {
+    const dadosSalvos = localStorage.getItem("representantes-selecionados");
 
-  //   if (dadosSalvos) {
-  //     try {
-  //       setSelecionados(JSON.parse(dadosSalvos));
-  //     } catch {
-  //       console.error("Erro ao carregar representantes salvos.");
-  //     }
-  //   }
-  // }, []);
+    if (dadosSalvos) {
+      try {
+        setSelecionados(JSON.parse(dadosSalvos));
+      } catch {
+        console.error("Erro ao carregar representantes salvos.");
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (selecionados.length > 0) {
@@ -111,11 +111,6 @@ export default function RepresentantePage() {
   async function handleProximoPasso() {
     if (selecionados.length < 2) {
       toast.error("Selecione dois representantes antes de prosseguir.");
-      return;
-    }
-
-    if (!turmaSelecionada) {
-      toast.error("Turma não encontrada.")
       return;
     }
 

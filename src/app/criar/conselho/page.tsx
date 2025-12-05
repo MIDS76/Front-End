@@ -10,9 +10,9 @@ import InfoCard from "@/components/card/cardTituloTelas";
 import ButtonTT from "@/components/button/ButtonTT";
 import { toast } from "sonner";
 import ActionModal from "@/components/modal/actionModal";
-import { listarUnidadeCurricular, listarProfessores, preConselhoProfessor } from "@/api/preConselho";
+import { listarUnidadeCurricular, listarProfessores, preConselhoProfessor, criarPreConselho, buscarPreConselhoPorConselho } from "@/api/preConselho";
 import { UnidadeCurricular, Usuario } from "@/utils/types";
-import { criarConselho, atualizarEtapa } from "@/api/conselho";
+import { criarConselho } from "@/api/conselho";
 
 export default function ConselhoPage() {
   const router = useRouter();
@@ -28,16 +28,28 @@ export default function ConselhoPage() {
   const [usuario, setUsuario] = useState<Usuario[]>([]);
   const [conselhoId, setConselho] = useState<number | null>(null);
   const [turmaSelecionada, setTurmaSelecionada] = useState<{ id: number; nome: string } | null>(null);
-  const [representante1, setIdRepresentante1] = useState<{ id: number } | null>(null);
-  const [representante2, setIdRepresentante2] = useState<{ id: number } | null>(null);
+  const [representante1, setIdRepresentante1] = useState<number | null>(null);
+  const [representante2, setIdRepresentante2] = useState<number | null>(null);
 
   // buscar os representantes da pagina anterior para salvar o conselho
   useEffect(() => {
     const representante1 = localStorage.getItem("representante1");
+
+    console.log("RAW representante1 do localStorage: ", representante1);
+
+    if (representante1) {
+      setIdRepresentante1(JSON.parse(representante1));
+    } else {
+      toast.error("Nenhum representante encontrado.");
+    }
+  }, []);
+
+  useEffect(() => {
     const representante2 = localStorage.getItem("representante2");
 
-    if (representante1 && representante2) {
-      setIdRepresentante1(JSON.parse(representante1));
+    console.log("RAW representante2 do localStorage: ", representante2);
+
+    if (representante2) {
       setIdRepresentante2(JSON.parse(representante2));
     } else {
       toast.error("Nenhum representante encontrado.");
@@ -203,10 +215,14 @@ export default function ConselhoPage() {
       }
 
       const idTurma = turmaSelecionada.id;
-      const idRepresentante1 = representante1!.id;
-      const idRepresentante2 = representante2!.id;
+      const idRepresentante1 = representante1;
+      const idRepresentante2 = representante2;
 
       const idPedagogico = 6;
+
+      console.log("id do representante: " + idRepresentante1);
+      console.log("id do representante: " + idRepresentante2);
+      console.log("id da turma: " + idTurma);
 
       const conselhoCriado = await criarConselho({
         idTurma,
@@ -220,21 +236,25 @@ export default function ConselhoPage() {
         return;
       }
 
+      console.log("conselhoCriado:", conselhoCriado);
+
       localStorage.setItem("idConselho", JSON.stringify(conselhoCriado.id));
 
       toast.success("Conselho criado com sucesso!");
 
-      await atualizarEtapa(conselhoCriado.id, "PRE_CONSELHO");
-      console.log(atualizarEtapa);
+      const preConselhoCriado = await criarPreConselho(conselhoCriado.id);
 
-      // parei aqui 04/12 - ultimo commit "feat: ajustes na integração de criar conselho na fase final"
+      if (!preConselhoCriado) {
+        toast.error("Erro ao criar o pre conselho");
+        return;
+      }
 
-      toast.success("Pré-conselho liberado com sucesso");
+      console.log("preConselho:" + preConselhoCriado);
+
+      toast.success("Pre Conselho criado com sucesso!");
 
       localStorage.removeItem("representante1");
       localStorage.removeItem("representante2");
-      localStorage.removeItem("associacoes");
-      localStorage.removeItem("preconselho-formulario");
 
       function normalizeRole(str: string) {
         return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
