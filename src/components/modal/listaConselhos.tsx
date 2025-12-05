@@ -12,7 +12,7 @@ import ConfirmarConselhoModal from "./confirmarConselhoModal";
 import AvancarEtapaModal from "./avancarEtapaModal";
 import { FileSpreadsheet } from "lucide-react";
 import BaixarDocumentosModal from "./BaixarDocumentosModal";
-import { Conselho, atualizarEtapa, listarConselhosPorTurma } from "@/api/conselho";
+import { Conselho, atualizarConselho, atualizarEtapa, listarConselhosPorTurma } from "@/api/conselho";
 
 
 
@@ -96,7 +96,14 @@ export default function ListaConselhos({
     setLoading(true);
     try {
       const conselhosDaAPI = await listarConselhosPorTurma(turma.id);
-      setConselhos(conselhosDaAPI || []);
+
+      const conselhosOrdenados = (conselhosDaAPI || []).sort((a, b) => {
+        const dateA = a.dataInicio ? new Date(a.dataInicio).getTime() : 0;
+        const dateB = b.dataInicio ? new Date(b.dataInicio).getTime() : 0;
+        return dateB - dateA; 
+    });
+
+      setConselhos(conselhosOrdenados);
 
     } catch (error) {
       console.error("Erro ao buscar conselhos:", error);
@@ -135,8 +142,15 @@ export default function ListaConselhos({
         return;
     }
 
+    let dataFim = undefined;
+    
+    if (novaEtapa === "RESULTADO") {
+        dataFim = new Date().toISOString(); 
+    }
+
     try {
       await atualizarEtapa(conselhoSelecionado.id, novaEtapa);
+      await atualizarConselho(conselhoSelecionado.id, conselhoSelecionado);
 
       await fetchConselhos();
 
@@ -223,7 +237,7 @@ export default function ListaConselhos({
                       <div className="text-foreground px-4 py-3 flex items-center justify-between bg-card">
                         <div className="text-sm">
                           <span className="font-medium">Status:</span>{" "}
-                          <span className="font-normal">{conselho.etapas}</span>
+                          <span className="font-normal">{getDisplayStatus(conselho.etapas ?? "")}</span>
                         </div>
 
                         {deveMostrarBotaoDocumentos && (

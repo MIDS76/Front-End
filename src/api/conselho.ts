@@ -91,11 +91,38 @@ export const listarConselhosPorTurma = async (idTurma: number) => {
     }
 }
 
+export const buscarConselho = async (id: number) => {
+    try {
+        const response = await api.get<Conselho>(`/conselhos/buscar/${id}`, { signal: controller.signal });
+
+        return response.data;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.log(err.response?.status);
+        }
+    }
+}
+
 export const atualizarEtapa = async (idConselho: number, novaEtapa: string) => {
     const controller = new AbortController();
 
     try {
         const response = await api.patch(`/conselhos/atualizar/${idConselho}/etapa`, { novaEtapa: novaEtapa}, { signal: controller.signal });
+        console.log(response.data);
+        return response.data;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.log(err.response?.status);
+            console.log(err.response?.data);
+        }
+    }
+}
+
+export const atualizarConselho = async (idConselho: number, conselho: Conselho) => {
+    const controller = new AbortController();
+
+    try {
+        const response = await api.patch(`/conselhos/atualizar/${idConselho}`, conselho, { signal: controller.signal });
         console.log(response.data);
         return response.data;
     } catch (err) {

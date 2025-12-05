@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import ActionModal from "@/components/modal/actionModal";
-import SucessoEnviarModal from "@/components/modal/sucessoEnviarModal";
 import ButtonTT from "@/components/button/ButtonTT";
 import { toast } from "sonner";
 import InfoCard from "@/components/card/cardTituloTelas";
@@ -12,7 +11,8 @@ import { useParams, useRouter } from "next/navigation";
 import { validateRequired } from "@/utils/formValidation";
 import { useAuth } from "@/context/AuthContext";
 import AccessDeniedPage from "../access-denied";
-import { listarPreConselhoProfessorPorConselho, preConselhoAmbienteEnsino, preConselhoPedagogico, preConselhoProfessor, preConselhoSupervisao } from "@/api/preConselho";
+import { buscarPreConselho, listarPreConselhoProfessorPorConselho, preConselhoAmbienteEnsino, preConselhoPedagogico, preConselhoProfessor, preConselhoSupervisao } from "@/api/preConselho";
+import { Conselho, atualizarEtapa, buscarConselho } from "@/api/conselho";
 
 type CampoFormulario = {
   titulo: string;
@@ -42,6 +42,7 @@ export default function PreConselhoFormulario() {
   const [formulario, setFormulario] = useState<CampoFormulario[]>([]);
   const [professoresData, setProfessoresData] = useState<UsuarioApi[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [conselho, setConselho] = useState<Conselho | null>(null);
   const router = useRouter();
 
   const { id } = useParams();
@@ -87,6 +88,8 @@ export default function PreConselhoFormulario() {
     const fetchAndInitialize = async () => {
       setIsLoading(true);
       try {
+        const preConselho = buscarPreConselho(idPreConselho);
+        const conselho = await buscarConselho(preConselho.idConselho);
         const professores = await listarPreConselhoProfessorPorConselho(idPreConselho);
 
         console.log(professores);
@@ -248,6 +251,7 @@ export default function PreConselhoFormulario() {
       }
 
       await Promise.all(promises);
+      await atualizarEtapa(conselho.id, "CONSELHO");
 
       toast.success("Pré-conselho salvo com sucesso!");
       localStorage.removeItem("preconselho-formulario");
