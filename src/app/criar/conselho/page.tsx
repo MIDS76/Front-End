@@ -238,8 +238,6 @@ export default function ConselhoPage() {
 
       console.log("conselhoCriado:", conselhoCriado);
 
-      localStorage.setItem("idConselho", JSON.stringify(conselhoCriado.id));
-
       toast.success("Conselho criado com sucesso!");
 
       const preConselhoCriado = await criarPreConselho(conselhoCriado.id);
@@ -252,6 +250,20 @@ export default function ConselhoPage() {
       console.log("preConselho:" + preConselhoCriado);
 
       toast.success("Pre Conselho criado com sucesso!");
+
+      for (const item of salvos) {
+        await preConselhoProfessor({
+          idPreConselho: preConselhoCriado.id,
+          idUnidadeCurricular: Number(item.unidade),
+          idProfessor: Number(item.professor),
+
+          // conforme solicitado → enviar como string vazia
+          pontosPositivos: "",
+          pontosMelhoria: "",
+          sugestoes: ""
+        });
+
+      }
 
       localStorage.removeItem("representante1");
       localStorage.removeItem("representante2");
