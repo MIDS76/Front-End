@@ -14,6 +14,11 @@ export interface Turma {
   dataFinal: string;
 }
 
+export interface UnidadeCurricular {
+  id: number;
+  nome: string;
+}
+
 export interface Conselho {
   id: number;
   idTurma: number;
@@ -29,6 +34,17 @@ export interface Usuario {
   email: string;
   role: string;
   isActive?: boolean;
+}
+
+export interface Aluno extends Usuario {
+  representante: boolean;
+  statusAtividadeAluno: boolean;
+}
+
+export interface AlunoTurmaResponse {
+  statusTurma: boolean;
+  nomeTurma: string;
+  alunos: Aluno[]; 
 }
 
 export const USER_ROLES = [

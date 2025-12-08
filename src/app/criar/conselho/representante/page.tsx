@@ -9,33 +9,62 @@ import AccessDeniedPage from "@/app/access-denied";
 import ButtonTT from "@/components/button/ButtonTT";
 import { toast } from "sonner";
 import Lista from "@/components/lista/lista";
-import { Usuario } from "@/utils/types";
-import usuariosData from "@/data/usuarios.json";
+import { Aluno, Usuario } from "@/utils/types";
 import InfoCard from "@/components/card/cardTituloTelas";
-import ActionModal from "@/components/modal/actionModal";
+import { buscarAlunosTurma } from "@/api/turmas";
+import { criarConselho } from "@/api/conselho";
 
 export default function RepresentantePage() {
   const router = useRouter();
-
   const [selecionados, setSelecionados] = useState<Usuario[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [aluno, setAluno] = useState<Aluno[]>([]);
+  const [turmaSelecionada, setTurmaSelecionada] = useState<{ id: number; nome: string } | null>(null);
 
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  useEffect(() => {
+    const t = localStorage.getItem("turmaSelecionada");
+    if (t) {
+      setTurmaSelecionada(JSON.parse(t));
+    } else {
+      toast.error("Nenhuma turma selecionada.");
+    }
+  }, []);
 
-  const alunosAtivos: Usuario[] = usuariosData.filter(
-    (u) => u.role === "Aluno" && u.isActive
-  );
+  useEffect(() => {
+    const carregarAlunos = async () => {
+      if (!turmaSelecionada) {
+        return;
+      }
+
+      const alunos = await buscarAlunosTurma(turmaSelecionada.id);
+      console.log("Recebido de buscarAlunosTurma:", alunos);
+
+      if (alunos) {
+        setAluno(alunos);
+      } else {
+        toast.error("Erro ao carregar alunos.");
+      }
+
+    };
+    carregarAlunos();
+  }, [turmaSelecionada]);
+
+
+  const alunosAtivos: Usuario[] = aluno.filter((a) => a.statusAtividadeAluno);
+
+  console.log(alunosAtivos);
 
   const alunosFiltrados = alunosAtivos.filter((aluno) =>
     aluno.nome.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {
-    const salvo = localStorage.getItem("representantes-selecionados");
-    if (salvo) {
+    const dadosSalvos = localStorage.getItem("representantes-selecionados");
+
+    if (dadosSalvos) {
       try {
-        setSelecionados(JSON.parse(salvo));
+        setSelecionados(JSON.parse(dadosSalvos));
       } catch {
         console.error("Erro ao carregar representantes salvos.");
       }
@@ -44,10 +73,7 @@ export default function RepresentantePage() {
 
   useEffect(() => {
     if (selecionados.length > 0) {
-      localStorage.setItem(
-        "representantes-selecionados",
-        JSON.stringify(selecionados)
-      );
+      // localStorage.setItem("representantes-selecionados", JSON.stringify(selecionados));
     }
   }, [selecionados]);
 
@@ -76,45 +102,22 @@ export default function RepresentantePage() {
     );
   }
 
-  function handleProximo() {
+  const { user } = useAuth();
+
+  if (user?.role !== "pedagogico" && user?.role !== "admin") {
+    return AccessDeniedPage();
+  }
+
+  async function handleProximoPasso() {
     if (selecionados.length < 2) {
       toast.error("Selecione dois representantes antes de prosseguir.");
       return;
     }
 
-    setIsConfirmOpen(true);
-  }
+    localStorage.setItem("representante1", JSON.stringify(selecionados[0].id));
+    localStorage.setItem("representante2", JSON.stringify(selecionados[1].id));
 
-  function handleConfirmarRepresentantes() {
-    try {
-      localStorage.removeItem("representantes-selecionados");
-      localStorage.removeItem("associacoes");
-      localStorage.removeItem("preconselho-formulario");
-
-      const role = localStorage.getItem("user-role");
-
-      const rotasPorRole: Record<string, string> = {
-        "Aluno": "/aluno",
-        "Coordenação pedagógica": "/pedagogico",
-        "Administrador": "/admin",
-      };
-
-      const rotaInicial = rotasPorRole[role ?? ""] || "/";
-
-      router.push(rotaInicial);
-
-    } catch (e) {
-      console.error("Erro ao limpar localStorage:", e);
-    } finally {
-      setIsConfirmOpen(false);
-    }
-  }
-
-
-  const { user } = useAuth();
-  
-  if (user?.role !== "pedagogico" && user?.role !== "admin") {
-    return AccessDeniedPage();
+    router.push("/criar/conselho")
   }
 
   return (
@@ -127,7 +130,7 @@ export default function RepresentantePage() {
           {/* CABEÇALHO */}
           <div className="flex justify-center mt-[1.5rem]">
             <InfoCard
-              titulo="Conselho da Turma MI 76"
+              titulo={`Conselho da Turma ${turmaSelecionada?.nome}`}
               descricao="Selecione os representantes da turma"
               className="w-[48.5rem] mb-6"
             />
@@ -174,14 +177,13 @@ export default function RepresentantePage() {
           <div className="w-[48.4rem] flex justify-between mt-[1rem]">
             <ButtonTT
               mode="default"
-              onClick={() => router.push("/criar/conselho")}
+              onClick={() => router.push("/criar/conselho/turma")}
               className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--secondary))] text-[hsl(var(--primary-foreground))] 
               px-[1.25rem] py-[0.5rem] rounded-md text-sm font-medium shadow-md transition-all"
             >
               Anterior
             </ButtonTT>
           </div>
-
         </div>
       </main>
 
@@ -195,17 +197,8 @@ export default function RepresentantePage() {
         }))}
         onRemover={handleRemover}
         vazioTexto="Nenhum representante selecionado"
-        onProximo={handleProximo}
-      />
-
-      {/* ACTION MODAL: */}
-      <ActionModal
-        isOpen={isConfirmOpen}
-        setOpen={setIsConfirmOpen}
-        title="Deseja liberar pré-conselho?"
-        conteudo="Ao confirmar, todos os dados relacionados ao pré-conselho serão enviados."
-        actionButtonLabel="Confirmar"
-        onConfirm={handleConfirmarRepresentantes}
+        // aqui vou criar o conselho - e vai para selecionar professor e uc
+        onProximo={handleProximoPasso}
       />
     </div>
   );

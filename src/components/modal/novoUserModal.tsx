@@ -8,6 +8,7 @@ import { USER_ROLES } from "@/utils/types";
 import { hasErrors, showError, validateEmail, validateRequired } from "@/utils/formValidation";
 import { criarUsuario } from "@/api/usuarios";
 import { AxiosError } from "axios";
+import ConfirmacaoNovoUser from "./confirmacaoNovoUser";
 
 interface NovoUserModalProps {
   isOpen: boolean;
@@ -72,12 +73,13 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
 
   useEffect(() => {
     if (!isOpen) {
-      // Limpar os campos e estados ao fechar o modal
-      setNome("");
-      setEmail("");
-      setValue("");
-      setErrors({});
-      setConfirmOpen(false);
+      setTimeout(() => {
+        setNome("");
+        setEmail("");
+        setValue("");
+        setErrors({});
+        setConfirmOpen(false);
+      }, 200);
     }
   }, [isOpen]);
 
@@ -98,6 +100,9 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
                   placeholder="Insira o nome do novo usuário"
                   type="text"
                   id="nome"
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  error={errors.nome}
                 />
               </div>
 
@@ -107,6 +112,9 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
                   placeholder="Insira o e-mail do novo usuário"
                   type="email"
                   id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  error={errors.email}
                 />
               </div>
 
@@ -123,12 +131,21 @@ export default function NovoUserModal({ isOpen, setOpen }: NovoUserModalProps) {
                     placeholder="Selecione um tipo de usuário..."
                     emptyMessage="Nenhum tipo de usuário encontrado."
                     width="100%"
+                    error={errors.tipo}
                   />
                 </div>
               </div>
             </Form>
           </div>
         }
+      />
+      <ConfirmacaoNovoUser
+        isOpen={confirmOpen}
+        setOpen={setConfirmOpen}
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirmOpen(false)}
+        title="Confirmar criação"
+        message={`Deseja criar o usuário "${nome}" com o e-mail "${email}" e tipo "${value}"?`}
       />
     </>
   );
