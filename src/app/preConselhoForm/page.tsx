@@ -11,7 +11,7 @@ import { useParams, useRouter } from "next/navigation";
 import { validateRequired } from "@/utils/formValidation";
 import { useAuth } from "@/context/AuthContext";
 import AccessDeniedPage from "../access-denied";
-import { buscarPreConselho, listarPreConselhoProfessorPorConselho, preConselhoAmbienteEnsino, preConselhoPedagogico, preConselhoProfessor, preConselhoSupervisao } from "@/api/preConselho";
+import { buscarPreConselho, listarPreConselhoProfessorPorConselho, preConselhoAmbienteEnsino, preConselhoPedagogico, preConselhoProfessorAtualizar, preConselhoSupervisao } from "@/api/preConselho";
 import { Conselho, atualizarEtapa, buscarConselho } from "@/api/conselho";
 
 type CampoFormulario = {
@@ -243,7 +243,7 @@ export default function PreConselhoFormulario() {
                 idProfessor: usuario.idProfessor,
               };
 
-              promises.push(preConselhoProfessor(
+              promises.push(preConselhoProfessorAtualizar(
                 usuario.id,
                 dadosProfessor
               ));
