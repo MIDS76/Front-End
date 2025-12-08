@@ -1,40 +1,24 @@
-import { useEffect, useState } from "react";
 import UserInfo from "./userInfo";
 import UserActions from "./userActions";
 import UserCheckbox from "./usercheckbox";
-import { Conselho, Usuario } from "@/utils/types";
+import { Conselho, Usuario } from "@/utils/types"; // Supondo que Conselho venha daqui
 import AddButton from "../button/addButton";
 
+// Mantive apenas as props que vi sendo usadas na lógica
 interface ListCellProps {
   usuario?: Usuario;
-  usuarioProfessor?: Usuario;
   copy?: boolean;
-  children?: React.ReactNode;
   toggleSelected: (id: number | undefined) => void;
-  tipo:
-  | "checkbox"
-  | "edit"
-  | "add"
-  | "star"
-  | "excluir"
-  | "conselho"
-  | "limpa";
+  tipo: "checkbox" | "edit" | "add" | "limpa"; // Removi tipos não usados no switch
   onClick?: () => void;
-  loading?: boolean;
-  removeUser?: () => void;
   isUserAlreadySelected?: boolean;
-  isStarred?: boolean;
-  onStarClick?: () => void;
-  onDelete?: (user: Usuario) => void;
-  conselho?: Conselho;
-  isDialogOpen: boolean;
-  setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setEditingUser: React.Dispatch<React.SetStateAction<Usuario>>;
+  setIsDialogOpen?: React.Dispatch<React.SetStateAction<boolean>>; // Opcional pois nem todo tipo usa
+  setEditingUser?: React.Dispatch<React.SetStateAction<Usuario>>; // Opcional
   ativo?: boolean;
 }
 
 export default function ListCell({
-  usuario: user,
+  usuario,
   copy,
   toggleSelected,
   tipo,
@@ -44,39 +28,32 @@ export default function ListCell({
   onClick,
   ativo,
 }: ListCellProps) {
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [usuario, setUsuario] = useState<Usuario>({} as Usuario);
-  const [isDropDownOpen, setIsDropDownOpen] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      setUsuario(user);
-    }
-  }, [user]);
-
-  const baseClasses =
-    "flex items-center justify-between py-2 px-3 rounded-md shadow mb-2 last:mb-0 transition-colors";
-  const tipoClasses =
-    tipo === "limpa"
-      ? `cursor-pointer ${ativo
+  
+  // Lógica de CSS extraída para facilitar leitura
+  const baseClasses = "flex items-center justify-between py-2 px-3 rounded-md shadow mb-2 last:mb-0 transition-colors";
+  
+  let interactionClasses = "bg-card";
+  if (tipo === "limpa") {
+    interactionClasses = `cursor-pointer ${
+      ativo
         ? "bg-[hsl(var(--primary)/0.15)] border border-[hsl(var(--primary))]"
         : "hover:bg-[hsl(var(--muted))] bg-card"
-      }`
-      : "bg-card";
+    }`;
+  }
+
+  // Se não houver usuário, retornamos null ou um esqueleto para evitar erros
+  if (!usuario && tipo !== 'add') return null;
 
   return (
     <li
-      key={usuario?.id}
-      className={`${baseClasses} ${tipoClasses}`}
-      onClick={() => {
-        if (tipo === "limpa" && onClick) {
-          onClick();
-        }
-      }}
+      className={`${baseClasses} ${interactionClasses}`}
+      // Apenas adiciona handlers de clique se for do tipo 'limpa'
+      onClick={tipo === "limpa" ? onClick : undefined}
       role={tipo === "limpa" ? "button" : undefined}
       tabIndex={tipo === "limpa" ? 0 : undefined}
       onKeyDown={(e) => {
         if ((e.key === "Enter" || e.key === " ") && tipo === "limpa" && onClick) {
+          e.preventDefault(); // Previne scroll ao apertar espaço
           onClick();
         }
       }}
@@ -86,43 +63,41 @@ export default function ListCell({
           nome={usuario?.nome}
           email={usuario?.email}
           copy={copy}
-          active={usuario.ativo ?? true}
+          active={usuario?.ativo ?? true}
         />
         <div className="text-sm text-muted-foreground inline-block">
-          <p className={`${!usuario.ativo ? "text-gray-400" : ""}`}>
+          <p className={`${!usuario?.ativo ? "text-gray-400" : ""}`}>
             {(usuario?.role ?? "").toLocaleUpperCase()}
           </p>
         </div>
       </div>
 
-      {tipo === "edit" && (
-        <UserActions
-          usuario={usuario}
-          isDropDownOpen={isDropDownOpen}
-          setIsDropDownOpen={setIsDropDownOpen}
-          setEditingUser={setEditingUser}
-          setIsDialogOpen={setIsDialogOpen}
-          isConfirmOpen={isConfirmOpen}
-          setIsConfirmOpen={setIsConfirmOpen}
-        />
-      )}
+      {/* Renderização Condicional Limpa */}
+      <div className="ml-2">
+        {tipo === "edit" && setEditingUser && setIsDialogOpen && (
+          // Mova o isDropDownOpen e isConfirmOpen para DENTRO deste componente se possível
+          <UserActions
+            usuario={usuario!}
+            setEditingUser={setEditingUser}
+            setIsDialogOpen={setIsDialogOpen}
+          />
+        )}
 
-      {tipo === "checkbox" && (
-        <UserCheckbox
-          usuario={usuario}
-          toggleSelected={toggleSelected}
-          isChecked={isUserAlreadySelected}
-        />
-      )}
+        {tipo === "checkbox" && (
+          <UserCheckbox
+            usuario={usuario!}
+            toggleSelected={toggleSelected}
+            isChecked={isUserAlreadySelected}
+          />
+        )}
 
-
-
-      {tipo === "add" && (
-        <AddButton
-          isUserAlreadySelected={isUserAlreadySelected}
-          onOpen={() => toggleSelected(usuario?.id)}
-        />
-      )}
+        {tipo === "add" && (
+          <AddButton
+            isUserAlreadySelected={isUserAlreadySelected}
+            onOpen={() => toggleSelected(usuario?.id)}
+          />
+        )}
+      </div>
     </li>
   );
 }

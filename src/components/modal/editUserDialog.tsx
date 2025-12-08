@@ -3,7 +3,9 @@ import { Combobox } from "../ui/combobox";
 import ActionModal from "./actionModal";
 import { useEffect, useState } from "react";
 import TextField from "../input/textField";
+import { editarUsuario } from "@/api/usuarios";
 import { showError, validateEmail, validateRequired } from "@/utils/formValidation";
+import { DialogDescription } from "@radix-ui/react-dialog"; 
 
 interface EditUserDialogProps {
   usuario: Usuario;
@@ -18,18 +20,23 @@ export default function EditUserDialog({
   setOpen,
   onUpdate
 }: EditUserDialogProps) {
-  const [nome, setNome] = useState(usuario.nome);
-  const [email, setEmail] = useState(usuario.email);
-  const [active, setActive] = useState(usuario.ativo ? "true" : "false");
+
+  const [nome, setNome] = useState(usuario?.nome || "");
+  const [email, setEmail] = useState(usuario?.email || "");
+  const [active, setActive] = useState(usuario?.ativo ? "true" : "false");
+  
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    setNome(usuario.nome);
-    setEmail(usuario.email);
-    setActive(usuario.ativo ? "true" : "false");
+    if (usuario) {
+      setNome(usuario.nome);
+      setEmail(usuario.email);
+      setActive(usuario.ativo ? "true" : "false");
+    }
   }, [usuario]);
 
-  const handleUpdateUser = () => {
+  const handleUpdateUser = async () => {
     setErrors({});
     const newErrors: { [key: string]: string } = {};
 
@@ -37,26 +44,50 @@ export default function EditUserDialog({
     newErrors.email = validateEmail(email);
     newErrors.active = validateRequired(active, "status do usuário");
 
-    if (Object.values(newErrors).every((error) => error === "")) {
+    const hasErrors = Object.values(newErrors).some((error) => error && error.length > 0);
+
+    if (!hasErrors) {
+      setIsLoading(true);
+
+      const roleParaUrl = "usuario"; 
+
       const updatedUsuario = {
         ...usuario,
+        role: roleParaUrl,
         nome,
         email,
-        isActive: active === "true",
+        ativo: active === "true",
       };
 
-      onUpdate(updatedUsuario);
-      setOpen(false);
+      try {
+        await editarUsuario(updatedUsuario);
+        
+        onUpdate(updatedUsuario);
+
+        setOpen(false);
+
+      } catch (error: any) {
+        console.error("ERRO:", error);
+        if (error.response?.status === 403) {
+             alert(`Erro 403. Permissão negada.`);
+        } else {
+             showError();
+        }
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       setErrors(newErrors);
-      showError
+      showError();
     }
   }
 
   const handleCancel = () => {
-    setNome(usuario.nome);
-    setEmail(usuario.email);
-    setActive(usuario.ativo ? "true" : "false");
+    if(usuario) {
+        setNome(usuario.nome);
+        setEmail(usuario.email);
+        setActive(usuario.ativo ? "true" : "false");
+    }
     setErrors({});
     setOpen(false);
   };
@@ -65,33 +96,34 @@ export default function EditUserDialog({
     <ActionModal
       isOpen={isOpen}
       setOpen={setOpen}
-      title="Editar Usuário"
-      onClose={() => {
-        handleCancel();
-      }}
-      onConfirm={() => {
-        handleUpdateUser();
-      }}
-
+      title="Editar Usuário"
+      isLoading={isLoading} 
+      onClose={() => { if (!isLoading) handleCancel(); }}
+      onConfirm={handleUpdateUser}
       conteudo={
         <div className="flex flex-col gap-2">
+          <div className="sr-only">
+             <DialogDescription>Formulário de edição</DialogDescription>
+          </div>
           <TextField
             value={nome}
             label="Nome"
             type="text"
             id="nomeUsuario"
-            placeholder="nome"
-            onChange={(e) => setNome(e.target.value)}
+            placeholder="Nome do usuário"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNome(e.target.value)}
             error={errors.nome}
+            disabled={isLoading} 
           />
           <TextField
             value={email}
             label="E-mail"
             type="text"
             id="email"
-            placeholder="email"
-            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Ex: exemplo@email.com"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
             error={errors.email}
+            disabled={isLoading} 
           />
           <div>
             <Combobox
@@ -104,9 +136,9 @@ export default function EditUserDialog({
               id="statusUsuario"
               label="Status do Usuário"
               error={errors.active}
+              disabled={isLoading} 
             />
           </div>
-
         </div>
       }
     ></ActionModal>

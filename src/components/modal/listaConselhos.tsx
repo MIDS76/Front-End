@@ -43,7 +43,6 @@ const converterData = (data: string | Date | null | undefined): string => {
 
 };
 
-// Normaliza os status vindos do banco/json
 const mapStatus = (status: string): string => {
 
   const s = status.toLowerCase();
@@ -234,29 +233,19 @@ export default function ListaConselhos({
                 
                 {conselhos.map((conselho) => {
                   
-                  // ===============================================
-                  // LÓGICA DE VISIBILIDADE DO BOTÃO CORRIGIDA
-                  // ===============================================
+                
                   const statusLower = conselho.etapas.toLowerCase();
                   const isWeg = (role || "").trim().toUpperCase() === "WEG";
 
-                  // LISTAS DE STATUS PERMITIDOS PARA VISUALIZAÇÃO
-                  // Nota: Removemos "Pré-conselho" destas listas para sumir com o botão nessa fase.
-                  
-                  // ADMIN/PEDAGÓGICO: Vê a partir de "Conselho"
+                
                   const listaStatusPre = ["conselho", "aguardando resultado", "resultado"];
                   
-                  // WEG: Vê a partir de "Aguardando resultado"
                   const listaStatusFinal = ["aguardando resultado", "resultado"];
 
-                  // VERIFICAÇÃO EXATA (para evitar que "pré-conselho" ative "conselho" via includes)
-                  // Usamos .some com igualdade estrita ou includes exato na lista
+                  
                   const adminPodeVer = !isWeg && listaStatusPre.includes(statusLower);
                   const wegPodeVer   = isWeg  && listaStatusFinal.includes(statusLower); // Se for WEG, não vê 'conselho'
-                  
-                  // Admin vê se status for 'conselho' ou maior. 
-                  // WEG só vê se status for 'aguardando' ou maior (pois no 'conselho' ele não tem nada pra baixar).
-                  // Na fase 'aguardando/resultado', AMBOS veem.
+                 
                   const deveMostrarBotao = adminPodeVer || (listaStatusFinal.includes(statusLower)); 
 
                   return (
@@ -290,7 +279,6 @@ export default function ListaConselhos({
                           <span className="font-normal">{conselho.etapas}</span>
                         </div>
 
-                        {/* BOTÃO APARECE CONFORME A REGRA */}
                         {deveMostrarBotao && (
                           <button
                             onClick={(e) => {
