@@ -9,9 +9,11 @@ import { toast } from "sonner";
 type Role = "aluno" | "pedagogico" | "admin" | "weg" | "supervisor";
 
 interface User {
+  id: number;
   email: string;
   role: Role;
   token: string;
+  primeiroAcesso: boolean;
 }
 
 interface AuthContextProps {
@@ -36,9 +38,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (session) {
         setUser({
+          id: session.id,
           email: session.email,
           role: session.role.toLowerCase(),
           token: session.token,
+          primeiroAcesso: session.primeiroAcesso
         });
       }
       setLoading(false);
@@ -58,9 +62,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
 
         setUser({
+          id: session.id,
           email: session.email,
           role: session.role.toLowerCase(),
           token: session.token,
+          primeiroAcesso: session.primeiroAcesso
         });
 
         return session;

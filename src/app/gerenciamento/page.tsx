@@ -1,26 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
-import { useEffect } from "react";
-import MedModal from "@/components/modal/medModal";
-import Lista from "@/components/lista/lista";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import SearchBar from "@/components/input/searchBar";
-import { useRouter } from "next/navigation";
+import BlocoTurmas from "@/components/modal/BlocoTurmas";
+import BlocoUsuarios from "@/components/modal/BlocoUsuarios";
 import { buscarTurmas } from "@/api/turmas";
 import { Turma, Usuario } from "@/utils/types";
 import { buscarUsuarios } from "@/api/usuarios";
-import { useAuth } from "@/context/AuthContext";
-import AccessDeniedPage from "../access-denied";
-
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function GerenciamentoUsersTurmas() {
-
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQueryTurmas, setSearchQueryTurmas] = useState("");
+  const [searchQueryUsuarios, setSearchQueryUsuarios] = useState("");
   const [turmas, setTurmas] = useState<Turma[]>([]);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,12 +24,10 @@ export default function GerenciamentoUsersTurmas() {
 
       const usuariosArray = await buscarUsuarios();
       setUsuarios(usuariosArray || []);
-    }
+    };
 
     fetchData();
   }, []);
-
-  console.log(usuarios);
 
   useEffect(() => {
     return () => {
@@ -42,80 +35,64 @@ export default function GerenciamentoUsersTurmas() {
     };
   }, []);
 
-  const router = useRouter();
-
   const handleTurmaClick = (id: number) => {
     router.push(`/gerenciamento/turma/${id}`);
   };
 
-  const { user } = useAuth();
-  
-  if (user?.role !== "pedagogico" && user?.role !== "admin") {
-    return AccessDeniedPage();
-  }
-
   return (
-    <>
-      <ProtectedRoute>
-        <div className="flex flex-col lg:flex-row gap-6">
-          <section className="flex flex-col h-full gap-4 w-full py-8 lg:px-0 px-4 lg:w-1/2 ">
-            <div className="flex flex-col gap-6 md:mt-8 md:w-[450px] md:m-auto">
-              <h2 className="px-4 text-3xl font-title font-bold text-accent-foreground">
-                Gerenciar uma turma
-              </h2>
+    <ProtectedRoute>
 
-              <SearchBar
-                className="px-4"
-                placeholder="Buscar uma turma"
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                filter
-                filtrosMostrar={{ aluno: false, turma: true, conselho: false }}
-              />
-            </div>
+      {/* CONTAINER GERAL */}
+      <div 
+        className="
+          w-full 
+          min-h-screen
 
-            <ScrollArea className="w-full h-[600px] mt-5 md:w-[450px] md:m-auto">
-              <div className="grid grid-cols-1 gap-6 px-4">
-                {turmas?.map((classItem, index) => (
-                  <MedModal
-                    key={index}
-                    courseCode={classItem.nome}
-                    courseName={classItem.curso}
-                    onClick={() => handleTurmaClick(classItem.id)}
-                    simple
-                  />
-                ))}
-              </div>
-            </ScrollArea>
-          </section>
+          tablet:overflow-auto      /* Tablet → página com scroll */
+          laptop:overflow-hidden    /* Laptop → sem scroll geral */
+        "
+      >
 
-          <section className="flex flex-col justify-between gap-4 w-full py-8 lg:py-8 md:px-14 
-            lg:px-0 px-4 lg:w-1/2 h-full md:mb-8">
-            <div className="flex flex-col gap-6 md:mt-8 lg:pr-28">
-              <h2 className="px-4 text-3xl font-title font-bold text-accent-foreground">
-                Gerenciar Usuários
-              </h2>
-              <SearchBar
-                className="px-4"
-                placeholder="Buscar um usuário"
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                filter
-                filtrosMostrar={{ aluno: true, turma: false, conselho: false }}
-              />
-            </div>
-            <div className="lg:pr-28">
-              <Lista
-                isDialogOpen={isDialogOpen}
-                setIsDialogOpen={setIsDialogOpen}
-                tipo="edit"
-                usuarios={usuarios}
-                className="px-4"
-              />
-            </div>
-          </section>
+        {/* GRID DOS BLOCOS */}
+        <div
+          className="
+            w-full 
+            grid gap-10 grid-cols-1
+
+            mt-24                    
+            tablet:mt-[6rem]
+            tablet:mb-[2rem]
+            laptop:mt-[6rem]              
+            desktop:mt-[10rem] 
+
+            tablet:grid-cols-1 
+            laptop:grid-cols-2 
+            desktop:grid-cols-2 
+
+            px-6 
+            laptop:max-w-[1350px] 
+            laptop:mx-auto
+          "
+        >
+          <BlocoTurmas
+            turmas={turmas}
+            searchQuery={searchQueryTurmas}
+            setSearchQuery={setSearchQueryTurmas}
+            handleTurmaClick={handleTurmaClick}
+            scrollHeight="28rem"  
+          />
+
+          <BlocoUsuarios
+            usuarios={usuarios}
+            searchQuery={searchQueryUsuarios}
+            setSearchQuery={setSearchQueryUsuarios}
+            isDialogOpen={isDialogOpen}
+            setIsDialogOpen={setIsDialogOpen}
+            scrollHeight="28rem"
+          />
         </div>
-      </ProtectedRoute>
-    </>
+
+      </div>
+    </ProtectedRoute>
   );
 }

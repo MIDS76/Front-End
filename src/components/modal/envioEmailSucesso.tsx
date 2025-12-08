@@ -10,8 +10,8 @@ export default function EnvioSuccessModal({ isOpen, onClose }: EnvioSuccessModal
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white px-8 py-7 rounded-xl shadow-2xl max-w-md relative">
-   
+      <div className="bg-white px-6 py-5 rounded-xl shadow-2xl max-w-md relative">
+    
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
@@ -29,13 +29,13 @@ export default function EnvioSuccessModal({ isOpen, onClose }: EnvioSuccessModal
             </svg>
           </div>
 
-          <h2 className="text-4xl font-bold text-gray-900 mb-9">E-mail enviado com sucesso!</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-9">E-mail enviado com sucesso!</h2>
           
-          <p className="font-semibold text-2xl text-gray-900 mb-4">
+          <p className="font-semibold text-1xl text-gray-900 mb-4">
             O link de redefinição de senha foi enviado
           </p>
           
-          <p className="text-gray-600 mb-6 ">
+          <p className="text-gray-600 mb-6 text-sm">
             Enviamos agora um e-mail com um link que você pode usar para redefinir sua senha. Pode levar alguns minutos até que chegue a sua caixa de entrada.
           </p>
 
@@ -44,8 +44,8 @@ export default function EnvioSuccessModal({ isOpen, onClose }: EnvioSuccessModal
 
         
           <div className="text-left p-4 rounded-lg">
-            <p className="font-semibold text-2xl text-gray-800 mb-2">Não está recebendo um e-mail?</p>
-            <p className="text-gray-600 text-1xs mb-3">
+            <p className="font-semibold text-1xl text-gray-800 mb-2">Não está recebendo um e-mail?</p>
+            <p className="text-gray-600 text-sm mb-3">
               Caso tenha aguardado mais de 5 minutos e ainda não tenha recebido o e-mail, siga as instruções abaixo:
             </p>
             <ul className="text-gray-800 text-sm list-disc pl-5 space-y-1">

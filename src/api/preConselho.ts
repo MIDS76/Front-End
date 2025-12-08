@@ -6,7 +6,22 @@ export const criarPreConselho = async (idConselho: number) => {
     const controller = new AbortController();
 
     try {
-        const response = await api.post(`/preConselho/criar`, idConselho, { signal: controller.signal });
+        const response = await api.post(`/preConselho/criar`, {idConselho}, { signal: controller.signal });
+        return response.data;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.log(err.response?.status);
+            console.log(err.response?.data);
+        }
+    }
+}
+
+// buscar pre conselho por id do conselho
+export const buscarPreConselhoPorConselho = async (idConselho: number) => {
+    const controller = new AbortController();
+
+    try {
+        const response = await api.get(`/conselhos/buscar/${idConselho}/preConselhos`, { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
@@ -35,6 +50,7 @@ export const preConselhoSupervisao = async (supervisao: {
     }
 }
 
+// utilizar para criar quando criar uc/professor na criação do conselho
 export const preConselhoProfessor = async (professor: {
     idPreConselho: number;
     idUnidadeCurricular: number;
@@ -46,7 +62,7 @@ export const preConselhoProfessor = async (professor: {
     const controller = new AbortController();
 
     try {
-        const response = await api.post(`/preConselhoSupervisao/criar`, professor, { signal: controller.signal });
+        const response = await api.post(`/preConselhoProfessor/criar`, professor, { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
@@ -94,27 +110,12 @@ export const preConselhoAmbienteEnsino = async (ambienteEnsino: {
     }
 }
 
-// listar na hora de criar um conselho
-export const unidadeCurricular = async () => {
-    const controller = new AbortController();
-
-    try {
-        const response = await api.get(`/unidadeCurricular/listar`, { signal: controller.signal });
-        return response.data;
-    } catch (err) {
-        if (err instanceof AxiosError) {
-            console.log(err.response?.status);
-            console.log(err.response?.data);
-        }
-    }
-}
-
 // criar unidade curricular
 export const criarUnidadeCurricular = async (nome: string) => {
     const controller = new AbortController();
 
     try {
-        const response = await api.post(`/unidadeCurricular/criar`, {nome}, { signal: controller.signal });
+        const response = await api.post(`/unidadeCurricular/criar`, { nome }, { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
@@ -129,7 +130,7 @@ export const criarUnidadeCurricularLista = async (lista: any[]) => {
     const controller = new AbortController();
 
     try {
-        const response = await api.post(`/unidadeCurricular/criarLista`, lista , { signal: controller.signal });
+        const response = await api.post(`/unidadeCurricular/criarLista`, lista, { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
@@ -140,11 +141,26 @@ export const criarUnidadeCurricularLista = async (lista: any[]) => {
 }
 
 // listar na hora de criar um conselho
-export const professores = async () => {
+export const listarUnidadeCurricular = async () => {
     const controller = new AbortController();
 
     try {
-        const response = await api.get(`/professores/listar`, { signal: controller.signal });
+        const response = await api.get(`/unidadeCurricular/listar`, { signal: controller.signal });
+        return response.data;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.log(err.response?.status);
+            console.log(err.response?.data);
+        }
+    }
+}
+
+// listar na hora de criar um conselho
+export const listarProfessores = async () => {
+    const controller = new AbortController();
+
+    try {
+        const response = await api.get(`/professor/listar`, { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {

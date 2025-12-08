@@ -24,7 +24,7 @@ export default function Login() {
 
     const newErrors: { [key: string]: string } = {};
 
-    newErrors.senha = validateRequired(password, "senha");
+    newErrors.senha = validateRequired(password, "Senha");
     newErrors.email = validateEmail(email);
 
     if (newErrors.senha || newErrors.email) {
@@ -37,7 +37,12 @@ export default function Login() {
     console.log("Resposta da API:", session);
 
     if (session) {
-      router.push(`/${(session.role).toLowerCase()}`);
+      if(session.primeiroAcesso){
+        router.push(`/alterarSenha`);
+      }else{
+        router.push(`/${session.role.toLowerCase()}`);
+      }
+      
     } else {
       newErrors.final = "E-mail ou senha incorretos.";
       setErrors(newErrors);
@@ -46,9 +51,8 @@ export default function Login() {
   };
 
   return (
-    <main className="relative min-h-screen w-full overflow-hidden flex flex-col">
-
-      <div className="relative flex-1 flex items-center justify-center">
+    <main className="min-h-screen w-full grid grid-cols-2">
+      <div className="relative flex items-center justify-start">
         <Image
           className="absolute inset-0 w-full h-full object-cover"
           width={1920}
@@ -58,61 +62,75 @@ export default function Login() {
         />
 
         <div className="absolute inset-0 bg-sky-950/45"></div>
-        <div className="relative z-10 bg-white p-8 rounded-2xl shadow-xl w-full max-w-md" style={{ paddingTop: '3rem', paddingBottom: '3rem' }}>
-          <div className="text-left mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-3">
+
+        <div className="relative z-10 p-16 text-white flex flex-row items-center">
+          <Image
+            src="/favicon.ico" 
+            alt="Logo do Conselho"
+            width={70} 
+            height={70} 
+            className="mr-4"
+          />
+          <h2 className="text-5xl font-semibold">
+            Portal do Conselho
+          </h2>
+        </div>
+      </div>
+
+      <div className="bg-white p-12 shadow-xl flex flex-col justify-center w-full ">
+        <div className="mx-auto w-full">
+          <div className="text-left mb-10">
+            <h1 className="text-3xl font-bold text-gray-900 mb-1">
               Bem-Vindo
             </h1>
-            <p className="text-sm text-left mb-6 ">
+            <p className="text-sm text-gray-700">
               A sua Plataforma Completa para Atividades Profissionais
             </p>
           </div>
 
-          <Form action={handleLogin} className="flex flex-col gap-3">
-
-            <div className="flex flex-col gap-1">
+          <Form action={handleLogin} className="flex flex-wrap gap-6 w-full mx-auto"> 
+            <div className="flex flex-col gap-1 w-full">
+              <span className="text-sm font-semibold text-gray-800">Login</span> 
               <TextField
                 id="email"
                 name="email"
-                label="E-mail"
                 placeholder="Insira seu e-mail institucional"
                 type="text"
                 error={errors.email}
               />
             </div>
 
-
-            <div className="flex flex-col gap-1 relative">
-              <label
-                htmlFor="password"
-                className="text-sm font-semibold text-gray-800"
-              >
-              </label>
+            <div className="flex flex-col gap-1 w-full">
+              <span className="text-sm font-semibold text-gray-800">Senha</span>
               <TextField
                 id="password"
                 name="password"
-                label="Senha"
                 placeholder="Insira sua senha"
                 type="password"
                 error={errors.senha}
               />
 
-              {errors && (
-                <p className="text-destructive absolute bottom-8 text-red-500 text-sm mt-0">
-                  {errors.final}
-                </p>
-              )}
-
-              <button //esqueceu a senha
+              <button
                 type="button"
                 onClick={() => setIsModalOpen(true)}
-                className="text-xs text-primary hover:underline text-left mt-6 mb-2"
+                className="text-sm text-blue-600 hover:underline text-left mt-2" 
               >
                 Esqueceu sua senha?
               </button>
+              
+              {errors.final && (
+                <p className="text-destructive text-red-500 text-sm mt-2">
+                  {errors.final}
+                </p>
+              )}
             </div>
 
-            <ButtonTT mode="default" tooltip="Fazer login" type="submit">
+            <ButtonTT 
+                mode="default" 
+                tooltip="Fazer login" 
+                type="submit" 
+                className="mt-6 bg-sky-950 hover:bg-sky-800 text-white py-2 px-4 rounded-lg mx-auto tablet:w-60 laptop:w-72 desktop:w-88" // Estilo do botão ajustado
+            >
               Login
             </ButtonTT>
           </Form>
