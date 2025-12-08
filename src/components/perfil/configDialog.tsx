@@ -69,6 +69,10 @@ export function ConfigDialog() {
     typography?: "default" | "alternative";
     fontSize?: number;
   }) {
+    if (!user?.email) return; 
+  
+    const key = `userPreferences_${user.email}`;
+  
     const current = {
       primaryColor,
       mode,
@@ -76,8 +80,10 @@ export function ConfigDialog() {
       fontSize,
       ...prefs,
     };
-    localStorage.setItem("userPreferences", JSON.stringify(current));
+  
+    localStorage.setItem(key, JSON.stringify(current));
   }
+  
 
   function applyPrimaryColor(color: string) {
     document.documentElement.classList.remove(
@@ -91,7 +97,7 @@ export function ConfigDialog() {
   }
 
   function applyThemeClass(themeValue: "light" | "dark") {
-    // next-themes usually handles theme classes, but garantimos a classe no html
+   
     document.documentElement.classList.remove("light", "dark");
     document.documentElement.classList.add(themeValue);
   }
@@ -118,84 +124,84 @@ export function ConfigDialog() {
     // aplica direto no root
     document.documentElement.style.fontSize = `${size}px`;
   }
+  const { user } = useAuth();
 
   React.useEffect(() => {
-    // Carregar preferências ao iniciar
-    const saved = localStorage.getItem("userPreferences");
+    if (!user?.email) return;
+  
+    const key = `userPreferences_${user.email}`;
+    const saved = localStorage.getItem(key);
+  
     if (saved) {
       try {
         const prefs = JSON.parse(saved);
+  
         if (prefs.primaryColor) {
           setPrimaryColor(prefs.primaryColor);
           applyPrimaryColor(prefs.primaryColor);
         }
+  
         if (prefs.mode) {
           setMode(prefs.mode);
           setTheme(prefs.mode);
           applyThemeClass(prefs.mode);
         }
+  
         if (prefs.typography) {
           setTypography(prefs.typography);
           applyTypographyClass(prefs.typography);
         }
+  
         if (prefs.fontSize) {
           setFontSize(Number(prefs.fontSize));
           applyFontSize(Number(prefs.fontSize));
         }
-      } catch (err) {
-        // nada, mantém padrão
+      } catch (e) {
+        console.error("Erro ao carregar preferências:", e);
       }
     } else {
-      // aplica defaults
       applyPrimaryColor(primaryColor);
       applyTypographyClass(typography);
       applyThemeClass(mode);
       applyFontSize(fontSize);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+  
+  
 
-  // --------------------------------------------------
-  // Handlers de UI (sempre salvam e aplicam)
-  // --------------------------------------------------
+  
   function handleSetTheme(value: "light" | "dark") {
     setMode(value);
     setTheme(value);
     applyThemeClass(value);
     savePreferences({ mode: value });
   }
-
+  
+  
   function handleSetColor(value: string) {
     setPrimaryColor(value);
     applyPrimaryColor(value);
     savePreferences({ primaryColor: value });
   }
-
+  
+  
   function handleSetTypography(value: "default" | "alternative") {
     setTypography(value);
     applyTypographyClass(value);
     savePreferences({ typography: value });
   }
+  
+  
 
   function handleSetFontSize(value: number) {
     setFontSize(value);
     applyFontSize(value);
     savePreferences({ fontSize: value });
   }
-
+   
   
-  const [user, setUser] = React.useState<Usuario | null>(null);
-  React.useEffect(() => {
-    const usuario = localStorage.getItem("user");
-    if (usuario) {
-      try {
-        setUser(JSON.parse(usuario));
-      } catch (error) {
-        toast.error("Erro ao recuperar os dados do usuário.");
-      }
-    }
-  }, []);
-
+ 
   // --------------------------------------------------
   // Alterar senha -> chama o backend
   // --------------------------------------------------
@@ -211,7 +217,6 @@ export function ConfigDialog() {
     );
     newErrors.igualPassword = validatePasswordMatch(password, confirmPassword);
 
-    // limpa campos vazios do objeto
     Object.keys(newErrors).forEach((k) => {
       if (!newErrors[k]) delete newErrors[k];
     });
@@ -305,12 +310,12 @@ export function ConfigDialog() {
                       <div className="w-full md:flex-1 space-y-2 order-last md:order-first">
                         <div className="space-y-2">
                           <Label htmlFor="name">Nome</Label>
-                          <Input id="name" defaultValue={user?.nome} readOnly className="bg-card" />
+                          <Input value={user?.nome || ""} readOnly className="bg-card" />
                         </div>
 
                         <div className="space-y-2">
                           <Label htmlFor="email">Email</Label>
-                          <Input id="email" type="email" defaultValue={user?.email} readOnly className="bg-card" />
+                          <Input value={user?.email || ""} readOnly className="bg-card" />
                         </div>
                       </div>
                     </div>
