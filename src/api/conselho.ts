@@ -28,6 +28,14 @@ export interface Turma {
     idUltimoConselho: number;
 }
 
+export interface ConselhoAlunoList {
+    id: number;
+    titulo: string; 
+    dataInicio: string;
+    dataFim: string;
+    etapas: string;
+}
+
 // utilizar quando for criar um pré-conselho
 export const criarConselho = async (conselho: Conselho) => {
     const controller = new AbortController();
@@ -154,3 +162,21 @@ export async function buscarTurmaPorConselho(idConselho: number): Promise<Turma 
         return undefined;
     }
 }
+
+export const listarConselhosDoAlunoComResultado = async (idAluno: number) => {
+    try {
+        const url = `/conselhos/listarConselhosPorAluno/${idAluno}`;
+        const response = await api.get<ConselhoAlunoList[]>(url);
+        
+        const conselhosResultado = response.data.filter(c => 
+             String(c.etapas).toUpperCase().trim() === "RESULTADO" 
+        );
+
+        return conselhosResultado;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            throw new Error(err.response?.data?.message || `Falha ao listar conselhos. Status: ${err.response?.status}`);
+        }
+        throw err;
+    }
+};
