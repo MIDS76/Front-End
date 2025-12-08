@@ -11,7 +11,8 @@ import { useParams, useRouter } from "next/navigation";
 import { validateRequired } from "@/utils/formValidation";
 import { useAuth } from "@/context/AuthContext";
 import AccessDeniedPage from "../access-denied";
-import { listarPreConselhoProfessorPorConselho, preConselhoAmbienteEnsino, preConselhoPedagogico, preConselhoProfessorAtualizar, preConselhoSupervisao } from "@/api/preConselho";
+import { buscarPreConselho, listarPreConselhoProfessorPorConselho, preConselhoAmbienteEnsino, preConselhoPedagogico, preConselhoProfessorAtualizar, preConselhoSupervisao } from "@/api/preConselho";
+import { Conselho, atualizarEtapa, buscarConselho } from "@/api/conselho";
 
 type CampoFormulario = {
   titulo: string;
@@ -41,6 +42,7 @@ export default function PreConselhoFormulario() {
   const [formulario, setFormulario] = useState<CampoFormulario[]>([]);
   const [professoresData, setProfessoresData] = useState<UsuarioApi[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [conselho, setConselho] = useState<Conselho | null>(null);
   const router = useRouter();
 
   const { id } = useParams();
@@ -86,9 +88,11 @@ export default function PreConselhoFormulario() {
     const fetchAndInitialize = async () => {
       setIsLoading(true);
       try {
+        const preConselho = await buscarPreConselho(idPreConselho);
+        const conselho = await buscarConselho(preConselho.idConselho);
         const professores = await listarPreConselhoProfessorPorConselho(idPreConselho);
 
-        console.log(professores);
+        setConselho(conselho || null);
 
         if (professores && Array.isArray(professores)) {
           setProfessoresData(professores);
@@ -189,8 +193,15 @@ export default function PreConselhoFormulario() {
 
   const handleSalvar = async () => {
     const tudoPreenchido = formulario.every((secao) => camposPreenchidos(secao));
+
     if (!tudoPreenchido) {
       toast.error("Preencha todos os campos antes de enviar o formulário completo!");
+      return;
+    }
+
+    if (!conselho || !conselho.id) {
+      console.error("Erro: Dados do conselho não foram carregados ou o ID está faltando.");
+      toast.error("Não foi possível finalizar o Pré-Conselho. Recarregue a página e tente novamente.");
       return;
     }
 
@@ -215,38 +226,41 @@ export default function PreConselhoFormulario() {
         } else if (secao.titulo.startsWith("Professor")) {
 
           const match = secao.titulo.match(/Professor\s(.*?)\s-\s(.*?)$/);
-            
-            if (match) {
-                const nomeProfessorTitulo = match[1].trim();
-                const nomeUcTitulo = match[2].trim();
 
-                const usuario = professoresData.find(u => 
-                    u.nomeProfessor.trim() === nomeProfessorTitulo && 
-                    u.nomeUc.trim() === nomeUcTitulo
-                );
+          if (match) {
+            const nomeProfessorTitulo = match[1].trim();
+            const nomeUcTitulo = match[2].trim();
 
-                if (usuario) {
-                    const dadosProfessor = {
-                        ...dataPadrao,
-                        idUnidadeCurricular: usuario.idUnidadeCurricular, 
-                        idProfessor: usuario.idProfessor,
-                    };
+            const usuario = professoresData.find(u =>
+              u.nomeProfessor.trim() === nomeProfessorTitulo &&
+              u.nomeUc.trim() === nomeUcTitulo
+            );
 
-                    promises.push(preConselhoProfessorAtualizar(
-                        usuario.id,
-                        dadosProfessor
-                    ));
+            if (usuario) {
+              const dadosProfessor = {
+                ...dataPadrao,
+                idUnidadeCurricular: usuario.idUnidadeCurricular,
+                idProfessor: usuario.idProfessor,
+              };
 
-                } else {
-                    console.error("Dados de professor/unidade curricular não encontrados para: ", secao.titulo);
-                }
+              promises.push(preConselhoProfessorAtualizar(
+                usuario.id,
+                dadosProfessor
+              ));
+
             } else {
-                console.error("Erro de formatação no título do professor:", secao.titulo);
+              console.error("Dados de professor/unidade curricular não encontrados para: ", secao.titulo);
             }
+          } else {
+            console.error("Erro de formatação no título do professor:", secao.titulo);
+          }
         }
       }
 
+      promises.push(atualizarEtapa(conselho.id, "CONSELHO"));
+
       await Promise.all(promises);
+      localStorage.removeItem("preconselho-formulario");
 
       toast.success("Pré-conselho salvo com sucesso!");
       localStorage.removeItem("preconselho-formulario");
@@ -374,7 +388,6 @@ export default function PreConselhoFormulario() {
         actionButtonLabel="Enviar"
         onConfirm={() => {
           handleSalvar();
-          localStorage.removeItem("preconselho-formulario");
           setIsConfirmOpen(false);
           handleGoHome();
         }}
