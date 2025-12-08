@@ -105,7 +105,7 @@ export function Icon({
       ? MdEditSquare
       : icon === "Star"
       ? Star
-      : () => <span />;
+      : () => <span />; // Fallback para um span vazio
 
   const isStar = icon === "Star";
 

@@ -1,18 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import ActionModal from "@/components/modal/actionModal";  // Modal de confirmação
+import ActionModal from "@/components/modal/actionModal";
 import SucessoEnviarModal from "@/components/modal/sucessoEnviarModal";
 import ButtonTT from "@/components/button/ButtonTT";
 import { toast } from "sonner";
-import usuariosData from "@/data/usuarios.json";
 import InfoCard from "@/components/card/cardTituloTelas";
-import { useRouter } from "next/navigation"; // Usar diretamente no componente
+import { useParams, useRouter } from "next/navigation";
 import { validateRequired } from "@/utils/formValidation";
 import { useAuth } from "@/context/AuthContext";
 import AccessDeniedPage from "../access-denied";
+import { listarPreConselhoProfessorPorConselho, preConselhoAmbienteEnsino, preConselhoPedagogico, preConselhoProfessor, preConselhoSupervisao } from "@/api/preConselho";
 
 type CampoFormulario = {
   titulo: string;
@@ -22,52 +22,118 @@ type CampoFormulario = {
   sugestoes: string;
 };
 
-const descricaoPorRole = (role: string): string => {
-  switch (role) {
-    case "Professor":
-      return "Relacionado ao desempenho em sala, didática, relacionamento com os alunos e domínio da matéria.";
-    case "Supervisor":
-      return "Avalie os aspectos relacionados à metodologia de ensino, domínio de conteúdo, clareza nas orientações, postura profissional e qualidade do acompanhamento oferecido pela supervisão.";
-    case "Técnico Pedagógico":
-      return "Relacionado ao apoio à turma, acompanhamento pedagógico e comunicação com os docentes.";
-    case "Secretária Pedagógica":
-      return "Avalie os aspectos relacionados à organização acadêmica, eficiência no atendimento, clareza nas informações, disponibilidade para auxiliar e qualidade no suporte prestado pela Secretaria Pedagógica.";
-    default:
-      return "";
-  }
-};
-
-const secoesIniciais: CampoFormulario[] = [
-  ...usuariosData
-    .filter((u) => u.role !== "Aluno" && u.isActive)
-    .sort((a, b) => {
-      const ordem = ["Supervisor", "Técnico Pedagógico", "Secretária Pedagógica", "Professor"];
-      return ordem.indexOf(a.role) - ordem.indexOf(b.role);
-    })
-    .map((u) => ({
-      titulo: `${u.role} ${u.nome}`,
-      descricao: descricaoPorRole(u.role),
-      positivos: "",
-      melhoria: "",
-      sugestoes: "",
-    })),
-  {
-    titulo: "Ambiente de Ensino",
-    descricao:
-      "Avalie os aspectos relacionados à estrutura física e tecnológica, recursos disponíveis para as aulas, conforto, acessibilidade, segurança e adequação do ambiente ao processo de aprendizagem",
-    positivos: "",
-    melhoria: "",
-    sugestoes: "",
-  },
-];
+export type UsuarioApi = {
+  id: number;
+  idPreConselho: number;
+  idUnidadeCurricular: number;
+  nomeUc: string;
+  idProfessor: number;
+  nomeProfessor: string;
+  pontosPositivos: string;
+  pontoMelhoria: string;
+  sugestoes: string;
+}
 
 export default function PreConselhoFormulario() {
-  const [formulario, setFormulario] = useState<CampoFormulario[]>(secoesIniciais);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [isSuccessOpen, setIsSuccessOpen] = useState(false); // Modal de sucesso
   const [pagina, setPagina] = useState(0);
   const [camposErro, setCamposErro] = useState<{ [key: string]: string }>({});
-  const router = useRouter(); // Use diretamente no componente
+
+  const [formulario, setFormulario] = useState<CampoFormulario[]>([]);
+  const [professoresData, setProfessoresData] = useState<UsuarioApi[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+
+  const { id } = useParams();
+
+  const idPreConselho = 2;
+
+  const createInitialFormSections = useCallback((data: UsuarioApi[]): CampoFormulario[] => {
+    const secoesProfessor = data
+      .map((u) => ({
+        titulo: `Professor ${u.nomeProfessor} - ${u.nomeUc}`,
+        descricao: "Relacionado ao desempenho em sala, didática, relacionamento com os alunos e domínio da matéria.",
+        positivos: "",
+        melhoria: "",
+        sugestoes: "",
+      }));
+
+    const secoesFixas: CampoFormulario[] = [
+      {
+        titulo: "Supervisor",
+        descricao:
+          "Avalie os aspectos relacionados à metodologia de ensino, domínio de conteúdo, clareza nas orientações, postura profissional e qualidade do acompanhamento oferecido pela supervisão.",
+        positivos: "", melhoria: "", sugestoes: "",
+      },
+      {
+        titulo: "Técnico Pedagógico",
+        descricao:
+          "Relacionado ao apoio à turma, acompanhamento pedagógico e comunicação com os docentes.",
+        positivos: "", melhoria: "", sugestoes: "",
+      },
+      {
+        titulo: "Ambiente de Ensino",
+        descricao:
+          "Avalie os aspectos relacionados à estrutura física e tecnológica, recursos disponíveis para as aulas, conforto, acessibilidade, segurança e adequação do ambiente ao processo de aprendizagem",
+        positivos: "", melhoria: "", sugestoes: "",
+      },
+    ];
+
+    return [...secoesProfessor, ...secoesFixas];
+  }, []);
+
+
+  useEffect(() => {
+    const fetchAndInitialize = async () => {
+      setIsLoading(true);
+      try {
+        const professores = await listarPreConselhoProfessorPorConselho(idPreConselho);
+
+        console.log(professores);
+
+        if (professores && Array.isArray(professores)) {
+          setProfessoresData(professores);
+          const novasSecoesIniciais = createInitialFormSections(professores);
+          console.log(novasSecoesIniciais);
+
+          const salvo = localStorage.getItem("preconselho-formulario");
+          let dadosSalvos = null;
+
+          if (salvo) {
+            try {
+              dadosSalvos = JSON.parse(salvo);
+            } catch (error) {
+              console.error("Erro ao fazer parsing do localStorage:", error);
+            }
+          }
+
+          if (Array.isArray(dadosSalvos) && dadosSalvos.length > 0) {
+            setFormulario(dadosSalvos);
+          } else {
+            setFormulario(novasSecoesIniciais);
+          }
+
+        } else {
+          toast.error("Não foi possível carregar a lista de avaliados.");
+          setFormulario([]);
+        }
+      } catch (err) {
+        console.error("Falha ao buscar dados de professores.", err);
+        toast.error("Falha ao carregar dados. Tente recarregar a página.");
+        setFormulario([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (idPreConselho) {
+      fetchAndInitialize();
+    } else {
+      setIsLoading(false);
+      toast.error("ID do Conselho não encontrado.");
+    }
+  }, [idPreConselho, createInitialFormSections]);
+
 
   useEffect(() => {
     const salvo = localStorage.getItem("preconselho-formulario");
@@ -122,31 +188,117 @@ export default function PreConselhoFormulario() {
     setPagina(pagina + 1);
   };
 
-  const handleSalvar = () => {
+  const handleSalvar = async () => {
     const tudoPreenchido = formulario.every((secao) => camposPreenchidos(secao));
     if (!tudoPreenchido) {
       toast.error("Preencha todos os campos antes de enviar o formulário completo!");
       return;
     }
 
-    toast.success("Pré-conselho salvo com sucesso!");
-    localStorage.setItem("preconselho-formulario", JSON.stringify(formulario));
+    try {
+      const promises = [];
 
-    // Abre o modal de sucesso
-    setIsSuccessOpen(true);
-    setIsConfirmOpen(false); // Fecha o modal de confirmação
+      for (const secao of formulario) {
+        const dataPadrao = {
+          idPreConselho: idPreConselho,
+          pontosPositivos: secao.positivos,
+          pontosMelhoria: secao.melhoria,
+          sugestoes: secao.sugestoes,
+        };
+
+
+        if (secao.titulo.startsWith("Supervisor")) {
+          promises.push(preConselhoSupervisao(dataPadrao));
+        } else if (secao.titulo.startsWith("Técnico Pedagógico")) {
+          promises.push(preConselhoPedagogico(dataPadrao));
+        } else if (secao.titulo.startsWith("Ambiente de Ensino")) {
+          promises.push(preConselhoAmbienteEnsino(dataPadrao));
+        } else if (secao.titulo.startsWith("Professor")) {
+
+          const match = secao.titulo.match(/Professor\s(.*?)\s-\s(.*?)$/);
+            
+            if (match) {
+                const nomeProfessorTitulo = match[1].trim();
+                const nomeUcTitulo = match[2].trim();
+
+                const usuario = professoresData.find(u => 
+                    u.nomeProfessor.trim() === nomeProfessorTitulo && 
+                    u.nomeUc.trim() === nomeUcTitulo
+                );
+
+                if (usuario) {
+                    const dadosProfessor = {
+                        ...dataPadrao,
+                        idUnidadeCurricular: usuario.idUnidadeCurricular, 
+                        idProfessor: usuario.idProfessor,
+                    };
+
+                    promises.push(preConselhoProfessor(
+                        usuario.id,
+                        dadosProfessor
+                    ));
+
+                } else {
+                    console.error("Dados de professor/unidade curricular não encontrados para: ", secao.titulo);
+                }
+            } else {
+                console.error("Erro de formatação no título do professor:", secao.titulo);
+            }
+        }
+      }
+
+      await Promise.all(promises);
+
+      toast.success("Pré-conselho salvo com sucesso!");
+      localStorage.removeItem("preconselho-formulario");
+
+      setIsConfirmOpen(false);
+    } catch (error) {
+      console.error("Erro durante o envio do formulário:", error);
+      toast.error("Erro ao enviar o Pré-Conselho. Tente novamente.");
+    }
   };
 
-  const secaoAtual = formulario[pagina];
-
   const handleGoHome = () => {
-    router.push("/aluno"); // Redireciona para a página /aluno
+    router.push("/aluno");
   };
 
   const { user } = useAuth();
-  
+
   if (user?.role !== "aluno") {
     return AccessDeniedPage();
+  }
+
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-[90rem] mx-auto text-center" style={{ paddingTop: "10rem" }}>
+        <p className="text-xl font-semibold text-primary">Carregando formulário e lista de avaliados...</p>
+      </div>
+    );
+  }
+
+  if (formulario.length === 0) {
+    return (
+      <div className="w-full max-w-[90rem] mx-auto text-center" style={{ paddingTop: "10rem" }}>
+        <p className="text-xl font-semibold text-destructive">Não há avaliações a serem exibidas para este pré-conselho.</p>
+        <ButtonTT
+          tooltip="Voltar"
+          mode="default"
+          onClick={handleGoHome}
+          className="mt-6 text-[0.875rem] leading-[1.25rem] px-8"
+        >
+          Voltar para Home
+        </ButtonTT>
+      </div>
+    );
+  }
+
+  const secaoAtual = formulario[pagina];
+
+  if (!secaoAtual) {
+    console.error("Erro: `secaoAtual` é undefined. Resetando a página.");
+    setPagina(0);
+    return null;
   }
 
   return (
@@ -190,7 +342,7 @@ export default function PreConselhoFormulario() {
               novosErros.melhoria = validateRequired(secaoAtual.melhoria, "melhoria");
               novosErros.sugestoes = validateRequired(secaoAtual.sugestoes, "sugestões");
 
-              if (Object.keys(novosErros).length > 0) {
+              if (Object.values(novosErros).some((erro) => erro)) {
                 setCamposErro(novosErros);
                 toast.error("Preencha todos os campos antes de voltar!");
                 return;
@@ -225,14 +377,8 @@ export default function PreConselhoFormulario() {
           handleSalvar();
           localStorage.removeItem("preconselho-formulario");
           setIsConfirmOpen(false);
+          handleGoHome();
         }}
-      />
-
-      <SucessoEnviarModal
-        isOpen={isSuccessOpen}
-        setOpen={setIsSuccessOpen}
-        onClose={() => setIsSuccessOpen(false)}
-        handleGoHome={handleGoHome}
       />
     </div>
   );

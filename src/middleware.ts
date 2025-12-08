@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { cookies } from "next/headers";
+
 
 const protectedRoutes = [
-  "/",
   "/admin",
   "/aluno",
   "/chat",
@@ -15,39 +14,31 @@ const protectedRoutes = [
   "/preConselhoForm"
 ];
 
-const routePermissions = {
-  admin: ["/admin", "/conselhoCoordenacao", "/criar", "/gerenciamento"],
-  aluno: ["/aluno", "/preConselhoForm"],
-  pedagogico: ["/pedagogico", "/conselhoCoordenacao", "/criar", "/gerenciamento"],
-  weg: ["/weg"],
-  supervisor: ["/supervisor"]
-};
 
-export async function middleware(request: NextRequest) {
-  const cookieStore = await cookies();
-  const session = cookieStore.get('session');
+export function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  const session = request.cookies.get('session')?.value;
 
-  const path = request.nextUrl.pathname
-  const isProtectedRoute = protectedRoutes.includes(path)
 
-  if (isProtectedRoute && !session?.value) {
+  if (path === "/") {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
+
+  if (path.startsWith("/alterarSenha") || path.startsWith("/login")) {
+     return NextResponse.next();
+  }
+
+
+  const isProtected = protectedRoutes.some((route) => path.startsWith(route));
+
+
+  if (isProtected && !session) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    "/:path*",
-    "/admin/:path*",
-    "/aluno/:path*",
-    "/chat/:path*",
-    "/conselhoCoordenacao/:path*",
-    "/criar/:path*",
-    "/dashboard/:path*",
-    "/gerenciamento/:path*",
-    "/pedagogico/:path*",
-    "/preConselhoForm/:path*"
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

@@ -11,8 +11,9 @@ import Paginacao from "@/components/paginacao/paginacao";
 import { useAuth } from "@/context/AuthContext";
 import BaixarDocumentosModal from "@/components/modal/BaixarDocumentosModal"; 
 
-export default function AdminPage() {
-  const { user } = useAuth(); 
+
+export default function WegPage() {
+  const { user } = useAuth(); // Pega a role (WEG)
 
   const [dataAleatoria] = useState(() => {
     const hoje = new Date();
@@ -29,12 +30,11 @@ export default function AdminPage() {
   const [sideModalOpen, setSideModalOpen] = useState(false);
   const [selectedTurma, setSelectedTurma] = useState<Turma | null>(null);
 
-  // ADICIONADO
+  // Estados para o Modal de Baixar Documentos
   const [baixarModalOpen, setBaixarModalOpen] = useState(false);
   const [conselhoSelecionado, setConselhoSelecionado] = useState<any | null>(null);
 
   const [screenWidth, setScreenWidth] = useState(0);
-
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Atualiza tamanho da tela
@@ -42,10 +42,7 @@ export default function AdminPage() {
     const updateScreenWidth = () => setScreenWidth(window.innerWidth);
     updateScreenWidth();
     window.addEventListener("resize", updateScreenWidth);
-
-    return () => {
-      window.removeEventListener("resize", updateScreenWidth);
-    };
+    return () => { window.removeEventListener("resize", updateScreenWidth); };
   }, []);
 
   // Filtro e paginação
@@ -86,19 +83,16 @@ export default function AdminPage() {
     setFilteredTurmas(filtradas.slice(inicio, fim));
   }, [searchQuery, paginaAtual, screenWidth, sideModalOpen]);
 
-  // Handler do Modal Lateral
   const handleOpenModal = (turma: Turma) => {
     if (selectedTurma?.id === turma.id) {
       setSideModalOpen(false);
       setSelectedTurma(null);
       return;
     }
-
     setSelectedTurma(turma);
     setSideModalOpen(true);
   };
 
-  // Função para abrir o modal de baixar documentos
   const handleBaixarDocumentos = (conselho: any) => {
     setConselhoSelecionado(conselho);
     setBaixarModalOpen(true);
@@ -110,11 +104,11 @@ export default function AdminPage() {
         <div className="flex flex-row flex-auto">
           <section className="w-full max-h-full md:w-3/5 xl:w-3/4 h-full flex flex-col items-start p-4 pt-24 gap-y-4">
 
-            {/* AQUI ESTÁ A AJUSTE PERFEITO QUE VOCÊ PEDIU */}
+            {/* BARRA DE PESQUISA COM O AJUSTE DE LARGURA */}
             <div className="ml-6 w-[calc(100%-3rem)] desktop:w-[35.8%] laptop:w-[47.5%]">
               <SearchBar
                 texto="Todos os Conselhos"
-                className="w-full" // Ocupa 100% da div pai acima
+                className="w-full"
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
                 filter

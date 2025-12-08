@@ -99,7 +99,7 @@ export default function CriarTurma() {
             />
 
             {/* Form */}
-            <div className="w-full laptop:w-[46rem] desktop:w-[46rem]">
+            <div className="w-full laptop:w-[26rem] desktop:w-[46rem]">
               <TurmaForm
                 title="Criar Turma"
                 onSubmit={handleSubmit}
@@ -115,8 +115,9 @@ export default function CriarTurma() {
               laptop:w-[28rem]
               flex justify-center
               laptop:items-start
+              laptop:ml-[-2rem]
 
-              desktop:ml-[8rem]       
+              desktop:ml-[14rem]       
               desktop:mt-[2rem]
               
             "

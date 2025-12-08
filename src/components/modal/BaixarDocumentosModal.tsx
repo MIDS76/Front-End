@@ -9,13 +9,15 @@ import api from "@/utils/axios";
 interface BaixarDocumentosModalProps {
   open: boolean;
   onClose: () => void;
-  conselho: { id: number; status: string; idTurma?: number } | null;
+  conselho: any | null;
+  role: string | undefined;
 }
 
 export default function BaixarDocumentosModal({
   open,
   onClose,
-  conselho
+  conselho,
+  role
 }: BaixarDocumentosModalProps) {
   if (!conselho) return null;
 

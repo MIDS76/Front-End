@@ -16,6 +16,16 @@ export interface Conselho {
     dataInicio: string;
     dataFim: string;
     etapas?: string;
+    ultimoConselho?: number;
+}
+
+export interface Turma {
+    id: number;
+    nome: string;
+    curso: string;
+    dataInicio: string;
+    dataFinal: string;
+    idUltimoConselho: number;
 }
 
 // utilizar quando for criar um pré-conselho
@@ -72,5 +82,75 @@ export const conselhoAluno = async (feedbackAluno: {
             console.log(err.response?.status);
             console.log(err.response?.data);
         }
+    }
+    
+}
+
+export const listarConselhosPorTurma = async (idTurma: number): Promise<Conselho[]> => {
+    const controller = new AbortController();
+
+    try {
+        const url = `/conselhos/listarConselhorPorTurma/${idTurma}`; 
+        
+        const response = await api.get<Conselho[]>(url, { signal: controller.signal });
+        
+        if (response.data && Array.isArray(response.data)) {
+            return response.data;
+        }
+
+        console.warn(`API retornou sucesso (200), mas a lista de conselhos para turma ${idTurma} está vazia ou mal formatada.`);
+        return []; 
+        
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.error(`ERRO API ${err.response?.status} ao buscar conselhos:`, err.message);
+        } else {
+            console.error("Erro desconhecido ao buscar conselhos:", err);
+        }
+        return [];
+    }
+}
+
+export const buscarUltimoConselhoPorTurma = async (idTurma: number): Promise<Conselho | null> => {
+    const controller = new AbortController();
+
+    try {
+        const url = `/conselhos/buscarConselhoPorTurma/${idTurma}`; 
+        
+        const response = await api.get<Conselho | null>(url, { signal: controller.signal });
+        
+        return response.data ?? null;
+        
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.error(`ERRO API ${err.response?.status} ao buscar último conselho:`, err.message);
+        } else {
+            console.error("Erro desconhecido ao buscar último conselho:", err);
+        }
+        return null;
+    }
+}
+
+export async function buscarTurmaPorConselho(idConselho: number): Promise<Turma | undefined> {
+    const controller = new AbortController();
+    
+    try {
+        const url = `/turmas/buscarTurmaPorConselho/${idConselho}`; 
+        
+        const response = await api.get<Turma>(url, { signal: controller.signal }); 
+
+        return response.data;
+        
+    } catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response?.status === 404) {
+                console.warn(`Turma para o Conselho ${idConselho} não encontrada (Status 404).`);
+                return undefined;
+            }
+            console.error(`Erro API ${error.response?.status} ao buscar turma por conselho:`, error.message);
+        } else {
+            console.error("Erro desconhecido na comunicação ao buscar turma por conselho:", error);
+        }
+        return undefined;
     }
 }
