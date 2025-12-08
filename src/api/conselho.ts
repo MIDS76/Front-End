@@ -122,7 +122,7 @@ export const atualizarConselho = async (idConselho: number, conselho: Conselho) 
     const controller = new AbortController();
 
     try {
-        const response = await api.patch(`/conselhos/atualizar/${idConselho}`, conselho, { signal: controller.signal });
+        const response = await api.put(`/conselhos/atualizar/${idConselho}`, conselho, { signal: controller.signal });
         console.log(response.data);
         return response.data;
     } catch (err) {
@@ -134,8 +134,10 @@ export const atualizarConselho = async (idConselho: number, conselho: Conselho) 
 }
 
 export const buscarUltimoConselhoPorTurma = async (idTurma: number) => {
+    const controller = new AbortController();
+    
     try {
-        const response = await api.get<Conselho>(`/conselhos/buscarConselhoPorTurma/${idTurma}`, { signal: controller.signal });
+        const response = await api.get(`/conselhos/buscarConselhoPorTurma/${idTurma}`, { signal: controller.signal });
 
         return response.data;
     } catch (err) {

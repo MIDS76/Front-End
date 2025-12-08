@@ -21,6 +21,7 @@ interface ListaConselhosProps {
   aoFechar: () => void;
   turma: TurmaType | null;
   role: string;
+  onConselhoUpdate?: () => void;
 }
 
 const converterData = (data: string | Date | null | undefined): string => {
@@ -80,7 +81,8 @@ export default function ListaConselhos({
   estaAberto,
   aoFechar,
   turma,
-  role
+  role,
+  onConselhoUpdate
 }: ListaConselhosProps) {
 
   const [modalEtapaAberto, setModalEtapaAberto] = useState(false);
@@ -100,8 +102,8 @@ export default function ListaConselhos({
       const conselhosOrdenados = (conselhosDaAPI || []).sort((a, b) => {
         const dateA = a.dataInicio ? new Date(a.dataInicio).getTime() : 0;
         const dateB = b.dataInicio ? new Date(b.dataInicio).getTime() : 0;
-        return dateB - dateA; 
-    });
+        return dateB - dateA;
+      });
 
       setConselhos(conselhosOrdenados);
 
@@ -131,28 +133,39 @@ export default function ListaConselhos({
     const novaEtapa = getNextStatusEnum(currentEtapa);
 
     if (currentEtapa === "CONSELHO") {
-        setModalEtapaAberto(false);
-        window.location.href = `/conselhoCoordenacao?conselhoId=${conselhoSelecionado.id}`;
-        return;
+      setModalEtapaAberto(false);
+      window.location.href = `/conselhoCoordenacao?conselhoId=${conselhoSelecionado.id}`;
+      return;
     }
 
     if (novaEtapa === conselhoSelecionado.etapas) {
-        console.warn("Tentativa de avançar uma etapa finalizada ou desconhecida.");
-        setModalEtapaAberto(false);
-        return;
+      console.warn("Tentativa de avançar uma etapa finalizada ou desconhecida.");
+      setModalEtapaAberto(false);
+      return;
     }
 
     let dataFim = undefined;
-    
+
     if (novaEtapa === "RESULTADO") {
-        dataFim = new Date().toISOString(); 
+      dataFim = new Date().toISOString();
     }
 
     try {
       await atualizarEtapa(conselhoSelecionado.id, novaEtapa);
-      await atualizarConselho(conselhoSelecionado.id, conselhoSelecionado);
+
+      const conselhoAtualizado: Conselho = {
+        ...conselhoSelecionado,
+        etapas: novaEtapa,
+        dataFim: dataFim || conselhoSelecionado.dataFim
+      };
+
+      await atualizarConselho(conselhoSelecionado.id, conselhoAtualizado);
 
       await fetchConselhos();
+
+      if (onConselhoUpdate) {
+        onConselhoUpdate();
+      }
 
       setModalEtapaAberto(false);
       setConselhoSelecionado(null);
@@ -194,13 +207,13 @@ export default function ListaConselhos({
                 {conselhos.map((conselho) => {
                   const statusUpper = conselho.etapas?.toUpperCase();
                   const isWeg = (role || "").trim().toUpperCase() === "WEG";
-                  
+
                   const listaStatusAdmin = ["CONSELHO", "AGUARDANDO_RESULTADO", "RESULTADO"];
                   const listaStatusWeg = ["AGUARDANDO_RESULTADO", "RESULTADO"];
-                  
+
                   const deveMostrarBotaoDocumentos =
-                      (!isWeg && listaStatusAdmin.includes(statusUpper ?? "")) ||
-                      (isWeg && listaStatusWeg.includes(statusUpper ?? ""));
+                    (!isWeg && listaStatusAdmin.includes(statusUpper ?? "")) ||
+                    (isWeg && listaStatusWeg.includes(statusUpper ?? ""));
 
                   return (
                     <Card

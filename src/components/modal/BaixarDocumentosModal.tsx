@@ -28,11 +28,11 @@ export default function BaixarDocumentosModal({
   const isWeg = safeRole === "WEG";
 
   // --- DEBUG (Olhe no F12 do navegador) ---
-  console.log("--- DEBUG MODAL ---");
-  console.log("Role:", safeRole);
-  console.log("É WEG?", isWeg);
-  console.log("Status Original:", statusOriginal);
-  console.log("Status Normalizado:", statusLower);
+  //console.log("--- DEBUG MODAL ---");
+  //console.log("Role:", safeRole);
+  //console.log("É WEG?", isWeg);
+  //console.log("Status Original:", statusOriginal);
+  //console.log("Status Normalizado:", statusLower);
 
   // --- REGRAS ---
 
@@ -59,8 +59,8 @@ export default function BaixarDocumentosModal({
   // LOGICA DO CONSELHO FINAL:
   const podeConselho = statusPermitidosFinal.some(s => statusLower.includes(s));
 
-  console.log("Pode Mostrar Pré?", podeMostrarPre);
-  console.log("-------------------");
+  //console.log("Pode Mostrar Pré?", podeMostrarPre);
+  //console.log("-------------------");
 
   return (
     <Dialog
