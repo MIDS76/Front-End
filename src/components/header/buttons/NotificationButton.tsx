@@ -72,7 +72,7 @@ export default function NotificationButton() {
             </DropdownMenu.Label>
 
             <ActionModal
-              description="Excluir todas as suas notificações"
+  
               title="Limpar todas notificações"
               onConfirm={handleDelete}
               destructive

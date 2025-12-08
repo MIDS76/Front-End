@@ -50,22 +50,22 @@ export default function ResetPassword() {
 
 
     if (!userId) {
-        setError("Usuário não autenticado.");
-        setIsLoading(false);
-        return;
+      setError("Usuário não autenticado.");
+      setIsLoading(false);
+      return;
     }
 
-    try{
+    try {
 
       await apiAtualizarSenha(userId, newPassword);
 
       setIsLoading(false);
       setShowSuccessModal(true);
-    }catch(error){
+    } catch (error) {
       setError("Erro ao atualizar a senha. Tente novamente!")
       setIsLoading(false)
-  }
-   
+    }
+
   };
 
   const handleCloseSuccessModal = () => {

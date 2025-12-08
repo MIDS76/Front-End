@@ -2,7 +2,6 @@ import {
   Card,
   CardContent,
   CardHeader,
-  
 } from "../ui/card";
 
 interface MedModalProps {
@@ -28,7 +27,7 @@ export default function MedModal({
     <Card
       className={
         className +
-        ` h-full flex flex-col hover:shadow-md cursor-pointer ${
+        ` h-full  flex flex-col hover:shadow-md cursor-pointer ${
           loading ? "animate-pulse bg-muted transition-all" : ""
         }`
       }

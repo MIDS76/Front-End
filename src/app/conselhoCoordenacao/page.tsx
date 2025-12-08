@@ -1,322 +1,670 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import ActionModal from "@/components/modal/actionModal";
 import ButtonTT from "@/components/button/ButtonTT";
-import { toast } from "sonner";
-import { Usuario } from "@/utils/types";
-import usuariosData from "@/data/usuarios.json";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import InfoCard from "@/components/card/cardTituloTelas";
 import UserInfo from "@/components/lista/userInfo";
 import Lista from "@/components/lista/lista";
-import { showError, validateRequired } from "@/utils/formValidation";
-import { useAuth } from "@/context/AuthContext";
 import AccessDeniedPage from "../access-denied";
+import { useAuth } from "@/context/AuthContext";
+import { validateRequired } from "@/utils/formValidation";
+import { Usuario, Turma } from "@/utils/types";
+import { buscarAlunosPorTurma } from "@/api/alunos";
+import { buscarTurmaPorConselho } from "@/api/conselho"; 
+import { criarFeedbackAluno, criarFeedbackTurma } from "@/api/feedback";
 
 type CampoFormulario = {
-  titulo: string;
-  positivos: string;
-  melhoria: string;
-  sugestoes: string;
+    titulo: string;
+    positivos: string;
+    melhoria: string;
+    sugestoes: string;
 };
 
-export default function ConselhoCoordenacao() {
-  const router = useRouter();
-  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-  const [formulario, setFormulario] = useState<CampoFormulario[]>([]);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [pagina, setPagina] = useState(0);
-  const [searchQueryUsuarios, setSearchQueryUsuarios] = useState("");
-  const [usuarioSelecionado, setUsuarioSelecionado] = useState<Usuario | null>(null);
-  const [errosCampos, setErrosCampos] = useState<Record<keyof CampoFormulario, boolean>>({
-    titulo: false,
-    positivos: false,
-    melhoria: false,
-    sugestoes: false,
-  });
-
-  useEffect(() => {
-    const alunosAtivos = usuariosData.filter((u) => u.role === "Aluno" && u.isActive);
-    setUsuarios(alunosAtivos);
-
-    const salvoRaw = localStorage.getItem("conselho-formulario");
-    const inicial = alunosAtivos.map((aluno) => ({
-      titulo: aluno.nome,
-      positivos: "",
-      melhoria: "",
-      sugestoes: "",
-    }));
-
-    if (!salvoRaw) {
-      setFormulario(inicial);
-      setPagina(0);
-      setUsuarioSelecionado(alunosAtivos[0] ?? null);
-      return;
-    }
-
-    try {
-      const salvo: CampoFormulario[] = JSON.parse(salvoRaw);
-      const alinhado = alunosAtivos.map((aluno) => {
-        const achado = salvo.find((s) => s.titulo === aluno.nome);
-        return achado ?? { titulo: aluno.nome, positivos: "", melhoria: "", sugestoes: "" };
-      });
-      setFormulario(alinhado);
-      setPagina(0);
-      setUsuarioSelecionado(alunosAtivos[0] ?? null);
-      localStorage.setItem("conselho-formulario", JSON.stringify(alinhado));
-    } catch {
-      setFormulario(inicial);
-      setPagina(0);
-      setUsuarioSelecionado(alunosAtivos[0] ?? null);
-      localStorage.setItem("conselho-formulario", JSON.stringify(inicial));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (formulario.length > 0) {
-      localStorage.setItem("conselho-formulario", JSON.stringify(formulario));
-    }
-  }, [formulario]);
-
-  const handleChange = (campo: keyof CampoFormulario, valor: string) => {
-    const novoFormulario = [...formulario];
-    const idx = Math.max(0, Math.min(pagina, novoFormulario.length - 1));
-    novoFormulario[idx] = { ...novoFormulario[idx], [campo]: valor };
-    setFormulario(novoFormulario);
-    setErrosCampos((prev) => ({ ...prev, [campo]: false }));
-  };
-
-  const validarCampos = () => {
-    if (!formulario || formulario.length === 0) return true;
-    const secaoAtual = formulario[pagina] ?? { positivos: "", melhoria: "", sugestoes: "", titulo: "" };
-    const erros = {
-      titulo: false,
-      positivos: validateRequired(secaoAtual.positivos, "Pontos positivos") !== "",
-      melhoria: validateRequired(secaoAtual.melhoria, "Pontos positivos") !== "",
-      sugestoes: validateRequired(secaoAtual.sugestoes, "Pontos positivos") !== "",
-    } as Record<keyof CampoFormulario, boolean>;
-    setErrosCampos(erros);
-
-    if (erros.positivos || erros.melhoria || erros.sugestoes) {
-      showError
-      return false;
-    }
-    return true;
-  };
-
-  const trocarPagina = (novaPagina: number) => {
-    if (novaPagina < 0 || novaPagina >= formulario.length) return;
-    if (!validarCampos()) return;
-    setPagina(novaPagina);
-    setUsuarioSelecionado(usuarios[novaPagina] ?? null);
-  };
-
-  const handleConcluir = () => {
-    if (!validarCampos()) return;
-    toast.success("Conselho concluído e salvo com sucesso!");
-    localStorage.removeItem("conselho-formulario");
-
-    const usuarioJson = localStorage.getItem("user");
-
-    if (usuarioJson) {
-      try {
-        const usuario = JSON.parse(usuarioJson);
-
-        if (usuario && usuario.perfil) {
-          setTimeout(() => router.push(`/${usuario.perfil}`), 800);
-        }
-      } catch (error) {
-        toast.error("Erro ao recuperar os dados do usuário.");
-      }
-    }
-  };
-
-  const alunosFiltrados = usuarios.filter((usuario) =>
-    usuario.nome.toLowerCase().includes(searchQueryUsuarios.toLowerCase())
-  );
-
-  const secaoAtual = usuarioSelecionado
-    ? formulario.find((f) => f.titulo === usuarioSelecionado.nome) ?? { titulo: "", positivos: "", melhoria: "", sugestoes: "" }
-    : formulario[pagina] ?? { titulo: "", positivos: "", melhoria: "", sugestoes: "" };
-
-  const todosPreenchidos = formulario.length > 0 && formulario.every(
-    (f) => f.positivos.trim() && f.melhoria.trim() && f.sugestoes.trim()
-  );
-
-  const campos: (keyof CampoFormulario)[] = ["positivos", "melhoria", "sugestoes"];
-
-  const { user } = useAuth();
-  
-  if (user?.role !== "pedagogico" && user?.role !== "admin") {
-    return AccessDeniedPage();
-  }
-
-  return (
-    <div
-      className="w-screen h-screen flex flex-col items-center justify-center overflow-hidden px-8"
-      style={{ backgroundColor: "hsl(var(--background))", color: "hsl(var(--foreground))" }}
-    >
-      <div className="flex w-full max-w-[100rem] justify-center gap-8">
-        {/* Primeira div - Lista de alunos */}
-        <div className="flex flex-col w-full max-w-[46.875rem] gap-4">
-          <InfoCard
-            titulo="JGS - AI MIDS 2024/1 INT1"
-            descricao="WEG - MI 76"
-          />
+type FeedbackTurma = {
+    positivosTurma: string;
+    melhoriaTurma: string;
+    sugestoesTurma: string;
+};
 
 
-          <div
-            className="w-full h-[32rem] rounded-2xl shadow-inner overflow-hidden border"
-            style={{
-              backgroundColor: "hsl(var(--background))",
-              borderColor: "hsl(var(--border))",
-            }}
-          >
-            <ScrollArea className="h-full w-full p-2">
-              <Lista
-                usuarios={alunosFiltrados}
-                tipo="limpa"
-                isDialogOpen={false}
-                setIsDialogOpen={() => { }}
-                className="flex flex-col gap-2"
-                onSelect={(usuarioClicado: Usuario) => {
-                  if (!validarCampos()) return;
+const FeedbackTurmaCard = ({
+    feedback,
+    handleChange,
+    erros,
+}: {
+    feedback: FeedbackTurma;
+    handleChange: (campo: keyof FeedbackTurma, valor: string) => void;
+    erros: Record<keyof FeedbackTurma, boolean>;
+}) => {
 
-                  const novaPagina = usuarios.findIndex((u) => u.nome === usuarioClicado.nome);
-                  if (novaPagina !== -1) {
-                    setPagina(novaPagina);
-                    setUsuarioSelecionado(usuarioClicado);
-                  }
-                }}
-                usuarioSelecionado={usuarioSelecionado}
-              />
-            </ScrollArea>
-          </div>
-        </div>
+    const camposTurma: (keyof FeedbackTurma)[] = ["positivosTurma", "melhoriaTurma", "sugestoesTurma"];
 
-        {/* Segunda div - Formulário e botões */}
-        <div className="flex flex-col w-full max-w-[46.875rem]">
-          <div
-            className="rounded-3xl shadow p-6 w-full flex flex-col gap-6 flex-grow"
-            style={{ backgroundColor: "hsl(var(--card))", color: "hsl(var(--card-foreground))" }}
-          >
-            {usuarioSelecionado && (
-              <div className="flex flex-row items-center gap-4 mt-2 scale-105 origin-left">
-                <UserInfo
-                  nome={usuarioSelecionado.nome}
-                  email={usuarioSelecionado.email}
-                  copy={false}
-                  active={usuarioSelecionado.ativo ? true : false}
-                />
-              </div>
-            )}
+    return (
+        <div className="mt-6 pl-2 pr-4 space-y-6 flex-grow">
+            {camposTurma.map((campo) => {
+                const isError = erros[campo] === true;
 
-            <div className="mt-6 pl-2 pr-4 space-y-6 flex-grow">
-              {campos.map((campo) => {
-                const isError = errosCampos[campo] === true;
+                let labelText = "";
+                if (campo === "positivosTurma") labelText = "Pontos positivos da Turma";
+                else if (campo === "melhoriaTurma") labelText = "Pontos de melhoria da Turma";
+                else if (campo === "sugestoesTurma") labelText = "Sugestões para a Turma";
+
                 return (
-                  <div key={campo}>
-                    <Label className="text-sm font-semibold" style={{ color: "hsl(var(--card-foreground))" }}>
-                      {campo === "positivos" ? "Pontos positivos" : campo === "melhoria" ? "Pontos de melhoria" : "Sugestões"}
-                    </Label>
-                    <Textarea
-                      placeholder={`Insira aqui os ${campo}...`}
-                      className="mt-2 resize-none"
-                      style={{
-                        backgroundColor: "hsl(var(--popover))",
-                        color: "hsl(var(--popover-foreground))",
-                        border: isError ? "2px solid hsl(var(--destructive))" : "1px solid hsl(var(--border))",
-                        borderRadius: "var(--radius)",
-                        minHeight: "4.5rem",
-                      }}
-                      value={secaoAtual[campo]}
-                      onChange={(e) => handleChange(campo, e.target.value)}
-                    />
-                    {isError && (
-                      <p className="text-sm mt-1" style={{ color: "hsl(var(--destructive))" }}>
-                        Este campo é obrigatório!
-                      </p>
-                    )}
-                  </div>
+                    <div key={campo}>
+                        <Label className="text-sm font-semibold" style={{ color: "hsl(var(--card-foreground))" }}>
+                            {labelText}
+                        </Label>
+                        <Textarea
+                            placeholder={`Insira aqui os ${labelText}...`}
+                            className="mt-2 resize-none"
+                            style={{
+                                backgroundColor: "hsl(var(--popover))",
+                                color: "hsl(var(--popover-foreground))",
+                                border: isError ? "2px solid hsl(var(--destructive))" : "1px solid hsl(var(--border))",
+                                borderRadius: "var(--radius)",
+                                minHeight: "4.5rem",
+                            }}
+                            value={feedback[campo]}
+                            onChange={(e) => handleChange(campo, e.target.value)}
+                        />
+                        {isError && (<p className="text-sm mt-1" style={{ color: "hsl(var(--destructive))" }}>Este campo é obrigatório!</p>)}
+                    </div>
                 );
-              })}
-            </div>
-          </div>
-
-          {/* Botões */}
-          <div className="flex justify-between items-center pt-6 w-full">
-            <div className="flex gap-4">
-              <ButtonTT
-                tooltip="Anterior"
-                mode="default"
-                onClick={() => trocarPagina(pagina - 1)}
-                disabled={pagina === 0}
-                className="text-sm px-8"
-                style={{
-                  backgroundColor: "hsl(var(--card))",
-                  color: "hsl(var(--foreground))",
-                  border: "1px solid hsl(var(--border))",
-                  opacity: pagina === 0 ? 0.5 : 1,
-                  cursor: pagina === 0 ? "not-allowed" : "pointer",
-                }}
-              >
-                Anterior
-              </ButtonTT>
-
-              <ButtonTT
-                tooltip="Próximo"
-                mode="default"
-                onClick={() => trocarPagina(pagina + 1)}
-                disabled={pagina === formulario.length - 1}
-                className="text-sm px-8"
-                style={{
-                  backgroundColor: "hsl(var(--card))",
-                  color: "hsl(var(--foreground))",
-                  border: "1px solid hsl(var(--border))",
-                  opacity: pagina === formulario.length - 1 ? 0.5 : 1,
-                  cursor: pagina === formulario.length - 1 ? "not-allowed" : "pointer",
-                }}
-              >
-                Próximo
-              </ButtonTT>
-            </div>
-
-            <ButtonTT
-              tooltip="Concluir"
-              mode="default"
-              disabled={!todosPreenchidos}
-              onClick={() => setIsConfirmOpen(true)}
-              className="text-sm px-8"
-              style={{
-                backgroundColor: "hsl(var(--primary))",
-                color: "hsl(var(--primary-foreground))",
-                borderRadius: "var(--radius)",
-                opacity: !todosPreenchidos ? 0.5 : 1,
-                cursor: !todosPreenchidos ? "not-allowed" : "pointer",
-                border: `1px solid hsl(var(--primary))`,
-              }}
-            >
-              Próximo passo
-            </ButtonTT>
-          </div>
+            })}
         </div>
-      </div>
+    );
+};
 
-      <ActionModal
-        isOpen={isConfirmOpen}
-        setOpen={setIsConfirmOpen}
-        title="Concluir conselho"
-        description="Tem certeza que deseja concluir e limpar os dados salvos?"
-        actionButtonLabel="Concluir"
-        onConfirm={() => {
-          handleConcluir();
-          setIsConfirmOpen(false);
-        }}
-      />
-    </div>
-  );
+
+export default function ConselhoCoordenacao() {
+    const router = useRouter();
+
+    const { user } = useAuth();
+
+    // VARIÁVEL DE ENTRADA É O ID DO CONSELHO
+    const idConselho = 5; // AQUI ENTRA O ID DO CONSELHO RECEBIDO, EX: 5
+
+    const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+    const [turma, setTurma] = useState<Turma | undefined>(undefined);
+    const [formulario, setFormulario] = useState<CampoFormulario[]>([]);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [pagina, setPagina] = useState(0);
+    const [searchQueryUsuarios, setSearchQueryUsuarios] = useState("");
+    const [usuarioSelecionado, setUsuarioSelecionado] = useState<Usuario | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const [exibirFeedbackTurma, setExibirFeedbackTurma] = useState(false);
+    const [feedbackTurma, setFeedbackTurma] = useState<FeedbackTurma>({
+        positivosTurma: "",
+        melhoriaTurma: "",
+        sugestoesTurma: "",
+    });
+    const [errosTurma, setErrosTurma] = useState<Record<keyof FeedbackTurma, boolean>>({
+        positivosTurma: false,
+        melhoriaTurma: false,
+        sugestoesTurma: false,
+    });
+
+    const [errosCampos, setErrosCampos] = useState<Record<keyof CampoFormulario, boolean>>({
+        titulo: false, positivos: false, melhoria: false, sugestoes: false,
+    });
+
+    const camposAluno: (keyof CampoFormulario)[] = ["positivos", "melhoria", "sugestoes"];
+
+
+    const validarCamposAluno = useCallback(() => {
+        if (!formulario || formulario.length === 0 || pagina >= formulario.length) return true;
+        const secaoAtual = formulario[pagina] ?? { positivos: "", melhoria: "", sugestoes: "", titulo: "" };
+
+        const erros = {
+            titulo: false,
+            positivos: validateRequired(secaoAtual.positivos, "Pontos positivos") !== "",
+            melhoria: validateRequired(secaoAtual.melhoria, "Pontos de melhoria") !== "",
+            sugestoes: validateRequired(secaoAtual.sugestoes, "Sugestões") !== "",
+        } as Record<keyof CampoFormulario, boolean>;
+
+        setErrosCampos(erros);
+
+        if (erros.positivos || erros.melhoria || erros.sugestoes) {
+            const firstErrorField = camposAluno.find(c => erros[c]);
+            if (firstErrorField) {
+                const label = firstErrorField === "positivos" ? "Pontos positivos" : firstErrorField === "melhoria" ? "Pontos de melhoria" : "Sugestões";
+                toast.error(`O campo '${label}' é obrigatório para este aluno.`);
+            }
+            return false;
+        }
+        return true;
+    }, [formulario, pagina, camposAluno]);
+
+    const validarCamposTurma = useCallback(() => {
+        const erros = {
+            positivosTurma: validateRequired(feedbackTurma.positivosTurma, "Pontos positivos da Turma") !== "",
+            melhoriaTurma: validateRequired(feedbackTurma.melhoriaTurma, "Pontos de melhoria da Turma") !== "",
+            sugestoesTurma: validateRequired(feedbackTurma.sugestoesTurma, "Sugestões para a Turma") !== "",
+        } as Record<keyof FeedbackTurma, boolean>;
+
+        setErrosTurma(erros);
+
+        if (erros.positivosTurma || erros.melhoriaTurma || erros.sugestoesTurma) {
+            toast.error("Por favor, preencha todos os campos obrigatórios para o Feedback da Turma.");
+            return false;
+        }
+        return true;
+    }, [feedbackTurma]);
+
+    const handleChange = (campo: keyof CampoFormulario, valor: string) => {
+        const novoFormulario = [...formulario];
+        const idx = Math.max(0, Math.min(pagina, novoFormulario.length - 1));
+        if (idx >= 0 && idx < novoFormulario.length) {
+            novoFormulario[idx] = { ...novoFormulario[idx], [campo]: valor };
+            setFormulario(novoFormulario);
+            setErrosCampos((prev) => ({ ...prev, [campo]: false }));
+        }
+    };
+
+    const handleChangeTurma = (campo: keyof FeedbackTurma, valor: string) => {
+        setFeedbackTurma((prev) => ({ ...prev, [campo]: valor }));
+        setErrosTurma((prev) => ({ ...prev, [campo]: false }));
+    };
+
+    const handleTransitionToTurma = () => {
+        if (!validarCamposAluno()) return;
+
+        const todosAlunosPreenchidosCheck = formulario.every(
+            (f) => f.positivos.trim() && f.melhoria.trim() && f.sugestoes.trim()
+        );
+
+        if (!todosAlunosPreenchidosCheck) {
+            toast.error("Você deve preencher todos os feedbacks dos alunos antes de passar para o Feedback da Turma.");
+            return;
+        }
+
+        setExibirFeedbackTurma(true);
+        setUsuarioSelecionado(null);
+        setPagina(formulario.length);
+    };
+
+    const trocarPagina = (novaPagina: number) => {
+        if (novaPagina > pagina && !exibirFeedbackTurma) {
+            if (!validarCamposAluno()) return;
+        }
+
+        if (novaPagina === formulario.length) {
+            return;
+        }
+
+        if (novaPagina >= 0 && novaPagina < formulario.length) {
+            setExibirFeedbackTurma(false);
+            setPagina(novaPagina);
+            setUsuarioSelecionado(usuarios[novaPagina] ?? null);
+            setErrosCampos({ titulo: false, positivos: false, melhoria: false, sugestoes: false });
+        }
+    };
+
+    const handleSelecionarUsuario = (usuarioClicado: Usuario) => {
+        if (!exibirFeedbackTurma && usuarioSelecionado && !validarCamposAluno()) return;
+
+        const novaPagina = usuarios.findIndex((u) => u.nome === usuarioClicado.nome);
+
+        if (novaPagina !== -1) {
+            setExibirFeedbackTurma(false);
+            setPagina(novaPagina);
+            setUsuarioSelecionado(usuarioClicado);
+            setErrosCampos({ titulo: false, positivos: false, melhoria: false, sugestoes: false });
+        }
+    };
+
+
+
+    const handleConcluir = async () => {
+        if (!validarCamposTurma()) return;
+
+        if (!idConselho) {
+            toast.error("ID do Conselho não está disponível para salvar. Recarregue a página.");
+            return;
+        }
+
+        const idPedagogico = user?.id;
+
+        if (!idPedagogico) {
+            toast.error("ID do usuário pedagógico não encontrado. Faça login novamente.");
+            return;
+        }
+
+        try {
+            for (const [index, feedback] of formulario.entries()) {
+                const aluno = usuarios[index];
+                if (!aluno?.id) continue;
+
+                const dadosFeedbackAluno = {
+                    idConselho: idConselho,
+                    idAluno: aluno.id,
+                    pontosPositivos: feedback.positivos,
+                    pontosMelhoria: feedback.melhoria,
+                    sugestao: feedback.sugestoes,
+                    idPedagogico: idPedagogico,
+                };
+
+                await criarFeedbackAluno(dadosFeedbackAluno);
+            }
+
+            const dadosFeedbackTurma = {
+                idConselho: idConselho,
+                pontosPositivos: feedbackTurma.positivosTurma,
+                pontosMelhoria: feedbackTurma.melhoriaTurma,
+                sugestao: feedbackTurma.sugestoesTurma,
+                idPedagogico: idPedagogico,
+            };
+
+
+            await criarFeedbackTurma(dadosFeedbackTurma);
+
+            toast.success("Conselho concluído e salvo com sucesso!");
+            localStorage.removeItem(`conselho-formulario-${idConselho}`);
+            localStorage.removeItem(`conselho-turma-${idConselho}`);
+
+            const usuarioJson = localStorage.getItem("user");
+            if (usuarioJson) {
+                const usuario = JSON.parse(usuarioJson);
+                if (usuario && usuario.perfil) {
+                    setTimeout(() => router.push(`/${usuario.perfil}`), 800);
+                }
+            }
+
+        } catch (error) {
+            toast.error("Falha ao salvar o conselho.");
+        }
+    };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+
+            if (!idConselho || isNaN(idConselho) || idConselho <= 0) {
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                const turmaEncontrada = await buscarTurmaPorConselho(idConselho);
+                
+                if (!turmaEncontrada || !turmaEncontrada.id) {
+                    toast.error("Turma não encontrada para este Conselho.");
+                    setTurma(undefined);
+                    setUsuarios([]);
+                    setIsLoading(false);
+                    return;
+                }
+                
+                setTurma(turmaEncontrada);
+                const turmaId = turmaEncontrada.id;
+
+                const alunosDaTurmaBrutos = await buscarAlunosPorTurma(turmaId);
+                const alunosPadronizados: Usuario[] = (alunosDaTurmaBrutos || []).map((alunoBruto: any) => ({
+                    id: alunoBruto.id,
+                    nome: alunoBruto.nome,
+                    email: alunoBruto.email,
+                    isActive: alunoBruto.statusAtividadeAluno,
+                    role: "ALUNO",
+                }));
+                const alunosAtivos: Usuario[] = alunosPadronizados.filter((u) => u.role === "ALUNO" && u.isActive);
+                setUsuarios(alunosAtivos);
+
+                const chaveLocalStorageAlunos = `conselho-formulario-${idConselho}`;
+                const chaveLocalStorageTurma = `conselho-turma-${idConselho}`;
+                const salvoRawAlunos = localStorage.getItem(chaveLocalStorageAlunos);
+                const salvoRawTurma = localStorage.getItem(chaveLocalStorageTurma);
+
+                const inicialAlunos: CampoFormulario[] = alunosAtivos.map((aluno) => ({
+                    titulo: aluno.nome,
+                    positivos: "", melhoria: "", sugestoes: "",
+                }));
+                let formulariosAlinhados = inicialAlunos;
+
+                if (salvoRawAlunos) {
+                    try {
+                        const salvo: CampoFormulario[] = JSON.parse(salvoRawAlunos);
+                        formulariosAlinhados = alunosAtivos.map((aluno) => {
+                            const achado = salvo.find((s) => s.titulo === aluno.nome);
+                            return achado ?? { titulo: aluno.nome, positivos: "", melhoria: "", sugestoes: "" };
+                        });
+                    } catch { }
+                }
+                setFormulario(formulariosAlinhados);
+
+                let feedbackTurmaInicial = { positivosTurma: "", melhoriaTurma: "", sugestoesTurma: "" };
+                if (salvoRawTurma) {
+                    try {
+                        feedbackTurmaInicial = JSON.parse(salvoRawTurma);
+                    } catch { }
+                }
+                setFeedbackTurma(feedbackTurmaInicial);
+
+                const primeiroAlunoIncompletoIndex = formulariosAlinhados.findIndex(
+                    (f) => !f.positivos.trim() || !f.melhoria.trim() || !f.sugestoes.trim()
+                );
+
+                let initialPage = 0;
+                let initialUsuario: Usuario | null = null;
+                let initialExibirTurma = false;
+
+                if (alunosAtivos.length > 0) {
+                    if (primeiroAlunoIncompletoIndex !== -1) {
+                        initialPage = primeiroAlunoIncompletoIndex;
+                        initialUsuario = alunosAtivos[initialPage] || null;
+                    } else {
+                        initialExibirTurma = true;
+                        initialPage = alunosAtivos.length;
+                    }
+                }
+
+                setExibirFeedbackTurma(initialExibirTurma);
+                setPagina(initialPage);
+                setUsuarioSelecionado(initialUsuario);
+
+            } catch (error) {
+                toast.error("Falha ao carregar dados. Verifique a conexão com a API.");
+                setUsuarios([]);
+                setFormulario([]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [idConselho]); 
+
+
+    useEffect(() => {
+        if (formulario.length > 0 && idConselho) {
+            localStorage.setItem(`conselho-formulario-${idConselho}`, JSON.stringify(formulario));
+        }
+    }, [formulario, idConselho]);
+
+    useEffect(() => {
+        if (idConselho) {
+            localStorage.setItem(`conselho-turma-${idConselho}`, JSON.stringify(feedbackTurma));
+        }
+    }, [feedbackTurma, idConselho]);
+
+
+    const isAlunoAtualPreenchido = useMemo(() => {
+        if (exibirFeedbackTurma || !usuarioSelecionado) return true;
+        if (!formulario || formulario.length === 0 || pagina >= formulario.length) return true;
+
+        const secaoAtual = formulario[pagina] ?? { positivos: "", melhoria: "", sugestoes: "", titulo: "" };
+
+        return secaoAtual.positivos.trim() !== "" &&
+            secaoAtual.melhoria.trim() !== "" &&
+            secaoAtual.sugestoes.trim() !== "";
+
+    }, [formulario, pagina, exibirFeedbackTurma, usuarioSelecionado]);
+
+
+    const alunosFiltrados = useMemo(() => {
+        return usuarios.filter((usuario) =>
+            usuario.nome.toLowerCase().includes(searchQueryUsuarios.toLowerCase())
+        );
+    }, [usuarios, searchQueryUsuarios]);
+
+    const secaoAtual = exibirFeedbackTurma
+        ? { titulo: "", positivos: "", melhoria: "", sugestoes: "" }
+        : (usuarioSelecionado
+            ? formulario.find((f) => f.titulo === usuarioSelecionado.nome) ?? { titulo: "", positivos: "", melhoria: "", sugestoes: "" }
+            : formulario[pagina] ?? { titulo: "", positivos: "", melhoria: "", sugestoes: "" });
+
+    const todosAlunosPreenchidos = useMemo(() => {
+        return formulario.length > 0 && formulario.every(
+            (f) => f.positivos.trim() && f.melhoria.trim() && f.sugestoes.trim()
+        );
+    }, [formulario]);
+
+    const todosTurmaPreenchidos = useMemo(() => {
+        return feedbackTurma.positivosTurma.trim() && feedbackTurma.melhoriaTurma.trim() && feedbackTurma.sugestoesTurma.trim();
+    }, [feedbackTurma]);
+
+    const proximoDesabilitado = exibirFeedbackTurma || !isAlunoAtualPreenchido || pagina === formulario.length - 1;
+
+    const enviarDesabilitado = exibirFeedbackTurma
+        ? !todosTurmaPreenchidos
+        : !todosAlunosPreenchidos;
+
+    const proximoButtonColor = {
+        backgroundColor: "hsl(var(--primary))",
+        color: "hsl(var(--primary-foreground))",
+        border: `1px solid hsl(var(--primary))`,
+    };
+
+
+    if (user?.role !== "pedagogico" && user?.role !== "admin") {
+        return AccessDeniedPage();
+    }
+
+    if (isLoading) {
+        return (
+            <div className="w-screen h-screen flex items-center justify-center" style={{ backgroundColor: "hsl(var(--background))", color: "hsl(var(--foreground))" }}>
+                <p className="text-xl animate-pulse">
+                    Carregando dados da turma...
+                </p>
+            </div>
+        );
+    }
+
+    if (!turma || usuarios.length === 0) {
+        return (
+            <div className="w-screen h-screen flex items-center justify-center p-8" style={{ backgroundColor: "hsl(var(--background))", color: "hsl(var(--foreground))" }}>
+                <div className="text-center">
+                    <p className="text-2xl font-bold text-red-500 mb-4">
+                        Erro ao carregar Turma
+                    </p>
+                    <p className="text-lg">
+                        A turma não foi encontrada ou não possui alunos ativos para avaliação.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+
+    return (
+        <div
+            className="w-screen h-screen flex flex-col items-center justify-center overflow-auto lg:overflow-hidden px-4 xl:px-8 py-4 lg:py-0"
+            style={{ backgroundColor: "hsl(var(--background))", color: "hsl(var(--foreground))" }}
+        >
+            <div className="flex w-full max-w-[100rem] justify-center gap-4 xl:gap-8">
+
+                <div className="flex flex-col flex-1 max-w-[46.875rem] min-w-0 gap-4">
+                    <InfoCard
+                        titulo={turma?.curso ?? "JGS - AI MIDS 2024/1 INT1"}
+                        descricao={turma?.nome ?? "WEG - MI 76"}
+                    />
+
+                    <div
+                        className="w-full h-[26rem] lg:h-[32rem] rounded-2xl shadow-inner overflow-hidden border"
+                        style={{
+                            backgroundColor: "hsl(var(--background))",
+                            borderColor: "hsl(var(--border))",
+                        }}
+                    >
+                        <input
+                            type="text"
+                            placeholder="Buscar um usuário"
+                            value={searchQueryUsuarios}
+                            onChange={(e) => setSearchQueryUsuarios(e.target.value)}
+                            className="w-full p-4 border-b focus:outline-none"
+                            style={{
+                                backgroundColor: "hsl(var(--background))",
+                                color: "hsl(var(--foreground))",
+                                borderColor: "hsl(var(--border))"
+                            }}
+                        />
+                        <ScrollArea className="h-full w-full p-2">
+                            <Lista
+                                usuarios={alunosFiltrados}
+                                tipo="limpa"
+                                isDialogOpen={false}
+                                setIsDialogOpen={() => { }}
+                                className="flex flex-col gap-2"
+                                onSelect={handleSelecionarUsuario}
+                                usuarioSelecionado={usuarioSelecionado}
+                            />
+                        </ScrollArea>
+                    </div>
+                </div>
+
+                <div className="flex flex-col flex-1 max-w-[46.875rem] min-w-0">
+
+                    <div
+                        className="rounded-3xl shadow p-6 w-full flex flex-col gap-6 flex-grow"
+                        style={{ backgroundColor: "hsl(var(--card))", color: "hsl(var(--card-foreground))" }}
+                    >
+                        <div className="flex flex-row items-start justify-between gap-4 mt-2 scale-105 origin-left">
+
+                            <div className="flex-shrink-0">
+                                {!exibirFeedbackTurma && usuarioSelecionado && (
+                                    <UserInfo
+                                        nome={usuarioSelecionado.nome}
+                                        email={usuarioSelecionado.email}
+                                        copy={false}
+                                        active={usuarioSelecionado.isActive ?? true}
+                                    />
+                                )}
+                            </div>
+
+                            {exibirFeedbackTurma && (
+                                <div className="flex flex-col flex-shrink-0 w-full">
+                                    <div className="flex justify-between items-start">
+                                        <div className="text-2xl font-bold">{turma?.nome ?? "MI 76"}</div>
+                                    </div>
+                                    <p className="text-sm font-normal text-left -mt-1">Curso: {turma?.curso ?? "Desenvolvimento de Sistemas"}</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {exibirFeedbackTurma ? (
+                            <FeedbackTurmaCard
+                                feedback={feedbackTurma}
+                                handleChange={handleChangeTurma}
+                                erros={errosTurma}
+                            />
+                        ) : (
+                            <div className="mt-6 pl-2 pr-4 space-y-6 flex-grow">
+                                {camposAluno.map((campo) => {
+                                    const isError = errosCampos[campo] === true;
+                                    return (
+                                        <div key={campo}>
+                                            <Label className="text-sm font-semibold" style={{ color: "hsl(var(--card-foreground))" }}>
+                                                {campo === "positivos" ? "Pontos positivos" : campo === "melhoria" ? "Pontos de melhoria" : "Sugestões"}
+                                            </Label>
+                                            <Textarea
+                                                placeholder={`Insira aqui os ${campo.replace("sugestoes", "sugestões")}...`}
+                                                className="mt-2 resize-none"
+                                                style={{
+                                                    backgroundColor: "hsl(var(--popover))",
+                                                    color: "hsl(var(--popover-foreground))",
+                                                    border: isError ? "2px solid hsl(var(--destructive))" : "1px solid hsl(var(--border))",
+                                                    borderRadius: "var(--radius)",
+                                                    minHeight: "4.5rem",
+                                                }}
+                                                value={secaoAtual[campo]}
+                                                onChange={(e) => handleChange(campo, e.target.value)}
+                                            />
+                                            {isError && (
+                                                <p className="text-sm mt-1" style={{ color: "hsl(var(--destructive))" }}>
+                                                    Este campo é obrigatório!
+                                                </p>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="flex justify-between items-center pt-6 w-full">
+                        <div className="flex gap-4">
+
+                            <ButtonTT
+                                tooltip="Anterior"
+                                mode="default"
+                                onClick={() => {
+                                    if (exibirFeedbackTurma) {
+                                        setExibirFeedbackTurma(false);
+                                        setPagina(formulario.length - 1);
+                                        setUsuarioSelecionado(usuarios[formulario.length - 1] ?? null);
+                                    } else {
+                                        trocarPagina(pagina - 1);
+                                    }
+                                }}
+                                disabled={!exibirFeedbackTurma && pagina === 0}
+                                className="text-sm px-8"
+                                style={{
+                                    backgroundColor: "hsl(var(--card))",
+                                    color: "hsl(var(--foreground))",
+                                    border: "1px solid hsl(var(--border))",
+                                    opacity: (!exibirFeedbackTurma && pagina === 0) ? 0.5 : 1,
+                                    cursor: (!exibirFeedbackTurma && pagina === 0) ? "not-allowed" : "pointer",
+                                }}
+                            >
+                                Anterior
+                            </ButtonTT>
+
+                            <ButtonTT
+                                tooltip="Próximo aluno"
+                                mode="default"
+                                onClick={() => trocarPagina(pagina + 1)}
+                                disabled={proximoDesabilitado}
+                                className="text-sm px-8"
+                                style={{
+                                    ...proximoButtonColor,
+                                    opacity: (proximoDesabilitado) ? 0.5 : 1,
+                                    cursor: (proximoDesabilitado) ? "not-allowed" : "pointer",
+                                }}
+                            >
+                                Próximo
+                            </ButtonTT>
+                        </div>
+
+                        <ButtonTT
+                            tooltip={exibirFeedbackTurma ? "Enviar Conselho" : (todosAlunosPreenchidos ? "Passar para Feedback da Turma" : "Preencha todos os alunos antes de avançar")}
+                            mode="default"
+                            onClick={() => exibirFeedbackTurma ? setIsConfirmOpen(true) : handleTransitionToTurma()}
+                            disabled={enviarDesabilitado}
+                            className="text-sm px-8"
+                            style={{
+                                backgroundColor: "hsl(var(--primary))",
+                                color: "hsl(var(--primary-foreground))",
+                                borderRadius: "var(--radius)",
+                                opacity: enviarDesabilitado ? 0.5 : 1,
+                                cursor: enviarDesabilitado ? "not-allowed" : "pointer",
+                                border: `1px solid hsl(var(--primary))`,
+                            }}
+                        >
+                            {exibirFeedbackTurma ? "Enviar" : "Avançar"}
+                        </ButtonTT>
+                    </div>
+                </div>
+            </div>
+
+            <ActionModal
+                isOpen={isConfirmOpen}
+                setOpen={setIsConfirmOpen}
+                title="Concluir e Enviar Conselho"
+                actionButtonLabel="Enviar Conselho"
+                onConfirm={() => {
+                    if (validarCamposTurma()) {
+                        handleConcluir();
+                        setIsConfirmOpen(false);
+                    }
+                }}
+            />
+        </div>
+    );
 }

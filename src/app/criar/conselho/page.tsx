@@ -10,7 +10,7 @@ import InfoCard from "@/components/card/cardTituloTelas";
 import ButtonTT from "@/components/button/ButtonTT";
 import { toast } from "sonner";
 import ActionModal from "@/components/modal/actionModal";
-import { listarUnidadeCurricular, listarProfessores, preConselhoProfessor, criarPreConselho, buscarPreConselhoPorConselho } from "@/api/preConselho";
+import { listarUnidadeCurricular, listarProfessores, preConselhoProfessorCriar, criarPreConselho, buscarPreConselhoPorConselho } from "@/api/preConselho";
 import { UnidadeCurricular, Usuario } from "@/utils/types";
 import { criarConselho } from "@/api/conselho";
 
@@ -218,7 +218,7 @@ export default function ConselhoPage() {
       const idRepresentante1 = representante1;
       const idRepresentante2 = representante2;
 
-      const idPedagogico = 6;
+      const idPedagogico = 79;
 
       console.log("id do representante: " + idRepresentante1);
       console.log("id do representante: " + idRepresentante2);
@@ -252,7 +252,7 @@ export default function ConselhoPage() {
       toast.success("Pre Conselho criado com sucesso!");
 
       for (const item of salvos) {
-        await preConselhoProfessor({
+        await preConselhoProfessorCriar({
           idPreConselho: preConselhoCriado.id,
           idUnidadeCurricular: Number(item.unidade),
           idProfessor: Number(item.professor),
