@@ -17,6 +17,7 @@ interface ListaProps {
   onSelect?: (usuario: Usuario) => void;
   usuarioSelecionado?: Usuario | null;
   selecionados?: Usuario[]; 
+
 }
 
 export default function Lista({
