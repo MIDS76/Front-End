@@ -36,6 +36,17 @@ export const criarUsuario = async (data: Usuario) => {
     }
 }
 
-export const editarUsuario = async (data: Usuario) => {
-    
+export const editarUsuario = async (usuario: Usuario) => {
+    const controller = new AbortController();
+
+    try {
+    const response = await api.put(`/${usuario.role}/atualizar/${usuario.id}`, usuario, { signal: controller.signal });
+        return response.data;
+
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.log(err.response?.status);
+            console.log(err.response?.data);
+        }
+    }
 }
