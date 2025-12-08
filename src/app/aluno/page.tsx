@@ -9,7 +9,7 @@ import BackgroundDevolutiva from "@/components/ui/background-devolutiva";
 import { useAuth } from "@/context/AuthContext";
 import AccessDeniedPage from "../access-denied";
 import InfoCard from "@/components/card/cardTituloTelas";
-import MedModal from "@/components/modal/medModal";
+import MedModal from "@/components/modal/medModal"; // Componente MedModal importado
 
 // ------------------ TIPOS ------------------
 interface Feedback {
@@ -37,7 +37,7 @@ const conselhos: Conselho[] = [
   {
     id: 1,
     titulo: "03/2024 - 04/2024",
-    periodo: "",
+    periodo: "1º Bimestre", // Adicionando valor para mapear o MedModal
     status: "Concluído",
     feedback: {
       pontosFortes: "Demonstra liderança em projetos de grupo.",
@@ -48,7 +48,7 @@ const conselhos: Conselho[] = [
   {
     id: 2,
     titulo: "05/2024 - 06/2024",
-    periodo: "",
+    periodo: "2º Bimestre", // Adicionando valor para mapear o MedModal
     status: "Concluído",
     feedback: {
       pontosFortes: "Excelente capacidade analítica.",
@@ -59,7 +59,7 @@ const conselhos: Conselho[] = [
   {
     id: 3,
     titulo: "07/2024 - 08/2024",
-    periodo: "",
+    periodo: "3º Bimestre", // Adicionando valor para mapear o MedModal
     status: "Em Andamento",
     feedback: null,
   },
@@ -185,8 +185,6 @@ function DevolutivaAluno({ isOpen, onClose, feedbackIndividual, periodo }: any) 
 // ------------------ PAGE PRINCIPAL ------------------
 export default function Page() {
   const [selectedConselho, setSelectedConselho] = useState<number | null>(null);
-  const [showMedModal, setShowMedModal] = useState<boolean>(false);
-
   const conselhoSelecionado = conselhos.find((c) => c.id === selectedConselho);
 
   return (
@@ -197,31 +195,39 @@ export default function Page() {
           titulo="Meus Conselhos"
           subtitulo="Centro de Gerenciamento de conselhos"
           descricao=""
-          className="shadow-sm   w-[32.5625rem] h-[6.4375rem] mb-[4rem]"
+          className="shadow-sm   w-[32.5625rem] h-[6.4375rem] mb-[4rem]"
         />
       </div>
 
-      {/* LISTA DE MEDMODAL */}
+      {/* LISTA DE MEDMODAL - AGORA COM O COMPONENTE MedModal */}
       <div className="flex flex-wrap gap-[1.5rem] ml-[2.5rem]">
         {conselhos.map((c) => (
-          <div key={c.id} className="flex-shrink-0" onClick={() => setSelectedConselho(c.id)}>
-            {/* MEDMODAL CUSTOMIZADO */}
-            <div className="group cursor-pointer flex flex-col w-[19rem] h-[7.50rem] rounded-[0.625rem] overflow-hidden shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg bg-white ">
-              <div className="bg-[#2A5C61] p-[1rem] h-[6.4375rem] flex flex-col justify-center gap-[0.25rem] relative overflow-hidden">
-                <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-300" />
-                {/* Alteração: O Período fica em cima da data */}
-                <Label className="text-[0.875rem] text-white pt-1">Período</Label>
-                <h3 className="text-[1.25rem] font-bold text-white tracking-wide">{c.titulo}</h3>
-                <span className="text-[0.875rem] text-white/70 font-medium uppercase tracking-wider">
-                  {c.periodo}
-                </span>
-              </div>
-              <div className="p-[0.75rem] border-t border-slate-100 flex items-center h-[2.8125rem]">
-                <p className="text-[0.875rem] font-bold text-slate-700">
-                  Status: <span className="text-slate-900 font-normal ml-[0.0625rem]">{c.status}</span>
-                </p>
-              </div>
-            </div>
+          <div 
+            key={c.id} 
+            className="flex-shrink-0 w-[19rem] h-[7.50rem]" // Mantém o tamanho do container
+          >
+            {/* 💡 IMPLEMENTAÇÃO DO MEDMODAL 💡 */}
+            <MedModal
+              // courseCode (Título) será a data do período, por exemplo: "03/2024 - 04/2024"
+              courseCode={c.titulo} 
+              
+              // courseName (Subtítulo) será o Período, por exemplo: "1º Bimestre"
+              courseName={c.periodo || "Período não definido"} 
+              
+              // Ação ao clicar no card, abre o painel lateral
+              onClick={() => setSelectedConselho(c.id)} 
+              
+              // Estilização para replicar o visual, incluindo hover e tamanho
+              className={cn(
+                "w-full h-full rounded-[0.625rem] overflow-hidden transition-all duration-300",
+                "hover:-translate-y-1 hover:shadow-lg"
+              )}
+            >
+              {/* O status vai dentro do CardContent (children do MedModal) */}
+              <p className="text-[0.875rem] font-bold text-slate-700 text-left">
+                Status: <span className="text-slate-900 font-normal ml-[0.0625rem]">{c.status}</span>
+              </p>
+            </MedModal>
           </div>
         ))}
       </div>
@@ -232,7 +238,8 @@ export default function Page() {
           isOpen={selectedConselho !== null}
           onClose={() => setSelectedConselho(null)}
           feedbackIndividual={conselhoSelecionado?.feedback}
-          periodo={conselhoSelecionado?.periodo}
+          // Passando o título do conselho para o header do painel lateral
+          periodo={conselhoSelecionado?.titulo} 
         />
       </BackgroundDevolutiva>
 
