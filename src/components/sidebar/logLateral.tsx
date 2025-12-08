@@ -42,6 +42,7 @@ export default function LogLateral({
   };
 
   return (
+
     <aside className="flex h-[calc(100vh-80px)] w-full tablet: w-[20rem] laptop:w-[25rem] desktop:w-[30rem] flex-shrink-0 flex flex-col rounded-l-xl overflow-hidden shadow-md">
       {/* Cabeçalho */}
       <div className="bg-[hsl(var(--primary))] p-[1rem]">
@@ -86,7 +87,7 @@ export default function LogLateral({
                     )}
 
                     <button
-                      onClick={() => onRemover(item.unidade)}
+                      onClick={() => onRemover(item.id)}
                       className="text-[hsl(var(--muted-foreground))] text-sm font-bold"
                       title="Remover"
                     >

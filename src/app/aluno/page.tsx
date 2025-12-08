@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import MedModal from "@/components/modal/medModal";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import ButtonTT from "@/components/button/ButtonTT";
@@ -10,6 +8,8 @@ import { cn } from "@/lib/utils";
 import BackgroundDevolutiva from "@/components/ui/background-devolutiva";
 import { useAuth } from "@/context/AuthContext";
 import AccessDeniedPage from "../access-denied";
+import InfoCard from "@/components/card/cardTituloTelas";
+import MedModal from "@/components/modal/medModal";
 
 // ------------------ TIPOS ------------------
 interface Feedback {
@@ -20,196 +20,222 @@ interface Feedback {
 
 interface Conselho {
   id: number;
+  titulo: string;
   periodo: string;
   status: string;
   feedback: Feedback | null;
 }
 
-// ------------------ DADOS MOCK ------------------
+// ------------------ MOCK DE DADOS ------------------
+const feedbackTurmaMock: Feedback = {
+  pontosFortes: "A turma apresenta boa coesão e participação nas aulas práticas.",
+  oportunidades: "Melhorar a pontualidade na entrega de trabalhos em grupo.",
+  sugestoes: "Realizar mais dinâmicas de integração."
+};
+
 const conselhos: Conselho[] = [
   {
     id: 1,
-    periodo: "03/2024 até 04/2024",
-    status: "Publicado",
+    titulo: "03/2024 - 04/2024",
+    periodo: "",
+    status: "Concluído",
     feedback: {
-      pontosFortes: `Demonstra liderança em projetos de grupo, sempre assumindo a frente na organização de tarefas e incentivando os colegas.`,
-      oportunidades: `Pode desenvolver mais segurança ao expor ideias em público.`,
-      sugestoes: `Participar de workshops e eventos voltados à comunicação e liderança.`,
+      pontosFortes: "Demonstra liderança em projetos de grupo.",
+      oportunidades: "Pode desenvolver mais segurança ao expor ideias em público.",
+      sugestoes: "Participar de workshops de comunicação.",
     },
   },
   {
     id: 2,
-    periodo: "09/2024 até 10/2024",
-    status: "Publicado",
+    titulo: "05/2024 - 06/2024",
+    periodo: "",
+    status: "Concluído",
     feedback: {
-      pontosFortes: `Excelente capacidade analítica e atenção aos detalhes.`,
-      oportunidades: `Desenvolver habilidades de trabalho em equipe.`,
-      sugestoes: `Participar de grupos de estudo colaborativos.`,
+      pontosFortes: "Excelente capacidade analítica.",
+      oportunidades: "Desenvolver habilidades de trabalho em equipe.",
+      sugestoes: "Participar de grupos colaborativos.",
     },
   },
   {
     id: 3,
-    periodo: "01/2025 até 03/2025",
-    status: "Publicado",
-    feedback: {
-      pontosFortes: `Muita criatividade e inovação nas abordagens.`,
-      oportunidades: `Aprimorar habilidades técnicas específicas.`,
-      sugestoes: `Fazer cursos online para reforçar as competências técnicas.`,
-    },
-  },
-  {
-    id: 4,
-    periodo: "05/2025 até 07/2025",
-    status: "Publicado",
-    feedback: {
-      pontosFortes: `Boa comunicação e proatividade.`,
-      oportunidades: `Melhorar a gestão do tempo.`,
-      sugestoes: `Participar mais nas discussões e buscar feedback constante.`,
-    },
+    titulo: "07/2024 - 08/2024",
+    periodo: "",
+    status: "Em Andamento",
+    feedback: null,
   },
 ];
 
-// ------------------ COMPONENTE: DevolutivaAluno ------------------
-interface DevolutivaAlunoProps {
-  isOpen: boolean;
-  onClose: () => void;
-  feedback: Feedback | null;
-  periodo?: string;
-}
-
-function DevolutivaAluno({ isOpen, onClose, feedback, periodo }: DevolutivaAlunoProps) {
+function DevolutivaAluno({ isOpen, onClose, feedbackIndividual, periodo }: any) {
   const { user } = useAuth();
   
-  if (user?.role !== "aluno") {
-    return AccessDeniedPage();
-  }
+  // ESTADO PARA CONTROLAR A VISUALIZAÇÃO
+  const [tipoVisualizacao, setTipoVisualizacao] = useState<"individual" | "turma">("individual");
+
+  if (user?.role !== "aluno" && user?.role !== "admin") return <AccessDeniedPage />;
+
+  const feedbackAtivo = tipoVisualizacao === "individual" ? feedbackIndividual : feedbackTurmaMock;
 
   return (
     <aside
       className={cn(
-        "fixed top-[5rem] right-0 z-50 w-full sm:w-[80%] md:w-[60%] lg:w-[480px] h-[calc(100vh-5rem)] p-4 sm:p-6",
-        "transform transition-transform duration-300 ease-in-out",
+        "fixed top-[3.75rem] right-0 z-50",
+        "w-[26rem] sm:w-[32rem] md:w-[45rem] lg:w-[55rem] xl:w-[60rem]",
+        "h-[calc(100vh-3.75rem)] bg-[#d2dbdc] shadow-2xl border-l border-slate-300 p-[1.25rem]",
+        "transform transition-transform duration-300 ease-in-out flex flex-col",
         isOpen ? "translate-x-0" : "translate-x-full"
       )}
     >
-      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 md:top-8 md:right-10 z-50">
-        <ButtonTT
-          variant="ghost"
-          mode="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-          icon="IoClose"
-          tooltip="none"
-          className="inline-flex items-center justify-center rounded-md h-10 w-10 text-accent-foreground hover:bg-accent hover:text-accent-foreground"
-        />
+      {/* CARD BRANCO */}
+      <div className="bg-white w-full h-full rounded-[1.25rem] shadow-sm flex flex-col overflow-hidden mt-[1rem]">
+
+        {/* HEADER */}
+        <div className="flex items-center justify-between px-[1.5rem] pt-[1.5rem] pb-[0.125rem]">
+          <div>
+            <h2 className="text-[1.25rem] font-bold text-slate-800">Conselho Publicado</h2>
+            <p className="text-[0.875rem] text-slate-600 mt-[0.0625rem]">{periodo}</p>
+          </div>
+          <ButtonTT
+            icon="IoClose"
+            tooltip="Fechar"
+            variant="ghost"
+            mode="text-icon"
+            onClick={(e: any) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            className="text-slate-500 hover:text-slate-800"
+          />
+        </div>
+
+        {/* LINHA SEPARADORA SUTIL */}
+        <div className="w-full h-[0.0625rem] bg-slate-100 mt-[0.125rem] mb-[1rem] mx-auto max-w-[90%]"></div>
+
+        {/* BOTÕES INTERRUPTOR */}
+        <div className="px-[1.5rem] pb-[0.5rem]">
+          <div className="flex bg-[#447f88] p-[0.3rem] rounded-[0.80rem] shadow-inner">
+            <button 
+                onClick={() => setTipoVisualizacao("turma")}
+                className={cn(
+                    "flex-1 py-[0.5rem] text-[0.875rem] font-bold rounded-[0.25rem] transition-all duration-200",
+                    tipoVisualizacao === "turma" 
+                        ? "bg-white text-[#2A5C61] shadow-sm" 
+                        : "text-white hover:bg-white/10"
+                )}
+            >
+              Turma
+            </button>
+            <button 
+                onClick={() => setTipoVisualizacao("individual")}
+                className={cn(
+                    "flex-1 py-[0.5rem] text-[0.875rem] font-bold rounded-[0.25rem] transition-all duration-200",
+                    tipoVisualizacao === "individual" 
+                        ? "bg-white text-[#2A5C61] shadow-sm" 
+                        : "text-white hover:bg-white/10"
+                )}
+            >
+              Individual
+            </button>
+          </div>
+        </div>
+
+        {/* CONTEÚDO SCROLLÁVEL (TEXTAREAS) */}
+        <div className="flex-1 overflow-y-auto px-[1.5rem] pb-[1.5rem] pt-[0.125rem] space-y-[1.25rem]">
+          {/* PONTOS FORTES */}
+          <div className="space-y-2">
+            <Label className="text-[1rem] font-bold text-[#2A5C61]">
+              Pontos fortes ({tipoVisualizacao === "individual" ? "Aluno" : "Turma"})
+            </Label>
+            <Textarea
+              readOnly
+              value={feedbackAtivo?.pontosFortes || "Sem dados para exibir."}
+              className="min-h-[7.5rem] bg-slate-50 border-slate-200 resize-none text-slate-700 focus-visible:ring-[#2A5C61]"
+            />
+          </div>
+
+          {/* OPORTUNIDADES */}
+          <div className="space-y-2">
+            <Label className="text-[1rem] font-bold text-[#2A5C61]">
+              Oportunidades de Melhoria
+            </Label>
+            <Textarea
+              readOnly
+              value={feedbackAtivo?.oportunidades || "Sem dados para exibir."}
+              className="min-h-[7.5rem] bg-slate-50 border-slate-200 resize-none text-slate-700 focus-visible:ring-[#2A5C61]"
+            />
+          </div>
+
+          {/* SUGESTÕES */}
+          <div className="space-y-2">
+            <Label className="text-[1rem] font-bold text-[#2A5C61]">
+              Sugestões
+            </Label>
+            <Textarea
+              readOnly
+              value={feedbackAtivo?.sugestoes || "Sem dados para exibir."}
+              className="min-h-[7.5rem] bg-slate-50 border-slate-200 resize-none text-slate-700 focus-visible:ring-[#2A5C61]"
+            />
+          </div>
+        </div>
+
       </div>
-
-      <Card className="h-full border-t-0 shadow-md">
-        <CardHeader>
-          <CardTitle className="font-title text-accent-foreground text-lg mb-1">
-            Conselho Publicado
-          </CardTitle>
-          <span className="text-sm text-muted-foreground mb-4">
-            {periodo || "Período não informado"}
-          </span>
-        </CardHeader>
-
-        <CardContent className="flex flex-col h-[calc(100%-7rem)] overflow-y-auto px-2 md:px-4 pb-4">
-          {!feedback ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground text-center px-2">
-              Nenhum conselho selecionado!
-            </div>
-          ) : (
-            <div className="flex flex-col gap-6 sm:gap-8 flex-1">
-              <div className="flex flex-col flex-1">
-                <Label className="mb-2 text-base font-semibold">Pontos Fortes</Label>
-                <Textarea
-                  value={feedback.pontosFortes}
-                  readOnly
-                  className="resize-none min-h-[150px] sm:min-h-[160px] md:min-h-[180px] text-sm leading-relaxed"
-                />
-              </div>
-
-              <div className="flex flex-col flex-1">
-                <Label className="mb-2 text-base font-semibold">
-                  Oportunidades de Melhoria
-                </Label>
-                <Textarea
-                  value={feedback.oportunidades}
-                  readOnly
-                  className="resize-none min-h-[150px] sm:min-h-[160px] md:min-h-[180px] text-sm leading-relaxed"
-                />
-              </div>
-
-              <div className="flex flex-col flex-1">
-                <Label className="mb-2 text-base font-semibold">Sugestões</Label>
-                <Textarea
-                  value={feedback.sugestoes}
-                  readOnly
-                  className="resize-none min-h-[150px] sm:min-h-[160px] md:min-h-[180px] text-sm leading-relaxed"
-                />
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </aside>
   );
 }
 
-// ------------------ COMPONENTE PRINCIPAL ------------------
-export default function AlunoHome() {
+// ------------------ PAGE PRINCIPAL ------------------
+export default function Page() {
   const [selectedConselho, setSelectedConselho] = useState<number | null>(null);
+  const [showMedModal, setShowMedModal] = useState<boolean>(false);
+
   const conselhoSelecionado = conselhos.find((c) => c.id === selectedConselho);
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen">
-      {/* LISTA DE CONSELHOS */}
-      <div className="flex-1 p-8">
-        <div className="flex items-center gap-2 mb-6 mt-20">
-          <h1 className="font-title text-2xl font-bold text-accent-foreground px-4">
-            Meus Conselhos
-          </h1>
-        </div>
+    <div className="min-h-screen pt-[6rem] px-[2rem] pb-[2.5rem] bg-[#F2F4F5]">
+      {/* BANNER PRINCIPAL */}
+      <div className="max-w-[32.5625rem] mt-[4rem] ml-[2.5rem]">
+        <InfoCard
+          titulo="Meus Conselhos"
+          subtitulo="Centro de Gerenciamento de conselhos"
+          descricao=""
+          className="shadow-sm   w-[32.5625rem] h-[6.4375rem] mb-[4rem]"
+        />
+      </div>
 
-        {/* GRID DE CONSELHOS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {conselhos.length > 0 ? (
-            conselhos.map((c) => (
-              <MedModal
-                key={c.id}
-                courseCode={c.periodo}
-                courseName="Conselho"
-                onClick={() => setSelectedConselho(c.id)}
-                className={cn(
-                  "transition-transform hover:scale-[1.02] cursor-pointer",
-                  selectedConselho === c.id && "ring-2 ring-primary scale-[1.02]"
-                )}
-              >
-                <div className="text-muted-foreground text-right">
-                  <span className="font-semibold">Status:</span> {c.status}
-                </div>
-              </MedModal>
-            ))
-          ) : (
-            <div className="text-center text-muted-foreground mt-6">
-              Nenhum conselho encontrado!
+      {/* LISTA DE MEDMODAL */}
+      <div className="flex flex-wrap gap-[1.5rem] ml-[2.5rem]">
+        {conselhos.map((c) => (
+          <div key={c.id} className="flex-shrink-0" onClick={() => setSelectedConselho(c.id)}>
+            {/* MEDMODAL CUSTOMIZADO */}
+            <div className="group cursor-pointer flex flex-col w-[19rem] h-[7.50rem] rounded-[0.625rem] overflow-hidden shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg bg-white ">
+              <div className="bg-[#2A5C61] p-[1rem] h-[6.4375rem] flex flex-col justify-center gap-[0.25rem] relative overflow-hidden">
+                <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-300" />
+                {/* Alteração: O Período fica em cima da data */}
+                <Label className="text-[0.875rem] text-white pt-1">Período</Label>
+                <h3 className="text-[1.25rem] font-bold text-white tracking-wide">{c.titulo}</h3>
+                <span className="text-[0.875rem] text-white/70 font-medium uppercase tracking-wider">
+                  {c.periodo}
+                </span>
+              </div>
+              <div className="p-[0.75rem] border-t border-slate-100 flex items-center h-[2.8125rem]">
+                <p className="text-[0.875rem] font-bold text-slate-700">
+                  Status: <span className="text-slate-900 font-normal ml-[0.0625rem]">{c.status}</span>
+                </p>
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        ))}
       </div>
 
       {/* PAINEL LATERAL */}
-      <BackgroundDevolutiva>
+      <BackgroundDevolutiva isOpen={selectedConselho !== null}>
         <DevolutivaAluno
           isOpen={selectedConselho !== null}
           onClose={() => setSelectedConselho(null)}
-          feedback={conselhoSelecionado?.feedback ?? null}
+          feedbackIndividual={conselhoSelecionado?.feedback}
           periodo={conselhoSelecionado?.periodo}
         />
       </BackgroundDevolutiva>
+
     </div>
   );
 }

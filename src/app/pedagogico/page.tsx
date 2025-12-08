@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Turma } from "@/utils/types";
 import MedModal from "@/components/modal/medModal";
 import SearchBar from "@/components/input/searchBar";
@@ -24,7 +24,6 @@ export default function PedagogicoPage() {
 
     const [filtroAtivoKey, setFiltroAtivoKey] = useState(0);
 
-
     const [paginaAtual, setPaginaAtual] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
     const [totalPages, setTotalPages] = useState(0);
@@ -44,54 +43,55 @@ export default function PedagogicoPage() {
         };
     }, []);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setIsLoading(true);
-            try {
-                const turmasArray = await buscarTurmas();
-                setAllTurmas(turmasArray || []);
-                setPaginaAtual(0);
+    const fetchData = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const turmasArray = await buscarTurmas();
+            setAllTurmas(turmasArray || []);
+            setPaginaAtual(0);
 
-                if (turmasArray?.length) {
-                    const promises = turmasArray.map(turma => {
-                        if (typeof turma.id === 'number' && turma.id > 0) {
-                            return buscarUltimoConselhoPorTurma(turma.id);
-                        }
-                        return Promise.resolve(null);
-                    });
+            if (turmasArray?.length) {
+                
+                const promises = turmasArray.map(turma => {
+                    if (typeof turma.id === 'number' && turma.id > 0) {
+                        return buscarUltimoConselhoPorTurma(turma.id);
+                    }
+                    return Promise.resolve(null);
+                });
 
-                    const resultados = await Promise.all(promises);
+                const resultados = await Promise.all(promises);
 
-                    const novoMapa: Record<number, string> = {};
-                    resultados.forEach((conselho, index) => {
-                        const turma = turmasArray[index];
-                        if (typeof turma.id === 'number' && turma.id > 0) {
-                            if (conselho) {
-                                if (conselho.etapas === "RESULTADO" && conselho.dataFim) {
-                                    const dataFormatada = new Date(conselho.dataFim).toLocaleDateString('pt-BR');
-                                    novoMapa[turma.id] = dataFormatada;
-                                } else {
-                                    novoMapa[turma.id] = "Em andamento";
-                                }
+                const novoMapa: Record<number, string> = {};
+                resultados.forEach((conselho, index) => {
+                    const turma = turmasArray[index];
+                    if (typeof turma.id === 'number' && turma.id > 0) {
+                        if (conselho) {
+                            if (conselho.etapas === "RESULTADO" && conselho.dataFim) {
+                                const dataFormatada = new Date(conselho.dataFim).toLocaleDateString('pt-BR');
+                                novoMapa[turma.id] = dataFormatada;
                             } else {
-
-                                novoMapa[turma.id] = "Não realizado";
+                                novoMapa[turma.id] = "Em andamento";
                             }
+                        } else {
+
+                            novoMapa[turma.id] = "Não realizado";
                         }
-                    });
-                    setUltimoConselhoMap(novoMapa);
-                }
-
-            } catch (error) {
-                console.error("Erro ao carregar dados da página pedagógica:", error);
-                setAllTurmas([]);
-            } finally {
-                setIsLoading(false);
+                    }
+                });
+                setUltimoConselhoMap(novoMapa);
             }
-        };
 
+        } catch (error) {
+            console.error("Erro ao carregar dados da página pedagógica:", error);
+            setAllTurmas([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [buscarTurmas, buscarUltimoConselhoPorTurma]);
+
+    useEffect(() => {
         fetchData();
-    }, []);
+    }, [fetchData]);
 
 
     const etapasEmAndamento = ["PRE_CONSELHO", "CONSELHO", "AGUARDANDO_RESULTADO", "NAO_INICIADO"];
@@ -294,6 +294,7 @@ export default function PedagogicoPage() {
                             estaAberto={sideModalOpen}
                             aoFechar={() => setSideModalOpen(false)}
                             role="PEDAGOGICO"
+                            onConselhoUpdate={fetchData}
                         />
                     </div>
                 </div>
