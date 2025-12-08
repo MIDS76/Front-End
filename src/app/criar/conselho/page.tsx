@@ -14,9 +14,9 @@ import { listarUnidadeCurricular, listarProfessores, preConselhoProfessor, criar
 import { UnidadeCurricular, Usuario } from "@/utils/types";
 import { criarConselho } from "@/api/conselho";
 
-type SelectedItem = { 
-  id: number; 
-  nome: string 
+type SelectedItem = {
+  id: number;
+  nome: string
 };
 
 type SavedItem = {
@@ -233,10 +233,17 @@ export default function ConselhoPage() {
         return;
       }
 
+      // const idPedagogico = user?.id;
+
+      // if (!idPedagogico) {
+      //   toast.error("ID do usuário pedagógico não encontrado.");
+      //   return;
+      // }
+
       const idTurma = turmaSelecionada.id;
       const idRepresentante1 = representante1;
       const idRepresentante2 = representante2;
-      const idPedagogico = 6;
+      const idPedagogico = 12;
 
       console.log("id do representante: " + idRepresentante1);
       console.log("id do representante: " + idRepresentante2);
@@ -270,8 +277,8 @@ export default function ConselhoPage() {
       for (const item of salvos) {
         await preConselhoProfessor({
           idPreConselho: preConselhoCriado.id,
-          idUnidadeCurricular: item.unidadeId, 
-          idProfessor: item.professorId, 
+          idUnidadeCurricular: item.unidadeId,
+          idProfessor: item.professorId,
           pontosPositivos: "",
           pontosMelhoria: "",
           sugestoes: ""
@@ -433,8 +440,8 @@ export default function ConselhoPage() {
         subtitulo="Professor"
         itens={salvos.map((s, i) => ({
           id: `${s.unidadeId}-${s.professorId}`,
-          unidade: s.unidadeNome, 
-          professor: s.professorNome, 
+          unidade: s.unidadeNome,
+          professor: s.professorNome,
         }))}
         onRemover={handleRemover}
         vazioTexto="Nenhuma unidade salva ainda"
