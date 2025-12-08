@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FiSearch } from "react-icons/fi";
 import LogLateral from "@/components/sidebar/logLateral";
@@ -14,24 +14,34 @@ import { listarUnidadeCurricular, listarProfessores, preConselhoProfessorCriar, 
 import { UnidadeCurricular, Usuario } from "@/utils/types";
 import { criarConselho } from "@/api/conselho";
 
+type SelectedItem = {
+  id: number;
+  nome: string
+};
+
+type SavedItem = {
+  unidadeId: number;
+  unidadeNome: string;
+  professorId: number;
+  professorNome: string
+};
+
 export default function ConselhoPage() {
   const router = useRouter();
 
-  const [selectedUnidades, setSelectedUnidades] = useState<string[]>([]);
-  const [selectedProfessor, setSelectedProfessor] = useState<string | null>(null);
-  const [salvos, setSalvos] = useState<{ unidade: string; professor: string }[]>([]);
+  const [selectedUnidades, setSelectedUnidades] = useState<SelectedItem[]>([]);
+  const [selectedProfessor, setSelectedProfessor] = useState<SelectedItem | null>(null);
+  const [salvos, setSalvos] = useState<SavedItem[]>([]);
   const [buscaProfessor, setBuscaProfessor] = useState("");
   const [buscaUnidade, setBuscaUnidade] = useState("");
   const [erros, setErros] = useState<{ professor?: boolean; unidade?: boolean }>({});
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [UnidadeCurriculares, setUnidadeCurriculares] = useState<UnidadeCurricular[]>([]);
   const [usuario, setUsuario] = useState<Usuario[]>([]);
-  const [conselhoId, setConselho] = useState<number | null>(null);
   const [turmaSelecionada, setTurmaSelecionada] = useState<{ id: number; nome: string } | null>(null);
   const [representante1, setIdRepresentante1] = useState<number | null>(null);
   const [representante2, setIdRepresentante2] = useState<number | null>(null);
 
-  // buscar os representantes da pagina anterior para salvar o conselho
   useEffect(() => {
     const representante1 = localStorage.getItem("representante1");
 
@@ -53,15 +63,6 @@ export default function ConselhoPage() {
       setIdRepresentante2(JSON.parse(representante2));
     } else {
       toast.error("Nenhum representante encontrado.");
-    }
-  }, []);
-
-  useEffect(() => {
-    const c = localStorage.getItem("idConselho");
-    if (c) {
-      setConselho(Number(JSON.parse(c)));
-    } else {
-      toast.error("Nenhum conselho encontrado.");
     }
   }, []);
 
@@ -112,31 +113,32 @@ export default function ConselhoPage() {
     normalizar(p.nome).includes(normalizar(buscaProfessor))
   );
 
-  // Toggle para selecionar unidades
-  function toggleUnidade(idUc: string) {
+  function toggleUnidade(uc: UnidadeCurricular) {
     setSelectedUnidades((prev) =>
-      prev.includes(idUc) ? prev.filter((p) => p !== idUc) : [...prev, idUc]
+      prev.some(item => item.id === uc.id)
+        ? prev.filter((item) => item.id !== uc.id)
+        : [...prev, { id: uc.id, nome: uc.nome }]
     );
   }
 
   // Carregar dados salvos no localStorage
   // useEffect(() => {
-  //   const dadosSalvos = localStorage.getItem("conselhoSalvos");
+  //   const dadosSalvos = localStorage.getItem("conselhoSalvos");
 
-  //   if (dadosSalvos) {
-  //     try {
-  //       setSalvos(JSON.parse(dadosSalvos));
-  //     } catch {
-  //       console.error("Erro ao carregar unidade curriculares e professores salvos.");
-  //     }
-  //   }
+  //   if (dadosSalvos) {
+  //     try {
+  //       setSalvos(JSON.parse(dadosSalvos));
+  //     } catch {
+  //       console.error("Erro ao carregar unidade curriculares e professores salvos.");
+  //     }
+  //   }
   // }, []);
 
   // // Salvar dados no localStorage
   // useEffect(() => {
-  //   if (salvos.length > 0) {
-  //     localStorage.setItem("conselhoSalvos", JSON.stringify(salvos));
-  //   }
+  //   if (salvos.length > 0) {
+  //     localStorage.setItem("conselhoSalvos", JSON.stringify(salvos));
+  //   }
   // }, [salvos]);
 
   // Salvar as alterações feitas
@@ -154,15 +156,17 @@ export default function ConselhoPage() {
 
     setErros({});
 
-    const novos = selectedUnidades.map((u) => ({
-      unidade: u,
-      professor: selectedProfessor!,
+    const novosSalvosItems: SavedItem[] = selectedUnidades.map((u) => ({
+      unidadeId: u.id,
+      unidadeNome: u.nome,
+      professorId: selectedProfessor!.id,
+      professorNome: selectedProfessor!.nome,
     }));
 
     const combinacoesExistentes = salvos.some(
       (item) =>
-        novos.some(
-          (novo) => novo.unidade === item.unidade && novo.professor === item.professor
+        novosSalvosItems.some(
+          (novo) => novo.unidadeId === item.unidadeId && novo.professorId === item.professorId
         )
     );
 
@@ -171,7 +175,7 @@ export default function ConselhoPage() {
       return;
     }
 
-    const novosSalvos = [...salvos, ...novos];
+    const novosSalvos = [...salvos, ...novosSalvosItems];
 
     setSalvos(novosSalvos);
     // localStorage.setItem("conselhoSalvos", JSON.stringify(novosSalvos));
@@ -182,9 +186,10 @@ export default function ConselhoPage() {
     toast.success("Unidade(s) e professor adicionados com sucesso!");
   }
 
-  function handleRemover(unidade: string) {
-    const atualizados = salvos.filter((s) => s.unidade !== unidade);
+  function handleRemover(idComposto: string) {
+    const atualizados = salvos.filter((s) => `${s.unidadeId}-${s.professorId}` !== idComposto);
     setSalvos(atualizados);
+    toast.info("Combinação removida.");
   }
 
   // Verificar se o usuário tem permissão
@@ -197,6 +202,10 @@ export default function ConselhoPage() {
   function handleProximoPasso() {
     // localStorage.setItem("conselhoSalvos", JSON.stringify(salvos));
 
+    if (salvos.length === 0) {
+      toast.error("Adicione pelo menos uma combinação de UC e Professor antes de liberar o pré-conselho.");
+      return;
+    }
 
     setIsConfirmOpen(true);
   }
@@ -214,11 +223,16 @@ export default function ConselhoPage() {
         return;
       }
 
+      const idPedagogico = user?.id;
+
+      if (!idPedagogico) {
+         toast.error("ID do usuário pedagógico não encontrado.");
+         return;
+      }
+
       const idTurma = turmaSelecionada.id;
       const idRepresentante1 = representante1;
       const idRepresentante2 = representante2;
-
-      const idPedagogico = 79;
 
       console.log("id do representante: " + idRepresentante1);
       console.log("id do representante: " + idRepresentante2);
@@ -231,7 +245,7 @@ export default function ConselhoPage() {
         idPedagogico
       });
 
-      if (!conselhoCriado) {
+      if (!conselhoCriado || !conselhoCriado.id) {
         toast.error("Erro ao criar o conselho.");
         return;
       }
@@ -242,22 +256,18 @@ export default function ConselhoPage() {
 
       const preConselhoCriado = await criarPreConselho(conselhoCriado.id);
 
-      if (!preConselhoCriado) {
+      if (!preConselhoCriado || !preConselhoCriado.id) {
         toast.error("Erro ao criar o pre conselho");
         return;
       }
 
       console.log("preConselho:" + preConselhoCriado);
 
-      toast.success("Pre Conselho criado com sucesso!");
-
       for (const item of salvos) {
         await preConselhoProfessorCriar({
           idPreConselho: preConselhoCriado.id,
-          idUnidadeCurricular: Number(item.unidade),
-          idProfessor: Number(item.professor),
-
-          // conforme solicitado → enviar como string vazia
+          idUnidadeCurricular: item.unidadeId,
+          idProfessor: item.professorId,
           pontosPositivos: "",
           pontosMelhoria: "",
           sugestoes: ""
@@ -265,19 +275,20 @@ export default function ConselhoPage() {
 
       }
 
+      localStorage.removeItem("turmaSelecionada");
       localStorage.removeItem("representante1");
       localStorage.removeItem("representante2");
 
       function normalizeRole(str: string) {
-        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(" ", "");
       }
 
-      const role = normalizeRole(localStorage.getItem("user-role") || "");
+      const role = normalizeRole(user?.role || "");
 
       const rotasPorRole: Record<string, string> = {
         "aluno": "/aluno",
-        "coordenacao pedagogica": "/pedagogico",
-        "administrador": "/admin",
+        "pedagogico": "/pedagogico",
+        "admin": "/admin",
       };
 
       router.push(rotasPorRole[role] || "/admin");
@@ -296,7 +307,7 @@ export default function ConselhoPage() {
         <div className="max-w-[80rem] mx-auto">
           <div className="flex justify-center mt-[1.5rem]">
             <InfoCard
-              titulo="Conselho da Turma MI 76"
+              titulo={`Conselho da Turma ${turmaSelecionada?.nome}`}
               descricao="Selecione os professores de cada unidade curricular"
               className="w-[48.5rem]"
             />
@@ -331,9 +342,9 @@ export default function ConselhoPage() {
                         type="radio"
                         name="professor"
                         value={prof.id}
-                        checked={selectedProfessor === prof.nome?.toString()}
+                        checked={selectedProfessor?.id === prof.id}
                         onChange={() => {
-                          setSelectedProfessor(prof.nome?.toString() || null);
+                          setSelectedProfessor({ id: prof.id, nome: prof.nome });
                           setErros((prev) => ({ ...prev, professor: false }));
                         }}
                         className="w-[1rem] h-[1rem] accent-[hsl(var(--primary))]"
@@ -374,9 +385,9 @@ export default function ConselhoPage() {
                     <label key={uc.id} className="flex items-center gap-[0.75rem] text-sm cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={selectedUnidades.includes(uc.nome!.toString())}
+                        checked={selectedUnidades.some(item => item.id === uc.id)}
                         onChange={() => {
-                          toggleUnidade(uc.nome!.toString());
+                          toggleUnidade(uc);
                           setErros((prev) => ({ ...prev, unidade: false }));
                         }}
                         className="w-[1rem] h-[1rem] accent-[hsl(var(--primary))]"
@@ -417,9 +428,9 @@ export default function ConselhoPage() {
         titulo="Unidade Curricular"
         subtitulo="Professor"
         itens={salvos.map((s, i) => ({
-          id: `${s.unidade}-${s.professor}-${i}`,
-          unidade: s.unidade,
-          professor: s.professor,
+          id: `${s.unidadeId}-${s.professorId}`,
+          unidade: s.unidadeNome,
+          professor: s.professorNome,
         }))}
         onRemover={handleRemover}
         vazioTexto="Nenhuma unidade salva ainda"
