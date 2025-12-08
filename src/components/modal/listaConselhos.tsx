@@ -153,6 +153,14 @@ export default function ListaConselhos({
     try {
       await atualizarEtapa(conselhoSelecionado.id, novaEtapa);
 
+      const conselhoAtualizado: Conselho = {
+        ...conselhoSelecionado,
+        etapas: novaEtapa,
+        dataFim: dataFim || conselhoSelecionado.dataFim
+      };
+      
+      await atualizarConselho(conselhoSelecionado.id, conselhoAtualizado);
+
       await fetchConselhos();
 
       if (onConselhoUpdate) {
