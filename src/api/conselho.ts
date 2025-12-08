@@ -48,25 +48,6 @@ export const criarConselho = async (payload: {
     }
 }
 
-// utilizar para quando atualizar etapa do conselho
-export const atualizarEtapa = async (idConselho: number, novaEtapa: string) => {
-    const controller = new AbortController();
-
-    try {
-        console.log("Atualizando etapa:", { idConselho, novaEtapa });
-
-        const response = await api.patch(`/conselhos/atualizar/${idConselho}/etapa`, { novaEtapa }, { signal: controller.signal })
-        console.log('deu certo?')
-        console.log(response)
-        return response.data;
-    } catch (err) {
-        if (err instanceof AxiosError) {
-            console.log(err.response?.status);
-            console.log(err.response?.data);
-        }
-    }
-}
-
 // quando o pedagogico estiver preenchendo o conselho
 export const conselhoTurma = async (feedbackTurma: {
     idConselho: number;
