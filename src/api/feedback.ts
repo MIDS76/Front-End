@@ -1,5 +1,6 @@
 import api from "@/utils/axios";
 import { AxiosError } from "axios";
+import { id } from "date-fns/locale";
 
 type DadosFeedbackAluno = {
     idConselho: number,
@@ -91,7 +92,7 @@ export async function buscarFeedbackConsolidado(
 ): Promise<FeedbackConsolidadoAPI | null> {
     
     const controller = new AbortController(); 
-    
+
     try {
         const url = `/conselhoAlunosFeedbacks/buscarFeedbackAlunoPorConselho/${idConselho}/${idAluno}`; 
         
@@ -109,9 +110,8 @@ export async function buscarFeedbackConsolidado(
                 console.warn(`Feedback para o Conselho ${idConselho} e Aluno ${idAluno} não encontrado (Status 404).`);
                 return null;
             }
-            
-            console.error(`Erro API ${status} ao buscar feedback consolidado:`, message);
-            throw new Error(message); 
+
+            throw error; 
             
         } else {
             const errorMessage = "Erro de comunicação desconhecido ou erro de rede.";
