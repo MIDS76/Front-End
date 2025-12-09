@@ -1,30 +1,24 @@
-"use client";
-
+// Componente: BackgroundDevolutiva.tsx (ou o nome que você estiver usando para o wrapper)
 import React, { ReactNode } from "react";
-import { cn } from "@/lib/utils"; // Supondo que você use uma lib de utilitários como a do shadcn/ui
+import { cn } from "@/lib/utils";
 
-interface SidebarProps {
+interface BackgroundDevolutivaProps {
   children?: ReactNode;
-  className?: string; 
+  isOpen: boolean; // 👈 Adicione a prop isOpen
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ children, className = "" }) => {
+const BackgroundDevolutiva: React.FC<BackgroundDevolutivaProps> = ({ children, isOpen }) => {
   return (
-    <section
+    <div
       className={cn(
-        // Visível em mobile e desktop, mas OCULTA em tablet (md)
-        "absolute bottom-0 right-0 w-3/4 sm:static sm:w-2/5 xl:w-1/4 flex flex-col items-center justify-center bg-none sm:bg-accent pointer-events-none sm:pointer-events-auto h-full sm:min-h-[calc(100vh-4rem)]",
-        "md:hidden", // 👈 ESTA É A CLASSE QUE A ESCONDE NO TABLET
-        "lg:flex", // 👈 E ESTA A MOSTRA NOVAMENTE NO DESKTOP
-        className
+        "fixed inset-0 z-40 bg-black/50 transition-opacity duration-300",
+        isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none" // 👈 Controla o overlay
       )}
     >
-      <p className="hidden md:block md:static bottom-1/2 text-muted-foreground">
-        Selecione um conselho para acesso
-      </p>
+      {/* O painel DevoutivaAluno (a sidebar que desliza) deve estar aqui dentro */}
       {children}
-    </section>
+    </div>
   );
 };
 
-export default Sidebar;
+export default BackgroundDevolutiva;

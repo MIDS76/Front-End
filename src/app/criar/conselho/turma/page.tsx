@@ -1,45 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FiSearch } from "react-icons/fi";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Header from "@/components/header/header";
 import LogLateral from "@/components/sidebar/logLateral";
 import { useRouter } from "next/navigation";
 import SearchBar from "@/components/input/searchBar";
-
 import MedModal from "@/components/modal/medModal";
 import { toast } from "sonner";
+import { buscarTurmas } from "@/api/turmas";
+import { Turma } from "@/utils/types";
 
 export default function SelecionarTurmaPreConselho() {
   const router = useRouter();
 
-  const turmas = [
-    { sigla: "MI 77", nome: "Desenvolvimento de Sistemas" },
-    { sigla: "MI 78", nome: "Desenvolvimento de Sistemas" },
-    { sigla: "MI 79", nome: "Desenvolvimento de Sistemas" },
-    { sigla: "MI 80", nome: "Desenvolvimento de Sistemas" },
-    { sigla: "MI 81", nome: "Desenvolvimento de Sistemas" },
-    { sigla: "MT 74", nome: "Eletromecânica" },
-    { sigla: "MT 76", nome: "Eletromecânica" },
-    { sigla: "ET 81", nome: "Eletroeletrônica Industrial" },
-    { sigla: "ET 75", nome: "Eletroeletrônica Industrial" },
-    { sigla: "ET 99", nome: "Eletroeletrônica Industrial" },
-    { sigla: "ET 45", nome: "Eletroeletrônica Industrial" },
-    { sigla: "ET 95", nome: "Eletroeletrônica Industrial" },
-    { sigla: "ET 55", nome: "Eletroeletrônica Industrial" },
-    { sigla: "ET 78", nome: "Eletroeletrônica Industrial" },
-    { sigla: "ET 79", nome: "Eletroeletrônica Industrial" },
-    { sigla: "ET 58", nome: "Eletroeletrônica Industrial" },
-  ];
-
-  const [selected, setSelected] = useState<typeof turmas[number] | null>(null);
+  const [turmas, setTurmas] = useState<Turma[]>([]);
+  const [selected, setSelected] = useState<Turma | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [erroSelecao, setErroSelecao] = useState("");
 
+  useEffect(() => {
+    const carregarTurmas = async () => {
+      const data = await buscarTurmas();
+
+      if (!data) {
+        toast.error("Erro ao carregar turmas");
+        return;
+      }
+
+      setTurmas(data);
+    };
+
+    carregarTurmas();
+  }, []);
+
   const turmasFiltradas = turmas.filter(
     (t) =>
-      t.sigla.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.nome.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -54,7 +51,7 @@ export default function SelecionarTurmaPreConselho() {
     }
 
     localStorage.setItem("turmaSelecionada", JSON.stringify(selected));
-    router.push("/criar/conselho");
+    router.push("/criar/conselho/representante");
   }
 
   return (
@@ -89,7 +86,7 @@ export default function SelecionarTurmaPreConselho() {
                     setSearchQuery={setSearchTerm}
                     filter
                     filtrosMostrar={{
-                      aluno: false,
+                      usuario: false,
                       turma: true,
                       conselho: false,
                     }}
@@ -100,23 +97,22 @@ export default function SelecionarTurmaPreConselho() {
                 <div className="flex-1 overflow-y-auto pr-2">
                   <div className="grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-3 gap-4">
                     {turmasFiltradas.map((t) => {
-                      const isSelected = selected?.sigla === t.sigla;
+                      const isSelected = selected?.id === t.id;
 
                       return (
                         <MedModal
-                          key={t.sigla}
-                          courseCode={t.sigla}
-                          courseName={t.nome}
+                          key={t.id}
+                          courseCode={t.nome}
+                          courseName={t.curso}
                           onClick={() => {
                             setSelected(t);
                             setErroSelecao("");
                           }}
                           className={`
                             transition-all duration-300 cursor-pointer
-                            ${
-                              isSelected
-                                ? "border-2 border-[hsl(var(--primary))] scale-[1.02]"
-                                : "hover:scale-[1.01]"
+                            ${isSelected
+                              ? "border-2 border-[hsl(var(--primary))] scale-[1.02]"
+                              : "hover:scale-[1.01]"
                             }
                           `}
                         >
@@ -148,18 +144,19 @@ export default function SelecionarTurmaPreConselho() {
             itens={
               selected
                 ? [
-                    {
-                      id: selected.sigla,
-                      unidade: selected.sigla,
-                      professor: selected.nome,
-                    },
-                  ]
+                  {
+                    id: selected.id,
+                    unidade: selected.nome,
+                    professor: selected.curso,
+                  },
+                ]
                 : []
             }
             onRemover={handleRemover}
             vazioTexto="Nenhuma turma selecionada"
             onProximo={handleProximo}
           />
+
         </div>
       </div>
     </ProtectedRoute>

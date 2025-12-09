@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import EditUserDialog from "../modal/editUserDialog";
@@ -17,6 +17,7 @@ interface ListaProps {
   onSelect?: (usuario: Usuario) => void;
   usuarioSelecionado?: Usuario | null;
   selecionados?: Usuario[]; 
+
 }
 
 export default function Lista({
@@ -30,55 +31,68 @@ export default function Lista({
   usuarioSelecionado,
   selecionados = [], 
 }: ListaProps) {
-  const [selectedUsuarios, setSelectedUsuarios] = useState<Usuario[]>([]);
-  const [editingUser, setEditingUser] = useState<Usuario>({} as Usuario);
-  const [updatedUsuarios, setUpdatedUsuarios] = useState<Usuario[]>(usuarios);
+  
+  const [updatedUsuarios, setUpdatedUsuarios] = useState<Usuario[]>(usuarios || []);
+  const [editingUser, setEditingUser] = useState<Usuario | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const skipUpdateRef = useRef(false);
 
   useEffect(() => {
-    setUpdatedUsuarios(usuarios);
-  }, [usuarios]);
+    if (skipUpdateRef.current) {
+        skipUpdateRef.current = false;
+        return;
+    }
+
+    if (usuarios) {
+      setUpdatedUsuarios(usuarios);
+    }
+  }, [usuarios]); 
 
   const toggleUsuario = (usuario: Usuario) => {
-    setSelectedUsuarios((prev) =>
-      prev.some((u) => u.id === usuario.id)
-        ? prev.filter((u) => u.id !== usuario.id)
-        : [...prev, usuario]
-    );
+    if (onSelect) onSelect(usuario); 
   };
 
   const handleUpdateUser = (updatedUsuario: Usuario) => {
-    setUpdatedUsuarios((prevUsuarios) =>
-      prevUsuarios.map((usuario) =>
-        usuario.id === updatedUsuario.id ? updatedUsuario : usuario
-      )
-    );
+
+    setUpdatedUsuarios((prevUsuarios) => {
+      return prevUsuarios.map((usuario) => {
+        if (String(usuario.id) === String(updatedUsuario.id)) {
+            return updatedUsuario; 
+        }
+        return usuario; 
+      });
+    });
+
+    setEditingUser(updatedUsuario);
+        skipUpdateRef.current = true;
+
+    setRefreshKey(old => old + 1);
+    setIsDialogOpen(false); 
   };
 
   return (
     <section className="flex flex-col items-stretch justify-start w-full gap-4">
       <ScrollArea className={cn(className, "flex flex-col")}>
         {updatedUsuarios && updatedUsuarios.length > 0 ? (
-          updatedUsuarios.map((usuario, index) => (
+          updatedUsuarios.map((usuario) => (
             <ListCell
-              key={usuario.id ?? index}
+              key={`${usuario.id}-${refreshKey}`} 
               usuario={usuario}
               conselho={conselho}
               tipo={tipo}
-              toggleSelected={() => {
-                toggleUsuario(usuario); 
-                if (onSelect) onSelect(usuario); 
-              }}
+              toggleSelected={() => toggleUsuario(usuario)}
               setEditingUser={setEditingUser}
               isDialogOpen={isDialogOpen}
               setIsDialogOpen={setIsDialogOpen}
               copy
-              isUserAlreadySelected={selecionados.some((u) => u.id === usuario.id)} 
+              isUserAlreadySelected={selecionados.some((u) => String(u.id) === String(usuario.id))} 
               onClick={() => {
                 if (tipo === "limpa" && onSelect) {
                   onSelect(usuario);
                 }
               }}
-              ativo={!!(tipo === "limpa" && usuarioSelecionado && usuarioSelecionado.id === usuario.id)}
+              ativo={!!(tipo === "limpa" && usuarioSelecionado && String(usuarioSelecionado.id) === String(usuario.id))}
             />
           ))
         ) : (
@@ -88,12 +102,13 @@ export default function Lista({
         )}
       </ScrollArea>
 
-      {tipo === "edit" && (
+      {tipo === "edit" && editingUser && (
         <EditUserDialog
-          usuario={editingUser!}
+          key={`modal-${editingUser.id}`}
+          usuario={editingUser}
           isOpen={isDialogOpen}
           setOpen={setIsDialogOpen}
-          onUpdate={handleUpdateUser}
+          onUpdate={handleUpdateUser} 
         />
       )}
     </section>

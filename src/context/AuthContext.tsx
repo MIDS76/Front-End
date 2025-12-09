@@ -9,7 +9,7 @@ import { toast } from "sonner";
 type Role = "aluno" | "pedagogico" | "admin" | "weg" | "supervisor";
 
 interface User {
-  nome: string;
+  id: number;
   email: string;
   role: Role;
   token: string;
@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   
       if (session) {
         setUser({
-          nome: session.nome,
+          id: session.id,
           email: session.email,
           role: session.role.toLowerCase(),
           token: session.token,
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
 
         setUser({
-          nome: session.nome,
+          id: session.id,
           email: session.email,
           role: session.role.toLowerCase(),
           token: session.token,
