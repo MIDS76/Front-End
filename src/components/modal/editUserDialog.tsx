@@ -1,103 +1,106 @@
+"use client";
+
 import { ACTIVE, Usuario } from "../../utils/types";
 import { Combobox } from "../ui/combobox";
 import ActionModal from "./actionModal";
 import { useEffect, useState } from "react";
 import TextField from "../input/textField";
-import { editarUsuario } from "@/api/usuarios";
+import { editarUsuario } from "@/api/usuarios"; 
 import { showError, validateEmail, validateRequired } from "@/utils/formValidation";
 import { DialogDescription } from "@radix-ui/react-dialog"; 
 
+
 interface EditUserDialogProps {
-  usuario: Usuario;
-  isOpen: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  onUpdate: (updatedUsuario: Usuario) => void;
+  usuario: Usuario;
+  isOpen: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onUpdate: (updatedUsuario: Usuario) => void;
 }
 
 export default function EditUserDialog({
-  usuario,
-  isOpen,
-  setOpen,
-  onUpdate
+  usuario,
+  isOpen,
+  setOpen,
+  onUpdate
 }: EditUserDialogProps) {
 
-  const [nome, setNome] = useState(usuario?.nome || "");
-  const [email, setEmail] = useState(usuario?.email || "");
-  const [active, setActive] = useState(usuario?.ativo ? "true" : "false");
-  
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [nome, setNome] = useState(usuario?.nome || "");
+  const [email, setEmail] = useState(usuario?.email || "");
+  
+  const [active, setActive] = useState(usuario?.ativo ? "true" : "false"); 
+  
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (usuario) {
-      setNome(usuario.nome);
-      setEmail(usuario.email);
-      setActive(usuario.ativo ? "true" : "false");
-    }
-  }, [usuario]);
+  useEffect(() => {
+    if (usuario) {
+      setNome(usuario.nome);
+      setEmail(usuario.email);
+      setActive(usuario.ativo ? "true" : "false"); 
+    }
+  }, [usuario]);
 
-  const handleUpdateUser = async () => {
-    setErrors({});
-    const newErrors: { [key: string]: string } = {};
+  const handleUpdateUser = async () => {
+    setErrors({});
+    const newErrors: { [key: string]: string } = {};
 
-    newErrors.nome = validateRequired(nome, "nome");
-    newErrors.email = validateEmail(email);
-    newErrors.active = validateRequired(active, "status do usuário");
+    newErrors.nome = validateRequired(nome, "nome");
+    newErrors.email = validateEmail(email);
+    newErrors.active = validateRequired(active, "status do usuário");
 
-    const hasErrors = Object.values(newErrors).some((error) => error && error.length > 0);
+    const hasErrors = Object.values(newErrors).some((error) => error && error.length > 0);
 
-    if (!hasErrors) {
-      setIsLoading(true);
+    if (!hasErrors) {
+      setIsLoading(true);
 
-      const roleParaUrl = "usuario"; 
+      const updatedUsuario: Usuario = {
+        ...usuario,
+        nome,
+        email,
+        ativo: active === "true", 
+      };
 
-      const updatedUsuario = {
-        ...usuario,
-        role: roleParaUrl,
-        nome,
-        email,
-        ativo: active === "true",
-      };
+      try {
+        await editarUsuario(updatedUsuario);
+        
+        onUpdate(updatedUsuario);
 
-      try {
-        await editarUsuario(updatedUsuario);
-        
-        onUpdate(updatedUsuario);
+        setOpen(false);
 
-        setOpen(false);
-
-      } catch (error: any) {
-        console.error("ERRO:", error);
-        if (error.response?.status === 403) {
-             alert(`Erro 403. Permissão negada.`);
+      } catch (error: any) {
+        console.error("ERRO ao atualizar usuário:", error);
+        
+        if (error.response?.status === 403) {
+             alert(`Erro 403. Permissão negada para editar o usuário.`);
+        } else if (error.response?.status === 400) {
+            alert(`Erro 400: Dados inválidos. Verifique o email.`);
         } else {
-             showError();
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      setErrors(newErrors);
-      showError();
-    }
-  }
+             alert("Erro ao atualizar o usuário. Verifique sua conexão ou tente novamente.");
+             showError();
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      setErrors(newErrors);
+      showError();
+    }
+  }
 
-  const handleCancel = () => {
-    if(usuario) {
-        setNome(usuario.nome);
-        setEmail(usuario.email);
-        setActive(usuario.ativo ? "true" : "false");
-    }
-    setErrors({});
-    setOpen(false);
-  };
-
+  const handleCancel = () => {
+    if(usuario) {
+        setNome(usuario.nome);
+        setEmail(usuario.email);
+        setActive(usuario.ativo ? "true" : "false"); 
+    }
+    setErrors({});
+    setOpen(false);
+  };
   return (
     <ActionModal
       isOpen={isOpen}
       setOpen={setOpen}
       title="Editar Usuário"
-      isLoading={isLoading} 
       onClose={() => { if (!isLoading) handleCancel(); }}
       onConfirm={handleUpdateUser}
       conteudo={
@@ -113,7 +116,6 @@ export default function EditUserDialog({
             placeholder="Nome do usuário"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNome(e.target.value)}
             error={errors.nome}
-            disabled={isLoading} 
           />
           <TextField
             value={email}
@@ -123,7 +125,6 @@ export default function EditUserDialog({
             placeholder="Ex: exemplo@email.com"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
             error={errors.email}
-            disabled={isLoading} 
           />
           <div>
             <Combobox
@@ -136,7 +137,6 @@ export default function EditUserDialog({
               id="statusUsuario"
               label="Status do Usuário"
               error={errors.active}
-              disabled={isLoading} 
             />
           </div>
         </div>

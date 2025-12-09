@@ -33,7 +33,7 @@ export interface Usuario {
   nome: string;
   email: string;
   role: string;
-  isActive?: boolean;
+  ativo?: boolean;
 }
 
 export interface Aluno extends Usuario {
