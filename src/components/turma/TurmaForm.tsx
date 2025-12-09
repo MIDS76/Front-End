@@ -111,7 +111,6 @@ export default function TurmaForm({ title, initialData, onSubmit, isLoading: ext
         <div className="flex flex-col md:flex-row gap-4 p-4">
             <div className="w-full md:w-1/2 flex flex-col items-start">
                 <div className="pb-0 w-full mt-6 h-full flex flex-col">
-
                     {/* AQUI EU REMOVI O SPAN QUE MOSTRAVA O ID */}
                     <h2 className="text-2xl font-semibold mb-4 text-gray-800">
                         {title}

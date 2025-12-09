@@ -8,7 +8,6 @@ import { Turma, Usuario } from "@/utils/types";
 import { buscarUsuarios } from "@/api/usuarios";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import FiltrosDinamicos from "@/components/filtros/FiltrosDinamicos";
 import {
   ordenarOrdemAlfabeticaTurma,
   filtrarPorCurso,
@@ -94,8 +93,8 @@ export default function GerenciamentoUsersTurmas() {
   }
 
   return (
-    <ProtectedRoute>
-      <div className="mt-32 w-full grid gap-10 grid-cols-1 tablet:grid-cols-1 laptop:grid-cols-2 desktop:grid-cols-2 px-10 laptop:max-w-[1350px] laptop:mx-auto">
+    <ProtectedRoute>  
+      <div className="pt-[5.5rem] w-full grid gap-10 grid-cols-1 tablet:grid-cols-1 laptop:grid-cols-2 desktop:grid-cols-2 px-10 laptop:max-w-[1350px] laptop:mx-auto">
 
         <BlocoTurmas
           turmas={turmas}

@@ -7,12 +7,14 @@ import ActionModal from "@/components/modal/actionModal";
 import ButtonTT from "@/components/button/ButtonTT";
 import { toast } from "sonner";
 import InfoCard from "@/components/card/cardTituloTelas";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { validateRequired } from "@/utils/formValidation";
 import { useAuth } from "@/context/AuthContext";
 import AccessDeniedPage from "../access-denied";
 import { buscarPreConselho, listarPreConselhoProfessorPorConselho, preConselhoAmbienteEnsino, preConselhoPedagogico, preConselhoProfessorAtualizar, preConselhoSupervisao } from "@/api/preConselho";
 import { Conselho, atualizarEtapa, buscarConselho } from "@/api/conselho";
+import { Aluno, Usuario } from "@/utils/types";
+import { buscarAluno } from "@/api/alunos";
 
 type CampoFormulario = {
   titulo: string;
@@ -38,14 +40,28 @@ export default function PreConselhoFormulario() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [pagina, setPagina] = useState(0);
   const [camposErro, setCamposErro] = useState<{ [key: string]: string }>({});
-
   const [formulario, setFormulario] = useState<CampoFormulario[]>([]);
   const [professoresData, setProfessoresData] = useState<UsuarioApi[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [conselho, setConselho] = useState<Conselho | null>(null);
-  const router = useRouter();
+  const [idPreConselho, setIdPreConselho] = useState<number | null>(null);
 
-  const idPreConselho = 3;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const preConselhoIdString = searchParams.get('preConselhoId');
+
+    if (preConselhoIdString) {
+      const id = parseInt(preConselhoIdString, 10);
+
+      if (!isNaN(id)) {
+        setIdPreConselho(id);
+        console.log("ID do Pre Conselho recebido:", id);
+      }
+    }
+  }, [searchParams]);
 
   const createInitialFormSections = useCallback((data: UsuarioApi[]): CampoFormulario[] => {
     const secoesProfessor = data
@@ -86,6 +102,12 @@ export default function PreConselhoFormulario() {
     const fetchAndInitialize = async () => {
       setIsLoading(true);
       try {
+        if (idPreConselho === null) {
+          toast.error("ID do Pré-Conselho não encontrado.");
+          setIsLoading(false);
+          return;
+        }
+
         const preConselho = await buscarPreConselho(idPreConselho);
         const conselho = await buscarConselho(preConselho.idConselho);
         const professores = await listarPreConselhoProfessorPorConselho(idPreConselho);
@@ -206,6 +228,12 @@ export default function PreConselhoFormulario() {
     try {
       const promises = [];
 
+      if (idPreConselho === null) {
+        toast.error("ID do Pré-Conselho não encontrado.");
+        setIsLoading(false);
+        return;
+      }
+
       for (const secao of formulario) {
         const dataPadrao = {
           idPreConselho: idPreConselho,
@@ -213,7 +241,6 @@ export default function PreConselhoFormulario() {
           pontosMelhoria: secao.melhoria,
           sugestoes: secao.sugestoes,
         };
-
 
         if (secao.titulo.startsWith("Supervisor")) {
           promises.push(preConselhoSupervisao(dataPadrao));
@@ -274,18 +301,16 @@ export default function PreConselhoFormulario() {
     router.push("/aluno");
   };
 
-  const { user } = useAuth();
-
-  if (user?.role !== "aluno") {
-    return AccessDeniedPage();
-  }
-
   if (isLoading) {
     return (
       <div className="w-full max-w-[90rem] mx-auto text-center" style={{ paddingTop: "10rem" }}>
         <p className="text-xl font-semibold text-primary">Carregando formulário e lista de avaliados...</p>
       </div>
     );
+  }
+
+  if (user?.role !== "aluno" || conselho?.etapas !== "PRE_CONSELHO") {
+    return AccessDeniedPage();
   }
 
   if (formulario.length === 0) {
