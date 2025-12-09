@@ -38,6 +38,8 @@ export default function RepresentantePage() {
     }
   }, [searchParams]);
 
+  localStorage.setItem("turmaSelecionada", JSON.stringify(turmaSelecionada));
+
   useEffect(() => {
     const carregarAlunos = async () => {
       if (!turmaSelecionada) {
