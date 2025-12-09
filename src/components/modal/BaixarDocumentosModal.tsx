@@ -62,6 +62,7 @@ export default function BaixarDocumentosModal({
       const dados = resp.data;
       if (!dados) throw new Error("Resposta vazia do servidor");
 
+      console.log(conselho.idTurma);
       const respAlunos = await api.get(`/aluno-turma/listarAlunosPorTurma/${conselho.idTurma}`);
       const alunosDaTurma = Array.isArray(respAlunos.data) && respAlunos.data.length > 0
         ? respAlunos.data[0].alunos || []

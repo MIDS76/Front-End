@@ -45,7 +45,7 @@ export default function PreConselhoFormulario() {
   const [conselho, setConselho] = useState<Conselho | null>(null);
   const router = useRouter();
 
-  const idPreConselho = 2;
+  const idPreConselho = 3;
 
   const createInitialFormSections = useCallback((data: UsuarioApi[]): CampoFormulario[] => {
     const secoesProfessor = data
