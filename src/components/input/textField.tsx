@@ -10,7 +10,7 @@ interface CampoTextoProps {
   name?: string;
   label: string;
   placeholder: string;
-  type: string;
+  type?: string;
   id?: string;
   className?: string;
   value?: string;

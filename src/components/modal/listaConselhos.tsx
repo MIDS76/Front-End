@@ -2,214 +2,169 @@
 
 
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Icon } from "@/components/button/smallButton";
 import ButtonTT from "@/components/button/ButtonTT";
-import turmasData from "@/data/turma.json";
-import conselhosData from "@/data/conselho.json";
-import { Turma as TurmaType, Conselho as ConselhoType } from "@/utils/types";
+import { Turma as TurmaType } from "@/utils/types";
 import ConfirmarConselhoModal from "./confirmarConselhoModal";
 import AvancarEtapaModal from "./avancarEtapaModal";
-import BaixarDocumentosModal from "./BaixarDocumentosModal";
-
-
-
 import { FileSpreadsheet } from "lucide-react";
+import BaixarDocumentosModal from "./BaixarDocumentosModal";
+import { Conselho, atualizarEtapa, listarConselhosPorTurma } from "@/api/conselho";
 
 
 
 interface ListaConselhosProps {
-
   estaAberto: boolean;
-
   aoFechar: () => void;
-
   turma: TurmaType | null;
   role: string;
-  onBaixarDocumentos?: (conselho: ConselhoType) => void;
+  onConselhoUpdate?: () => void;
 }
 
 const converterData = (data: string | Date | null | undefined): string => {
-
   if (!data) return "—";
-
   const d = new Date(data);
-
   if (isNaN(d.getTime())) return "—";
-
   return `${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
-
 };
 
-const mapStatus = (status: string): string => {
+const mapStatusToModalText = (status: string): { pergunta: string, proximo: string } => {
+  const s = status ? status.toUpperCase() : "";
 
-  const s = status.toLowerCase();
-  if (s.includes("nao") || s.includes("não")) return "Não iniciado";
-  if (s.includes("pre")) return "Pré-conselho"; // Atenção aqui
-  if (s.includes("cons")) return "Conselho";
-
-  if (s.includes("aguard")) return "Aguardando resultado";
-  if (s.includes("result") || s.includes("final") || s.includes("conc")) return "Resultado";
-  return "Não iniciado";
-
+  switch (s) {
+    case "NAO_INICIADO":
+      return { pergunta: "Deseja liberar conselho?", proximo: "Pré-conselho" };
+    // ...
+    case "CONSELHO":
+      return { pergunta: "Deseja iniciar conselho?", proximo: "Aguardando resultado" };
+    case "AGUARDANDO_RESULTADO":
+      return { pergunta: "Deseja enviar feedback?", proximo: "Resultado" };
+    case "RESULTADO":
+      return { pergunta: "Etapa finalizada.", proximo: "Resultado" };
+    default:
+      return { pergunta: "Avançar Etapa?", proximo: "Próxima Etapa" };
+  }
 };
 
+const getNextStatusEnum = (currentStatus: string): string => {
+  const s = currentStatus ? currentStatus.toUpperCase() : "";
 
+  switch (s) {
+    case "NAO_INICIADO":
+      return "PRE_CONSELHO";
+    case "PRE_CONSELHO":
+      return "CONSELHO";
+    case "CONSELHO":
+      return "AGUARDANDO_RESULTADO";
+    case "AGUARDANDO_RESULTADO":
+      return "RESULTADO";
+    case "RESULTADO":
+    default:
+      return s;
+  }
+};
+
+const getDisplayStatus = (status: string): string => {
+  const s = status ? status.toUpperCase() : "";
+  if (s === "NAO_INICIADO") return "Não iniciado";
+  if (s === "PRE_CONSELHO") return "Pré-conselho (Aguardando Aluno)";
+  if (s === "CONSELHO") return "Conselho";
+  if (s === "AGUARDANDO_RESULTADO") return "Aguardando resultado";
+  if (s === "RESULTADO") return "Resultado (Finalizado)";
+  return status;
+};
 
 export default function ListaConselhos({
   estaAberto,
   aoFechar,
-
   turma,
   role,
-  onBaixarDocumentos,
+  onConselhoUpdate
 }: ListaConselhosProps) {
 
   const [modalEtapaAberto, setModalEtapaAberto] = useState(false);
-  const [conselhoSelecionado, setConselhoSelecionado] = useState<ConselhoType | null>(null);
+  const [conselhoSelecionado, setConselhoSelecionado] = useState<Conselho | null>(null);
+  const [modalDocumentosAberto, setModalDocumentosAberto] = useState(false);
 
-  const ordemStatus = ["Não iniciado", "Pré-conselho", "Conselho", "Aguardando resultado", "Resultado"];
-
-  const proximoStatus = (atual: string) => {
-    const index = ordemStatus.indexOf(atual);
-
-    return ordemStatus[index + 1] || atual;
-  };
-
-
-
-  const [conselhos, setConselhos] = useState<ConselhoType[]>([]);
-
-  const [turmaLocal, setTurmaLocal] = useState<TurmaType | null>(null);
-
+  const [conselhos, setConselhos] = useState<Conselho[]>([]);
   const [modalAberto, setModalAberto] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  const fetchConselhos = useCallback(async () => {
+    if (!turma?.id) return;
+    setLoading(true);
+    try {
+      const conselhosDaAPI = await listarConselhosPorTurma(turma.id);
 
+      const conselhosOrdenados = (conselhosDaAPI || []).sort((a, b) => {
+        const dateA = a.dataInicio ? new Date(a.dataInicio).getTime() : 0;
+        const dateB = b.dataInicio ? new Date(b.dataInicio).getTime() : 0;
+        return dateB - dateA;
+      });
 
-  const handleConfirm = () => {
+      setConselhos(conselhosOrdenados);
 
-    window.location.href = "/criar/conselho";
-
-    setModalAberto(false);
-
-  };
-
-  useEffect(() => {
-
-    if (!turma) {
-
-      setTurmaLocal(null);
-
-      setConselhos([]);
-
-      return;
-
+    } catch (error) {
+      console.error("Erro ao buscar conselhos:", error);
+    } finally {
+      setLoading(false);
     }
-
-    const encontradaJson = turmasData.find((t) => t.id === turma.id);
-    const encontrada: TurmaType = encontradaJson
-      ? {
-          id: encontradaJson.id,
-          nome: encontradaJson.nomeCurso,
-          curso: encontradaJson.nomeCurso,
-          dataInicio: encontradaJson.dataInicio,
-          dataFinal: encontradaJson.dataFim
-        }
-      : turma;
-
-    setTurmaLocal(encontrada);
-
-
-
-    const filtrados: ConselhoType[] = conselhosData
-
-      .filter((c) => c.turmaId === encontrada.id)
-
-      .map((c) => ({
-
-        id: c.id,
-
-        turmaId: c.turmaId,
-        dataInicio: c.periodoInicio,
-
-        dataFim: c.periodoFim,
-        status: mapStatus(c.status),
-
-        etapa: mapStatus(c.status),
-        turma: encontrada,
-
-      }));
-
-
-
-    const concluidos: ConselhoType[] = [];
-
-    const emAndamento: ConselhoType[] = [];
-
-
-
-    filtrados.forEach((c) => {
-
-      if (c.etapas === "Resultado") concluidos.push(c);
-
-      else emAndamento.push(c);
-
-    });
-
-
-
-    if (emAndamento.length > 1) {
-
-      const maisRecente = emAndamento.sort(
-        (a, b) => Number(new Date(b.dataInicio)) - Number(new Date(a.dataInicio))
-      )[0];
-      const ajustados = filtrados.map((c) =>
-
-        c.id !== maisRecente.id && c.etapas !== "Resultado"
-
-          ? { ...c, status: "Resultado" }
-
-          : c
-
-      );
-      setConselhos(ajustados);
-
-    } else {
-
-      setConselhos(filtrados);
-
-    }
-
   }, [turma]);
 
+  useEffect(() => {
+    fetchConselhos();
+  }, [fetchConselhos]);
 
-
-  const podeEditar = (status: string) => status !== "Resultado";
-  const existeConselhoAberto = conselhos.some((c) => c.etapas !== "Resultado");
-
-
-
-  const handleAvancarEtapa = () => {
-
-    if (!conselhoSelecionado) return;
-    const atualizado = conselhos.map((c) =>
-
-      c.id === conselhoSelecionado.id
-
-        ? { ...c, status: proximoStatus(c.etapas) }
-
-        : c
-
-    );
-    setConselhos(atualizado);
-
-    setModalEtapaAberto(false);
-
+  const handleConfirm = () => {
+    window.location.href = "/criar/conselho";
+    setModalAberto(false);
   };
 
+  const podeEditar = (status: string) => status.toLowerCase() !== "resultado";
+  const existeConselhoAberto = conselhos.some((c) => c.etapas?.toLowerCase() !== "resultado");
 
+  const handleAvancarEtapa = async () => {
+    if (!conselhoSelecionado || !conselhoSelecionado.id || !conselhoSelecionado.etapas) return;
+
+    const currentEtapa = conselhoSelecionado.etapas.toUpperCase();
+    const novaEtapa = getNextStatusEnum(currentEtapa);
+
+    if (currentEtapa === "CONSELHO") {
+      setModalEtapaAberto(false);
+      window.location.href = `/conselhoCoordenacao?conselhoId=${conselhoSelecionado.id}`;
+      return;
+    }
+
+    if (novaEtapa === conselhoSelecionado.etapas) {
+      console.warn("Tentativa de avançar uma etapa finalizada ou desconhecida.");
+      setModalEtapaAberto(false);
+      return;
+    }
+
+    try {
+      await atualizarEtapa(conselhoSelecionado.id, novaEtapa);
+
+      await fetchConselhos();
+
+      if (onConselhoUpdate) {
+        onConselhoUpdate();
+      }
+
+      setModalEtapaAberto(false);
+      setConselhoSelecionado(null);
+
+    } catch (error) {
+      console.error("Falha ao avançar etapa:", error);
+    }
+  };
+
+  const deveMostrarBotaoAvanco = (status: string) => {
+    const s = status.toLowerCase();
+    return s === "nao_iniciado" || s === "conselho" || s === "aguardando_resultado";
+  };
 
   return (
 
@@ -227,26 +182,24 @@ export default function ListaConselhos({
         <div className="flex flex-col h-full shadow-xl bg-card border-l">
           <div className="flex-1 overflow-auto px-5 pt-10 bg-background">
 
-            {conselhos.length > 0 ? (
+            {loading && (
+              <div className="text-center py-4 text-primary">
+                Carregando conselhos...
+              </div>
+            )}
 
+            {!loading && conselhos.length > 0 ? (
               <div className="flex flex-wrap justify-center pt-6 gap-6">
-                
                 {conselhos.map((conselho) => {
-                  
-                
-                  const statusLower = conselho.etapas.toLowerCase();
+                  const statusUpper = conselho.etapas?.toUpperCase();
                   const isWeg = (role || "").trim().toUpperCase() === "WEG";
 
-                
-                  const listaStatusPre = ["conselho", "aguardando resultado", "resultado"];
-                  
-                  const listaStatusFinal = ["aguardando resultado", "resultado"];
+                  const listaStatusAdmin = ["CONSELHO", "AGUARDANDO_RESULTADO", "RESULTADO"];
+                  const listaStatusWeg = ["AGUARDANDO_RESULTADO", "RESULTADO"];
 
-                  
-                  const adminPodeVer = !isWeg && listaStatusPre.includes(statusLower);
-                  const wegPodeVer   = isWeg  && listaStatusFinal.includes(statusLower); // Se for WEG, não vê 'conselho'
-                 
-                  const deveMostrarBotao = adminPodeVer || (listaStatusFinal.includes(statusLower)); 
+                  const deveMostrarBotaoDocumentos =
+                    (!isWeg && listaStatusAdmin.includes(statusUpper ?? "")) ||
+                    (isWeg && listaStatusWeg.includes(statusUpper ?? ""));
 
                   return (
                     <Card
@@ -260,32 +213,39 @@ export default function ListaConselhos({
                             {converterData(conselho.dataInicio)} até {converterData(conselho.dataFim)}
                           </div>
                         </div>
-                        {podeEditar(conselho.etapas) && (
+                        {podeEditar(conselho.etapas ?? "") && deveMostrarBotaoAvanco(conselho.etapas ?? "") && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              setConselhoSelecionado(conselho);
-                              setModalEtapaAberto(true);
+                              if (conselho.id) {
+                                setConselhoSelecionado(conselho);
+                                setModalEtapaAberto(true);
+                              }
                             }}
                           >
                             <Icon icon="MoreHorizontal" />
                           </button>
+                        )}
+                        {podeEditar(conselho.etapas ?? "") && conselho.etapas?.toLowerCase() === "pre_conselho" && (
+                          <div className="text-xs self-center text-primary-foreground opacity-90 italic">
+                            Aguardando Aluno
+                          </div>
                         )}
                       </div>
 
                       <div className="text-foreground px-4 py-3 flex items-center justify-between bg-card">
                         <div className="text-sm">
                           <span className="font-medium">Status:</span>{" "}
-                          <span className="font-normal">{conselho.etapas}</span>
+                          <span className="font-normal">{getDisplayStatus(conselho.etapas ?? "")}</span>
                         </div>
 
-                        {deveMostrarBotao && (
+                        {deveMostrarBotaoDocumentos && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              setConselhoSelecionado(conselho);
-                              if (onBaixarDocumentos) {
-                                onBaixarDocumentos(conselho);
+                              if (conselho.id) {
+                                setConselhoSelecionado(conselho);
+                                setModalDocumentosAberto(true);
                               }
                             }}
                             title="Baixar documentos"
@@ -299,7 +259,7 @@ export default function ListaConselhos({
                 })}
               </div>
 
-            ) : (
+            ) : (!loading &&
 
               <div className="flex flex-col items-center justify-center h-60 text-muted-foreground font-normal">
 
@@ -318,58 +278,46 @@ export default function ListaConselhos({
             <div className="flex justify-center">
 
               <ButtonTT
-
                 disabled={existeConselhoAberto}
-
                 className="text-primary-foreground rounded-md text-base font-medium"
-
                 onClick={() => setModalAberto(true)}
-
                 mode="default"
-
                 tooltip={
-
                   existeConselhoAberto
-
                     ? "Já existe um conselho em andamento"
-
                     : "Criar novo conselho para esta turma"
-
                 }
-
                 type="button"
-
               >
-
                 Criar novo conselho para esta turma
-
               </ButtonTT>
-
             </div>
-
           </div>
-
         </div>
-
       </aside>
 
       <ConfirmarConselhoModal
         open={modalAberto}
         onClose={() => setModalAberto(false)}
         onConfirm={handleConfirm}
-
       />
 
 
 
       <AvancarEtapaModal
-
         open={modalEtapaAberto}
         onClose={() => setModalEtapaAberto(false)}
-        statusAtual={conselhoSelecionado?.etapas || ""}
-        statusProximo={proximoStatus(conselhoSelecionado?.etapas || "")}
+        statusAtual={mapStatusToModalText(conselhoSelecionado?.etapas || "").pergunta}
+        statusProximo={mapStatusToModalText(conselhoSelecionado?.etapas || "").proximo}
         onConfirm={handleAvancarEtapa}
 
+      />
+
+      <BaixarDocumentosModal
+        open={modalDocumentosAberto}
+        onClose={() => setModalDocumentosAberto(false)}
+        conselho={conselhoSelecionado}
+        role={role}
       />
     </>
 

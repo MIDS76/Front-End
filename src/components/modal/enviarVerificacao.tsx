@@ -1,14 +1,19 @@
 "use client";
 
+
 import { useState } from "react";
 import TextField from "@/components/input/textField";
 import ButtonTT from "@/components/button/ButtonTT";
 import EnvioSuccessModal from "./envioEmailSucesso";
 import { validateEmail } from "@/utils/formValidation";
+import axios from "axios";
+
 
 interface PasswordProps {
   onClose: () => void;
 }
+const API_URL = "http://localhost:8081/api/redefinirSenha/solicitar";
+
 
 export default function PasswordResetModal({ onClose }: PasswordProps) {
   const [email, setEmail] = useState("");
@@ -16,34 +21,60 @@ export default function PasswordResetModal({ onClose }: PasswordProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    setError("");
-    let validationEmail = validateEmail(email);
 
+    setError("");
+   
+    let validationEmail = validateEmail(email);
     if (validationEmail) {
       setError(validationEmail);
-      setIsLoading(false);
       return;
     }
 
+
     setIsLoading(true);
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsLoading(false);
-    setShowSuccessModal(true);
+
+    try {
+      console.log("Enviando requisição para:", API_URL, "Email:", email);
+     
+      await axios.post(API_URL, { email: email });
+
+
+      setIsLoading(false);
+      setShowSuccessModal(true);
+
+
+    } catch (err: any) {
+      console.error("Erro ao enviar:", err);
+      setIsLoading(false);
+     
+      if (err.response) {
+         if (err.response.status === 403) {
+             setError("Erro de permissão (CORS ou Security).");
+         } else {
+             setError("Erro ao enviar e-mail. Tente novamente.");
+         }
+      } else {
+         setError("Erro de conexão com o servidor.");
+      }
+    }
   };
+
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
     onClose();
   };
 
+
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-        <div className="bg-white px-8 pt-20 pb-20 rounded-xl shadow-2xl max-w-md relative">
+        <div className="bg-white px-8 pt-20 pb-36 rounded-xl shadow-2xl max-w-md relative mt-32">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
@@ -53,12 +84,15 @@ export default function PasswordResetModal({ onClose }: PasswordProps) {
             </svg>
           </button>
 
+
           <h2 className="text-2xl font-bold text-left mb-6">Esqueceu sua senha?</h2>
+
 
           <p className="text-left text-gray-600 mb-6 text-sm">
             Insira o endereço de e-mail que você usa no Portal do Conselho.
             Enviaremos um link por e-mail para redefinir sua senha.
           </p>
+
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <TextField
@@ -71,12 +105,14 @@ export default function PasswordResetModal({ onClose }: PasswordProps) {
               error={error}
             />
 
+
             <ButtonTT mode="default" type="submit" disabled={isLoading}>
               {isLoading ? "Enviando..." : "Enviar e-mail"}
             </ButtonTT>
           </form>
         </div>
       </div>
+
 
       <EnvioSuccessModal
         isOpen={showSuccessModal}

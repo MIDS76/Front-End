@@ -9,11 +9,13 @@ import { toast } from "sonner";
 type Role = "aluno" | "pedagogico" | "admin" | "weg" | "supervisor";
 
 interface User {
+  id: number;
   email: string;
   role: Role;
   token: string;
   primeiroAcesso: boolean;
 }
+
 
 interface AuthContextProps {
   user: User | null;
@@ -32,22 +34,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const verify = async () => {
-      const cookie = Cookies.get('session');
+      const cookie = Cookies.get("session");
       const session = cookie ? JSON.parse(cookie) : null;
-
+  
       if (session) {
         setUser({
+          id: session.id,
           email: session.email,
           role: session.role.toLowerCase(),
           token: session.token,
-          primeiroAcesso: session.primeiroAcesso
+          primeiroAcesso: session.primeiroAcesso,
         });
       }
+  
       setLoading(false);
     };
-
+  
     verify();
   }, []);
+  
 
   const login = async (email: string, password: string): Promise<User | null> => {
     try {
@@ -60,10 +65,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
 
         setUser({
+          id: session.id,
           email: session.email,
           role: session.role.toLowerCase(),
           token: session.token,
-          primeiroAcesso: session.primeiroAcesso
+          primeiroAcesso: session.primeiroAcesso,
         });
 
         return session;

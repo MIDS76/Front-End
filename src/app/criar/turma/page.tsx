@@ -95,7 +95,7 @@ export default function CriarTurma() {
             <InfoCard
               titulo="Criar nova turma"
               subtitulo="Resumo"
-              descricao="Alunos ativos: 0"
+              descricao={`Alunos ativos: ${alunos.length}`}
             />
 
             {/* Form */}

@@ -9,91 +9,139 @@ import AccessDeniedPage from "@/app/access-denied";
 import InfoCard from "@/components/card/cardTituloTelas";
 import ButtonTT from "@/components/button/ButtonTT";
 import { toast } from "sonner";
+import ActionModal from "@/components/modal/actionModal";
+import { listarUnidadeCurricular, listarProfessores, preConselhoProfessorCriar, criarPreConselho, buscarPreConselhoPorConselho } from "@/api/preConselho";
+import { UnidadeCurricular, Usuario } from "@/utils/types";
+import { criarConselho } from "@/api/conselho";
+
+type SelectedItem = {
+  id: number;
+  nome: string
+};
+
+type SavedItem = {
+  unidadeId: number;
+  unidadeNome: string;
+  professorId: number;
+  professorNome: string
+};
 
 export default function ConselhoPage() {
   const router = useRouter();
 
-  const [unidades] = useState<string[]>([
-    "Arquitetura de Redes",
-    "Desenvolvimento Mobile",
-    "Banco de Dados",
-    "Programação de API",
-    "Automação Industrial",
-    "Processos e Produtos WEG",
-    "Matemática Aplicada",
-    "Engenharia de Software",
-    "Segurança da Informação",
-    "Sistemas Embarcados",
-    "Redes de Computadores",
-    "Análise de Sistemas",
-    "Computação em Nuvem",
-    "Gestão de Projetos",
-    "Sistemas Distribuídos",
-  ]);
-
-  const [professores] = useState<string[]>([
-    "Roberto Baumgartel",
-    "Matheus Quost",
-    "João Pedro Valentim",
-    "Romário Hornburg",
-    "André Kessler",
-    "Gabriela Silva",
-    "Renan Souza",
-    "Paula Schmidt",
-    "Marcos Hoffmann",
-    "Juliana Andrade",
-    "Felipe Borges",
-    "Larissa Pereira",
-    "César Lima",
-    "Bianca Moura",
-    "Eduardo Klein",
-  ]);
-
-  const [selectedUnidades, setSelectedUnidades] = useState<string[]>([]);
-  const [selectedProfessor, setSelectedProfessor] = useState<string | null>(null);
-  const [salvos, setSalvos] = useState<{ unidade: string; professor: string }[]>([]);
+  const [selectedUnidades, setSelectedUnidades] = useState<SelectedItem[]>([]);
+  const [selectedProfessor, setSelectedProfessor] = useState<SelectedItem | null>(null);
+  const [salvos, setSalvos] = useState<SavedItem[]>([]);
   const [buscaProfessor, setBuscaProfessor] = useState("");
   const [buscaUnidade, setBuscaUnidade] = useState("");
   const [erros, setErros] = useState<{ professor?: boolean; unidade?: boolean }>({});
-
-  const normalizar = (texto: string) =>
-    texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-
-  const unidadesFiltradas = unidades.filter((u) =>
-    normalizar(u).includes(normalizar(buscaUnidade))
-  );
-  const professoresFiltrados = professores.filter((p) =>
-    normalizar(p).includes(normalizar(buscaProfessor))
-  );
-
-  function toggleUnidade(uc: string) {
-    setSelectedUnidades((prev) =>
-      prev.includes(uc) ? prev.filter((p) => p !== uc) : [...prev, uc]
-    );
-  }
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [UnidadeCurriculares, setUnidadeCurriculares] = useState<UnidadeCurricular[]>([]);
+  const [usuario, setUsuario] = useState<Usuario[]>([]);
+  const [turmaSelecionada, setTurmaSelecionada] = useState<{ id: number; nome: string } | null>(null);
+  const [representante1, setIdRepresentante1] = useState<number | null>(null);
+  const [representante2, setIdRepresentante2] = useState<number | null>(null);
 
   useEffect(() => {
-    const carregarDados = () => {
-      const dadosSalvos = localStorage.getItem("conselhoSalvos");
-      if (dadosSalvos) {
-        try {
-          setSalvos(JSON.parse(dadosSalvos));
-        } catch {
-          localStorage.removeItem("conselhoSalvos");
-        }
-      }
-    };
+    const representante1 = localStorage.getItem("representante1");
 
-    carregarDados();
-    window.addEventListener("focus", carregarDados);
-    return () => window.removeEventListener("focus", carregarDados);
+    console.log("RAW representante1 do localStorage: ", representante1);
+
+    if (representante1) {
+      setIdRepresentante1(JSON.parse(representante1));
+    } else {
+      toast.error("Nenhum representante encontrado.");
+    }
   }, []);
 
   useEffect(() => {
-    if (salvos.length > 0) {
-      localStorage.setItem("conselhoSalvos", JSON.stringify(salvos));
-    }  }, [salvos]);
+    const representante2 = localStorage.getItem("representante2");
 
+    console.log("RAW representante2 do localStorage: ", representante2);
+
+    if (representante2) {
+      setIdRepresentante2(JSON.parse(representante2));
+    } else {
+      toast.error("Nenhum representante encontrado.");
+    }
+  }, []);
+
+  useEffect(() => {
+    const t = localStorage.getItem("turmaSelecionada");
+    if (t) {
+      setTurmaSelecionada(JSON.parse(t));
+    } else {
+      toast.error("Nenhuma turma selecionada.");
+    }
+  }, []);
+
+  // Carregar unidade curricular ao iniciar
+  useEffect(() => {
+    const carregarUnidadeCurricular = async () => {
+      const data = await listarUnidadeCurricular();
+      if (!data) {
+        toast.error("Erro ao carregar unidade curricular.");
+        return;
+      }
+      setUnidadeCurriculares(data);
+    };
+    carregarUnidadeCurricular();
+  }, []);
+
+  // Carregar professores ao iniciar
+  useEffect(() => {
+    const carregarProfessores = async () => {
+      const data = await listarProfessores();
+      if (!data) {
+        toast.error("Erro ao carregar professores.");
+        return;
+      }
+      setUsuario(data);
+    };
+    carregarProfessores();
+  }, []);
+
+  // Normalizar os textos para busca
+  const normalizar = (texto: string) =>
+    texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+  // Filtrar unidades e professores
+  const unidadesFiltradas = UnidadeCurriculares.filter((u) =>
+    normalizar(u.nome).includes(normalizar(buscaUnidade))
+  );
+  const professoresFiltrados = usuario.filter((p) =>
+    normalizar(p.nome).includes(normalizar(buscaProfessor))
+  );
+
+  function toggleUnidade(uc: UnidadeCurricular) {
+    setSelectedUnidades((prev) =>
+      prev.some(item => item.id === uc.id)
+        ? prev.filter((item) => item.id !== uc.id)
+        : [...prev, { id: uc.id, nome: uc.nome }]
+    );
+  }
+
+  // Carregar dados salvos no localStorage
+  // useEffect(() => {
+  //   const dadosSalvos = localStorage.getItem("conselhoSalvos");
+
+  //   if (dadosSalvos) {
+  //     try {
+  //       setSalvos(JSON.parse(dadosSalvos));
+  //     } catch {
+  //       console.error("Erro ao carregar unidade curriculares e professores salvos.");
+  //     }
+  //   }
+  // }, []);
+
+  // // Salvar dados no localStorage
+  // useEffect(() => {
+  //   if (salvos.length > 0) {
+  //     localStorage.setItem("conselhoSalvos", JSON.stringify(salvos));
+  //   }
+  // }, [salvos]);
+
+  // Salvar as alterações feitas
   function handleSalvar() {
     const novosErros: { professor?: boolean; unidade?: boolean } = {};
 
@@ -107,14 +155,30 @@ export default function ConselhoPage() {
     }
 
     setErros({});
-    const novos = selectedUnidades.map((u) => ({
-      unidade: u,
-      professor: selectedProfessor!,
+
+    const novosSalvosItems: SavedItem[] = selectedUnidades.map((u) => ({
+      unidadeId: u.id,
+      unidadeNome: u.nome,
+      professorId: selectedProfessor!.id,
+      professorNome: selectedProfessor!.nome,
     }));
 
-    const atualizados = [...salvos, ...novos];
-    setSalvos(atualizados);
-    localStorage.setItem("conselhoSalvos", JSON.stringify(atualizados));
+    const combinacoesExistentes = salvos.some(
+      (item) =>
+        novosSalvosItems.some(
+          (novo) => novo.unidadeId === item.unidadeId && novo.professorId === item.professorId
+        )
+    );
+
+    if (combinacoesExistentes) {
+      toast.error("Esta combinação de unidade e professor já foi adicionada!");
+      return;
+    }
+
+    const novosSalvos = [...salvos, ...novosSalvosItems];
+
+    setSalvos(novosSalvos);
+    // localStorage.setItem("conselhoSalvos", JSON.stringify(novosSalvos));
 
     setSelectedUnidades([]);
     setSelectedProfessor(null);
@@ -122,25 +186,120 @@ export default function ConselhoPage() {
     toast.success("Unidade(s) e professor adicionados com sucesso!");
   }
 
-  function handleRemover(unidade: string) {
-    const atualizados = salvos.filter((s) => s.unidade !== unidade);
+  function handleRemover(idComposto: string) {
+    const atualizados = salvos.filter((s) => `${s.unidadeId}-${s.professorId}` !== idComposto);
     setSalvos(atualizados);
-    localStorage.setItem("conselhoSalvos", JSON.stringify(atualizados));
+    toast.info("Combinação removida.");
   }
 
+  // Verificar se o usuário tem permissão
   const { user } = useAuth();
-  
   if (user?.role !== "pedagogico" && user?.role !== "admin") {
     return AccessDeniedPage();
   }
+
+  // Ação do próximo passo
   function handleProximoPasso() {
-    localStorage.setItem("conselhoSalvos", JSON.stringify(salvos));
-  
-    setTimeout(() => {
-      router.push("/criar/conselho/representante");
-    }, 10);
+    // localStorage.setItem("conselhoSalvos", JSON.stringify(salvos));
+
+    if (salvos.length === 0) {
+      toast.error("Adicione pelo menos uma combinação de UC e Professor antes de liberar o pré-conselho.");
+      return;
+    }
+
+    setIsConfirmOpen(true);
   }
-  
+
+  // Confirmar as unidades e professores
+  async function handleConfirmarUcProfessores() {
+    try {
+      if (!turmaSelecionada) {
+        toast.error("Turma não encontrada.")
+        return;
+      }
+
+      if (!representante1 || !representante2) {
+        toast.error("Representantes não encontrados.");
+        return;
+      }
+
+      const idPedagogico = user?.id;
+
+      if (!idPedagogico) {
+         toast.error("ID do usuário pedagógico não encontrado.");
+         return;
+      }
+
+      const idTurma = turmaSelecionada.id;
+      const idRepresentante1 = representante1;
+      const idRepresentante2 = representante2;
+
+      console.log("id do representante: " + idRepresentante1);
+      console.log("id do representante: " + idRepresentante2);
+      console.log("id da turma: " + idTurma);
+
+      const conselhoCriado = await criarConselho({
+        idTurma,
+        idRepresentante1,
+        idRepresentante2,
+        idPedagogico
+      });
+
+      if (!conselhoCriado || !conselhoCriado.id) {
+        toast.error("Erro ao criar o conselho.");
+        return;
+      }
+
+      console.log("conselhoCriado:", conselhoCriado);
+
+      toast.success("Conselho criado com sucesso!");
+
+      const preConselhoCriado = await criarPreConselho(conselhoCriado.id);
+
+      if (!preConselhoCriado || !preConselhoCriado.id) {
+        toast.error("Erro ao criar o pre conselho");
+        return;
+      }
+
+      console.log("preConselho:" + preConselhoCriado);
+
+      for (const item of salvos) {
+        await preConselhoProfessorCriar({
+          idPreConselho: preConselhoCriado.id,
+          idUnidadeCurricular: item.unidadeId,
+          idProfessor: item.professorId,
+          pontosPositivos: "",
+          pontosMelhoria: "",
+          sugestoes: ""
+        });
+
+      }
+
+      localStorage.removeItem("turmaSelecionada");
+      localStorage.removeItem("representante1");
+      localStorage.removeItem("representante2");
+
+      function normalizeRole(str: string) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(" ", "");
+      }
+
+      const role = normalizeRole(user?.role || "");
+
+      const rotasPorRole: Record<string, string> = {
+        "aluno": "/aluno",
+        "pedagogico": "/pedagogico",
+        "admin": "/admin",
+      };
+
+      router.push(rotasPorRole[role] || "/admin");
+
+    } catch (e) {
+      console.error("Erro ao limpar localStorage:", e);
+      toast.error("Erro ao liberar o pré-conselho.");
+    } finally {
+      setIsConfirmOpen(false);
+    }
+  }
 
   return (
     <div className="flex min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
@@ -148,7 +307,7 @@ export default function ConselhoPage() {
         <div className="max-w-[80rem] mx-auto">
           <div className="flex justify-center mt-[1.5rem]">
             <InfoCard
-              titulo="Conselho da Turma MI 76"
+              titulo={`Conselho da Turma ${turmaSelecionada?.nome}`}
               descricao="Selecione os professores de cada unidade curricular"
               className="w-[48.5rem]"
             />
@@ -178,19 +337,19 @@ export default function ConselhoPage() {
               <div className="flex-1 overflow-y-auto pr-[0.25rem]">
                 <div className="grid gap-[0.5rem]">
                   {professoresFiltrados.map((prof) => (
-                    <label key={prof} className="flex items-center gap-[0.75rem] text-sm cursor-pointer">
+                    <label key={prof.id} className="flex items-center gap-[0.75rem] text-sm cursor-pointer">
                       <input
                         type="radio"
                         name="professor"
-                        value={prof}
-                        checked={selectedProfessor === prof}
+                        value={prof.id}
+                        checked={selectedProfessor?.id === prof.id}
                         onChange={() => {
-                          setSelectedProfessor(prof);
+                          setSelectedProfessor({ id: prof.id, nome: prof.nome });
                           setErros((prev) => ({ ...prev, professor: false }));
                         }}
                         className="w-[1rem] h-[1rem] accent-[hsl(var(--primary))]"
                       />
-                      <span className="truncate">{prof}</span>
+                      <span className="truncate">{prof.nome}</span>
                     </label>
                   ))}
                 </div>
@@ -223,17 +382,17 @@ export default function ConselhoPage() {
               <div className="flex-1 overflow-y-auto pr-[0.25rem]">
                 <div className="grid gap-[0.5rem]">
                   {unidadesFiltradas.map((uc) => (
-                    <label key={uc} className="flex items-center gap-[0.75rem] text-sm cursor-pointer">
+                    <label key={uc.id} className="flex items-center gap-[0.75rem] text-sm cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={selectedUnidades.includes(uc)}
+                        checked={selectedUnidades.some(item => item.id === uc.id)}
                         onChange={() => {
                           toggleUnidade(uc);
                           setErros((prev) => ({ ...prev, unidade: false }));
                         }}
                         className="w-[1rem] h-[1rem] accent-[hsl(var(--primary))]"
                       />
-                      <span className="truncate">{uc}</span>
+                      <span className="truncate">{uc.nome}</span>
                     </label>
                   ))}
                 </div>
@@ -245,7 +404,15 @@ export default function ConselhoPage() {
           </div>
 
           {/* BOTÃO SALVAR */}
-          <div className="flex justify-end mt-[1rem] w-[48.4rem] mx-auto">
+          <div className="flex justify-between mt-[1rem] w-[48.4rem] mx-auto">
+            <ButtonTT
+              mode="default"
+              onClick={() => router.push("/criar/conselho/representante")}
+              className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--secondary))] text-[hsl(var(--primary-foreground))] 
+              px-[1.25rem] py-[0.5rem] rounded-md text-sm font-medium shadow-md transition-all"
+            >
+              Anterior
+            </ButtonTT>
             <ButtonTT
               mode="default"
               onClick={handleSalvar}
@@ -261,13 +428,23 @@ export default function ConselhoPage() {
         titulo="Unidade Curricular"
         subtitulo="Professor"
         itens={salvos.map((s, i) => ({
-          id: `${s.unidade}-${s.professor}-${i}`,
-          unidade: s.unidade,
-          professor: s.professor,
+          id: `${s.unidadeId}-${s.professorId}`,
+          unidade: s.unidadeNome,
+          professor: s.professorNome,
         }))}
         onRemover={handleRemover}
         vazioTexto="Nenhuma unidade salva ainda"
         onProximo={handleProximoPasso}
+      />
+
+      {/* ACTION MODAL: */}
+      <ActionModal
+        isOpen={isConfirmOpen}
+        setOpen={setIsConfirmOpen}
+        title="Deseja liberar pré-conselho?"
+        conteudo="Ao confirmar, todos os dados relacionados ao pré-conselho serão enviados."
+        actionButtonLabel="Confirmar"
+        onConfirm={handleConfirmarUcProfessores}
       />
     </div>
   );
