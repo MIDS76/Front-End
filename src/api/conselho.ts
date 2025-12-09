@@ -137,6 +137,7 @@ export const atualizarEtapa = async (idConselho: number, novaEtapa: string) => {
             console.log(err.response?.status);
             console.log(err.response?.data);
         }
+        throw err;
     }
 }
 

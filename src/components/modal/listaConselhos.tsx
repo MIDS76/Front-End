@@ -12,7 +12,7 @@ import ConfirmarConselhoModal from "./confirmarConselhoModal";
 import AvancarEtapaModal from "./avancarEtapaModal";
 import { FileSpreadsheet } from "lucide-react";
 import BaixarDocumentosModal from "./BaixarDocumentosModal";
-import { Conselho, atualizarConselho, atualizarEtapa, listarConselhosPorTurma } from "@/api/conselho";
+import { Conselho, atualizarEtapa, listarConselhosPorTurma } from "@/api/conselho";
 
 
 
@@ -144,22 +144,8 @@ export default function ListaConselhos({
       return;
     }
 
-    let dataFim = undefined;
-
-    if (novaEtapa === "RESULTADO") {
-      dataFim = new Date().toISOString();
-    }
-
     try {
       await atualizarEtapa(conselhoSelecionado.id, novaEtapa);
-
-      const conselhoAtualizado: Conselho = {
-        ...conselhoSelecionado,
-        etapas: novaEtapa,
-        dataFim: dataFim || conselhoSelecionado.dataFim
-      };
-      
-      await atualizarConselho(conselhoSelecionado.id, conselhoAtualizado);
 
       await fetchConselhos();
 

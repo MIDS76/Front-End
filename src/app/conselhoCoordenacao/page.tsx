@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import { Textarea } from "@/components/ui/textarea";
@@ -17,7 +17,7 @@ import { useAuth } from "@/context/AuthContext";
 import { validateRequired } from "@/utils/formValidation";
 import { Usuario, Turma } from "@/utils/types";
 import { buscarAlunosPorTurma } from "@/api/alunos";
-import { buscarTurmaPorConselho } from "@/api/conselho"; 
+import { atualizarEtapa, buscarTurmaPorConselho } from "@/api/conselho";
 import { criarFeedbackAluno, criarFeedbackTurma } from "@/api/feedback";
 
 type CampoFormulario = {
@@ -85,11 +85,24 @@ const FeedbackTurmaCard = ({
 
 export default function ConselhoCoordenacao() {
     const router = useRouter();
-
     const { user } = useAuth();
 
-    // VARIÁVEL DE ENTRADA É O ID DO CONSELHO
-    const idConselho = 5; // AQUI ENTRA O ID DO CONSELHO RECEBIDO, EX: 5
+    const searchParams = useSearchParams();
+
+    const [idConselho, setIdConselho] = useState<number | null>(null);
+
+    useEffect(() => {
+        const conselhoIdString = searchParams.get('conselhoId');
+
+        if (conselhoIdString) {
+            const id = parseInt(conselhoIdString, 10);
+
+            if (!isNaN(id)) {
+                setIdConselho(id);
+                console.log("ID do Conselho recebido:", id);
+            }
+        }
+    }, [searchParams]);
 
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
     const [turma, setTurma] = useState<Turma | undefined>(undefined);
@@ -266,17 +279,13 @@ export default function ConselhoCoordenacao() {
 
             await criarFeedbackTurma(dadosFeedbackTurma);
 
+            await atualizarEtapa(idConselho, "AGUARDANDO_RESULTADO");
+
             toast.success("Conselho concluído e salvo com sucesso!");
             localStorage.removeItem(`conselho-formulario-${idConselho}`);
             localStorage.removeItem(`conselho-turma-${idConselho}`);
 
-            const usuarioJson = localStorage.getItem("user");
-            if (usuarioJson) {
-                const usuario = JSON.parse(usuarioJson);
-                if (usuario && usuario.perfil) {
-                    setTimeout(() => router.push(`/${usuario.perfil}`), 800);
-                }
-            }
+            setTimeout(() => router.push(`/${user.role}`), 800);
 
         } catch (error) {
             toast.error("Falha ao salvar o conselho.");
@@ -294,7 +303,7 @@ export default function ConselhoCoordenacao() {
 
             try {
                 const turmaEncontrada = await buscarTurmaPorConselho(idConselho);
-                
+
                 if (!turmaEncontrada || !turmaEncontrada.id) {
                     toast.error("Turma não encontrada para este Conselho.");
                     setTurma(undefined);
@@ -302,7 +311,7 @@ export default function ConselhoCoordenacao() {
                     setIsLoading(false);
                     return;
                 }
-                
+
                 setTurma(turmaEncontrada);
                 const turmaId = turmaEncontrada.id;
 
@@ -379,7 +388,7 @@ export default function ConselhoCoordenacao() {
         };
 
         fetchData();
-    }, [idConselho]); 
+    }, [idConselho]);
 
 
     useEffect(() => {

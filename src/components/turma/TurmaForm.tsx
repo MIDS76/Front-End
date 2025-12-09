@@ -11,20 +11,20 @@ import { toast } from "sonner";
 
 interface TurmaFormProps {
     title: string;
-    initialData?: Turma; 
+    initialData?: Turma;
     onSubmit?: (form: Turma) => void;
-    isLoading?: boolean; 
+    isLoading?: boolean;
 }
 
 export default function TurmaForm({ title, initialData, onSubmit, isLoading: externalLoading }: TurmaFormProps) {
     const router = useRouter();
-    const params = useParams(); 
-    
+    const params = useParams();
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const isLoading = externalLoading || isSubmitting;
 
     const [form, setForm] = useState<Turma>({
-        id: undefined, 
+        id: undefined,
         nome: "",
         curso: "",
         dataInicio: "",
@@ -36,7 +36,7 @@ export default function TurmaForm({ title, initialData, onSubmit, isLoading: ext
     useEffect(() => {
         // Garante o ID vindo do initialData OU da URL
         const idFinal = initialData?.id || (params?.id ? Number(params.id) : undefined);
-        
+
         if (initialData || idFinal) {
             setForm({
                 id: idFinal,
@@ -70,23 +70,25 @@ export default function TurmaForm({ title, initialData, onSubmit, isLoading: ext
         const hasErrors = Object.values(newErrors).some(val => val !== undefined && val !== "");
 
         if (!hasErrors) {
-            if (!form.id) {
-                toast.error("Erro Crítico: ID não encontrado.");
-                return;
-            }
-
             setIsSubmitting(true);
-
             try {
-                await atualizarTurma(form);
-                
-                toast.success("Turma salva com sucesso!");
-                router.refresh(); 
-                router.back();
+                if (form.id) {
+                    await atualizarTurma(form);
+                    toast.success("Turma salva com sucesso!");
+                    router.refresh();
+                    router.back();
+
+                } else if (onSubmit) {
+                    await onSubmit(form);
+                } else {
+                    toast.error("Erro Crítico: ID não encontrado ou função de criação ausente.");
+                    setIsSubmitting(false);
+                    return;
+                }
 
             } catch (error: any) {
                 console.error("ERRO CAPTURADO:", error);
-                
+
                 if (error.response?.status === 403) {
                     toast.error("ERRO 403: Permissão Negada. Seu usuário não pode editar turmas.");
                 } else if (error.response?.status === 404) {
@@ -108,7 +110,7 @@ export default function TurmaForm({ title, initialData, onSubmit, isLoading: ext
         <div className="flex flex-col md:flex-row gap-4 p-4">
             <div className="w-full md:w-1/2 flex flex-col items-start">
                 <div className="pb-0 w-full mt-6 h-full flex flex-col">
-                    
+
                     {/* AQUI EU REMOVI O SPAN QUE MOSTRAVA O ID */}
                     <h2 className="text-2xl font-semibold mb-4 text-gray-800">
                         {title}
@@ -120,7 +122,7 @@ export default function TurmaForm({ title, initialData, onSubmit, isLoading: ext
                             id="className"
                             value={form.nome}
                             placeholder="Ex: MI 74"
-                            editavel={!isLoading} 
+                            editavel={!isLoading}
                             onChange={(e: any) => handleChange("nome", e)}
                             error={errors.nome}
                         />
@@ -143,6 +145,7 @@ export default function TurmaForm({ title, initialData, onSubmit, isLoading: ext
                             label="Data de Início"
                             type="date"
                             id="dataInicio"
+                            placeholder="Insira a Data de Início do curso"
                             value={form.dataInicio}
                             editavel={!isLoading}
                             onChange={(e: any) => handleChange("dataInicio", e)}
@@ -155,6 +158,7 @@ export default function TurmaForm({ title, initialData, onSubmit, isLoading: ext
                             label="Data de Fim"
                             type="date"
                             id="dataFim"
+                            placeholder="Insira a Data de Fim do curso"
                             value={form.dataFinal}
                             editavel={!isLoading}
                             onChange={(e: any) => handleChange("dataFinal", e)}
@@ -163,16 +167,16 @@ export default function TurmaForm({ title, initialData, onSubmit, isLoading: ext
                     </div>
 
                     <div className="flex justify-start gap-2 mt-auto">
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             onClick={() => router.back()}
                             disabled={isLoading}
                         >
                             Cancelar
                         </Button>
 
-                        <Button 
-                            onClick={handleSubmit} 
+                        <Button
+                            onClick={handleSubmit}
                             disabled={isLoading}
                         >
                             {isLoading ? "Salvando..." : "Salvar"}

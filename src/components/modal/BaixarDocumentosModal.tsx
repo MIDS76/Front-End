@@ -21,8 +21,13 @@ export default function BaixarDocumentosModal({
 }: BaixarDocumentosModalProps) {
   if (!conselho) return null;
 
-  const podePre = ["Pré-conselho", "Conselho", "Aguardando resultado", "Resultado"].includes(conselho.status);
-  const podeConselho = ["Conselho", "Aguardando resultado", "Resultado"].includes(conselho.status);
+  const STATUS_PRE = ["NAO_INICIADO", "PRE_CONSELHO", "CONSELHO", "AGUARDANDO_RESULTADO", "RESULTADO"]; // Adicionei 'NAO_INICIADO' para cobrir todos.
+  const STATUS_CONSELHO = ["CONSELHO", "AGUARDANDO_RESULTADO", "RESULTADO"];
+
+  const statusConselhoUpper = conselho.etapas ? conselho.etapas.toUpperCase() : "";
+
+  const podePre = STATUS_PRE.includes(statusConselhoUpper);
+  const podeConselho = STATUS_CONSELHO.includes(statusConselhoUpper);
 
   function addHeader(pdf: jsPDF, titulo: string, sub: string[]) {
     pdf.setFont("helvetica", "bold");
@@ -53,7 +58,7 @@ export default function BaixarDocumentosModal({
 
   const gerarPDFPreConselho = async () => {
     try {
-      const resp = await api.get(`/preConselho/buscar/${conselho.id}}/feedbacks`);
+      const resp = await api.get(`/preConselho/buscar/${conselho.id}/feedbacks`);
       const dados = resp.data;
       if (!dados) throw new Error("Resposta vazia do servidor");
 
