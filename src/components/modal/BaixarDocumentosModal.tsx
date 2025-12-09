@@ -21,13 +21,29 @@ export default function BaixarDocumentosModal({
 }: BaixarDocumentosModalProps) {
   if (!conselho) return null;
 
-  const STATUS_PRE = ["NAO_INICIADO", "PRE_CONSELHO", "CONSELHO", "AGUARDANDO_RESULTADO", "RESULTADO"]; // Adicionei 'NAO_INICIADO' para cobrir todos.
+  const STATUS_PRE = ["NAO_INICIADO", "PRE_CONSELHO", "CONSELHO", "AGUARDANDO_RESULTADO", "RESULTADO"];
   const STATUS_CONSELHO = ["CONSELHO", "AGUARDANDO_RESULTADO", "RESULTADO"];
 
   const statusConselhoUpper = conselho.etapas ? conselho.etapas.toUpperCase() : "";
 
   const podePre = STATUS_PRE.includes(statusConselhoUpper);
   const podeConselho = STATUS_CONSELHO.includes(statusConselhoUpper);
+
+  // ------------------------------------------------------------
+  // FUNÇÃO PARA BUSCAR TURMA (CORRETO!)
+  // ------------------------------------------------------------
+  async function fetchTurmaInfo(idTurma: number) {
+    try {
+      const resp = await api.get(`/turmas/buscar/${idTurma}`);
+
+      if (!resp.data) return null;
+
+      return resp.data;
+    } catch (e) {
+      console.error("Erro ao buscar turma:", e);
+      return null;
+    }
+  }
 
   function addHeader(pdf: jsPDF, titulo: string, sub: string[]) {
     pdf.setFont("helvetica", "bold");
@@ -56,13 +72,25 @@ export default function BaixarDocumentosModal({
     return y;
   }
 
+  // -----------------------------------------------------------
+  // PDF DO PRÉ-CONSELHO
+  // -----------------------------------------------------------
   const gerarPDFPreConselho = async () => {
     try {
-      const resp = await api.get(`/preConselho/buscar/${conselho.id}/feedbacks`);
-      const dados = resp.data;
+      const dadosResp = await api.get(`/preConselho/buscar/${conselho.id}/feedbacks`);
+      const dados = dadosResp.data;
       if (!dados) throw new Error("Resposta vazia do servidor");
 
-      console.log(conselho.idTurma);
+      const turmaInfo = await fetchTurmaInfo(conselho.idTurma);
+
+      const nomeTurma =
+        turmaInfo?.nome ||
+        `Turma-${conselho.idTurma}`;
+
+      const nomeCurso =
+        turmaInfo?.curso ||
+        "Curso não informado";
+
       const respAlunos = await api.get(`/aluno-turma/listarAlunosPorTurma/${conselho.idTurma}`);
       const alunosDaTurma = Array.isArray(respAlunos.data) && respAlunos.data.length > 0
         ? respAlunos.data[0].alunos || []
@@ -71,7 +99,8 @@ export default function BaixarDocumentosModal({
       const pdf = new jsPDF();
       let y = addHeader(pdf, "Relatório do Pré-Conselho", [
         `Gerado em: ${new Date().toLocaleString()}`,
-        `Turma: 1`
+        `Turma: ${nomeTurma}`,
+        `Curso: ${nomeCurso}`,
       ]);
 
       if (dados.preConselhoPedagogicos?.length) {
@@ -191,26 +220,40 @@ export default function BaixarDocumentosModal({
         });
       }
 
-      pdf.save(`pre-conselho-1.pdf`);
+      pdf.save(`pre-conselho-${nomeTurma}.pdf`);
     } catch (err) {
       console.error("Erro ao gerar PDF do Pré-Conselho:", err);
       alert("Não foi possível gerar o PDF do Pré-Conselho.");
     }
   };
 
+  // -----------------------------------------------------------
+  // PDF DO CONSELHO
+  // -----------------------------------------------------------
   const gerarPDFConselho = async () => {
     try {
       const resp = await api.get(`/conselhos/listar/${conselho.id}/alunosFeedbacks`);
       const dados = resp.data;
       if (!dados) throw new Error("Resposta vazia do servidor");
 
-      const respProfs = await api.get(`/ucprofessor/listar`, { params: { idConselho: conselho.id } });
+      const turmaInfo = await fetchTurmaInfo(conselho.idTurma);
+
+      const nomeTurma =
+        turmaInfo?.nome ||
+        `Turma-${conselho.idTurma}`;
+
+      const nomeCurso =
+        turmaInfo?.curso ||
+        "Curso não informado";
+
+      const respProfs = await api.get(`/preConselho/listar-por-pre-conselho/${conselho.id}`);
       const professoresDoConselho = Array.isArray(respProfs.data) ? respProfs.data : [];
 
       const pdf = new jsPDF();
       let y = addHeader(pdf, "Relatório do Conselho", [
         `Gerado em: ${new Date().toLocaleString()}`,
-        `Conselho: 1`
+        `Turma: ${nomeTurma}`,
+        `Curso: ${nomeCurso}`,
       ]);
 
       if (dados.turmaFeedbackResponseDTO) {
@@ -284,16 +327,19 @@ export default function BaixarDocumentosModal({
       } else {
         pdf.setFont("helvetica", "normal");
         pdf.setFontSize(11);
-        pdf.text("Não foi possível listar os professores vinculados ao conselho.", 15, y + 5);
+        pdf.text("Nenhum professor vinculado ao conselho.", 15, y + 5);
       }
 
-      pdf.save(`conselho-1.pdf`);
+      pdf.save(`conselho-${nomeTurma}.pdf`);
     } catch (err) {
       console.error("Erro ao gerar PDF do Conselho:", err);
       alert("Não foi possível gerar o PDF do Conselho.");
     }
   };
 
+  // -----------------------------------------------------------
+  // RENDERIZAÇÃO
+  // -----------------------------------------------------------
   return (
     <Dialog open={open} onOpenChange={(state) => { if (!state) onClose(); }}>
       <DialogContent className="max-w-[560px] rounded-2xl p-6" onClick={(e) => e.stopPropagation()}>
