@@ -246,7 +246,7 @@ export default function BaixarDocumentosModal({
         turmaInfo?.curso ||
         "Curso não informado";
 
-      const respProfs = await api.get(`/ucprofessor/listar`, { params: { idConselho: conselho.id } });
+      const respProfs = await api.get(`/preConselho/listar-por-pre-conselho/${conselho.id}`);
       const professoresDoConselho = Array.isArray(respProfs.data) ? respProfs.data : [];
 
       const pdf = new jsPDF();
