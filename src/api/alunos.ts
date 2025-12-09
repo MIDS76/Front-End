@@ -37,12 +37,13 @@ export const buscarAluno = async (idAluno: number) => {
     const controller = new AbortController();
 
     try {
-        const response = await api.get<Aluno>(`/aluno/buscar/${idAluno}`, { signal: controller.signal });
+        const response = await api.get(`/aluno/buscar/${idAluno}`, { signal: controller.signal });
 
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
             console.log(err.response?.status);
         }
+        throw err;
     }
 }

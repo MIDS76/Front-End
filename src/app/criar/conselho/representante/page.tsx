@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FiSearch } from "react-icons/fi";
 import LogLateral from "@/components/sidebar/logLateral";
 import { useAuth } from "@/context/AuthContext";
@@ -22,14 +22,21 @@ export default function RepresentantePage() {
   const [aluno, setAluno] = useState<Aluno[]>([]);
   const [turmaSelecionada, setTurmaSelecionada] = useState<{ id: number; nome: string } | null>(null);
 
+  const searchParams = useSearchParams();
+
   useEffect(() => {
-    const t = localStorage.getItem("turmaSelecionada");
-    if (t) {
-      setTurmaSelecionada(JSON.parse(t));
-    } else {
-      toast.error("Nenhuma turma selecionada.");
+    const turmaIdString = searchParams.get('turmaId');
+    const turmaNomeString = searchParams.get('turmaNome')
+
+    if (turmaIdString) {
+      const id = parseInt(turmaIdString, 10);
+      const nomeTurma = turmaNomeString ? decodeURIComponent(turmaNomeString) : "Turma Não Encontrada";
+
+      if (!isNaN(id)) {
+        setTurmaSelecionada({id: id, nome: nomeTurma});
+      }
     }
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     const carregarAlunos = async () => {

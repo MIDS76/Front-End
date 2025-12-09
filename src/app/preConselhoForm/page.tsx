@@ -45,7 +45,6 @@ export default function PreConselhoFormulario() {
   const [isLoading, setIsLoading] = useState(true);
   const [conselho, setConselho] = useState<Conselho | null>(null);
   const [idPreConselho, setIdPreConselho] = useState<number | null>(null);
-  const [aluno, setAluno] = useState<Aluno | null>(null);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -63,8 +62,6 @@ export default function PreConselhoFormulario() {
       }
     }
   }, [searchParams]);
-
-
 
   const createInitialFormSections = useCallback((data: UsuarioApi[]): CampoFormulario[] => {
     const secoesProfessor = data
@@ -105,12 +102,7 @@ export default function PreConselhoFormulario() {
     const fetchAndInitialize = async () => {
       setIsLoading(true);
       try {
-        if(user){
-          const alunoResposta = await buscarAluno(user?.id);
-          setAluno(alunoResposta || null);
-        }
-
-        if(idPreConselho === null) {
+        if (idPreConselho === null) {
           toast.error("ID do Pré-Conselho não encontrado.");
           setIsLoading(false);
           return;
@@ -236,7 +228,7 @@ export default function PreConselhoFormulario() {
     try {
       const promises = [];
 
-      if(idPreConselho === null) {
+      if (idPreConselho === null) {
         toast.error("ID do Pré-Conselho não encontrado.");
         setIsLoading(false);
         return;
@@ -317,7 +309,7 @@ export default function PreConselhoFormulario() {
     );
   }
 
-  if (user?.role !== "aluno" || aluno?.representante !== true || conselho?.etapas !== "PRE-CONSELHO") {
+  if (user?.role !== "aluno" || conselho?.etapas !== "PRE_CONSELHO") {
     return AccessDeniedPage();
   }
 
