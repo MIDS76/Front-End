@@ -1,6 +1,6 @@
 import api from "@/utils/axios";
 import { AxiosError } from "axios";
-import { Usuario } from "@/utils/types"; 
+import { Aluno, Usuario } from "@/utils/types";
 
 export interface TurmaAlunosResponse {
     nomeTurma: string;
@@ -30,5 +30,19 @@ export const buscarAlunosPorTurma = async (idTurma: number): Promise<Usuario[]> 
             console.error(err.response?.data);
         }
         return [];
+    }
+}
+
+export const buscarAluno = async (idAluno: number) => {
+    const controller = new AbortController();
+
+    try {
+        const response = await api.get<Aluno>(`/aluno/buscar/${idAluno}`, { signal: controller.signal });
+
+        return response.data;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.log(err.response?.status);
+        }
     }
 }

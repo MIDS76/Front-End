@@ -119,7 +119,7 @@ export default function ListaConselhos({
   }, [fetchConselhos]);
 
   const handleConfirm = () => {
-    window.location.href = "/criar/conselho";
+    window.location.href = "/criar/conselho/representante";
     setModalAberto(false);
   };
 
@@ -166,6 +166,20 @@ export default function ListaConselhos({
     return s === "nao_iniciado" || s === "conselho" || s === "aguardando_resultado";
   };
 
+  const roleUpper = (role || "").toUpperCase();
+
+  const isRestrictedRole = roleUpper === "WEG" || roleUpper === "SUPERVISOR";
+
+  const conselhosFiltrados = conselhos.filter(conselho => {
+    const statusUpper = conselho.etapas?.toUpperCase();
+
+    if (!isRestrictedRole) {
+      return true;
+    }
+
+    return statusUpper === "RESULTADO";
+  });
+
   return (
 
     <>
@@ -188,9 +202,9 @@ export default function ListaConselhos({
               </div>
             )}
 
-            {!loading && conselhos.length > 0 ? (
+            {!loading && conselhosFiltrados.length > 0 ? (
               <div className="flex flex-wrap justify-center pt-6 gap-6">
-                {conselhos.map((conselho) => {
+                {conselhosFiltrados.map((conselho) => {
                   const statusUpper = conselho.etapas?.toUpperCase();
                   const isWeg = (role || "").trim().toUpperCase() === "WEG";
 
@@ -262,9 +276,7 @@ export default function ListaConselhos({
             ) : (!loading &&
 
               <div className="flex flex-col items-center justify-center h-60 text-muted-foreground font-normal">
-
-                Nenhum conselho cadastrado
-
+                {isRestrictedRole ? "Nenhum conselho finalizado para visualização." : "Nenhum conselho cadastrado"}
               </div>
 
             )}
