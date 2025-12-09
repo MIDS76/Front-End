@@ -4,9 +4,9 @@ import { AxiosError } from "axios";
 const controller = new AbortController();
 
 // Função para marcar a notificação como lida
-export const marcarComoLida = async (id: number) => {
+export const marcarComoLida = async (notificacaoId: number) => {
     try {
-        const response = await api.patch(`/notificacao/lida/${id}`, null, { signal: controller.signal});
+        const response = await api.patch(`/notificacao/lida/${notificacaoId}`, { signal: controller.signal});
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
@@ -16,9 +16,9 @@ export const marcarComoLida = async (id: number) => {
     }
 }
 
-export const listarNotificacao = async (id: number) => {
+export const listarNotificacao = async (usuarioId: number) => {
     try {
-        const response = await api.get(`/notificacao/listar/${id}`, { signal: controller.signal});
+        const response = await api.get(`/notificacao/listar/${usuarioId}`, { signal: controller.signal});
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {

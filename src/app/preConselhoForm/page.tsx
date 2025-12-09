@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation"; // Usar diretamente no componente
 import { validateRequired } from "@/utils/formValidation";
 import { useAuth } from "@/context/AuthContext";
 import AccessDeniedPage from "../access-denied";
+import { buscarPreConselhoPorConselho } from "@/api/preConselho";
 
 type CampoFormulario = {
   titulo: string;
@@ -67,7 +68,26 @@ export default function PreConselhoFormulario() {
   const [isSuccessOpen, setIsSuccessOpen] = useState(false); // Modal de sucesso
   const [pagina, setPagina] = useState(0);
   const [camposErro, setCamposErro] = useState<{ [key: string]: string }>({});
-  const router = useRouter(); // Use diretamente no componente
+  const [preConselho, setPreConselho] = useState(null);
+  const router = useRouter(); 
+  const { preConselhoId } = router.query;
+
+  useEffect(() => {
+    if (preConselhoId) {
+      // Realiza a requisição para buscar o pré-conselho com o ID
+      const fetchPreConselho = async () => {
+        try {
+          const data = await buscarPreConselhoPorConselho(preConselhoId);
+          setPreConselho(data);
+        } catch (error) {
+          toast.error("Erro ao carregar pré-conselho.");
+          console.error("Erro ao carregar pré-conselho", error);
+        }
+      };
+
+      fetchPreConselho();
+    }
+  }, [preConselhoId]);
 
   useEffect(() => {
     const salvo = localStorage.getItem("preconselho-formulario");

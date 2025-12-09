@@ -1,51 +1,55 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";  // Para exibir mensagens de toast
 import ButtonTT from "@/components/button/ButtonTT";  // Componente de botão customizado
 import ActionModal from "@/components/modal/actionModal";  // Modal de ação
 import SmallModal from "@/components/modal/smallModal";  // Modal para exibir as notificações
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";  // Menu suspenso para exibir as notificações
 import * as ScrollArea from "@radix-ui/react-scroll-area";  // Scroll para as notificações
-import { useWebSocket } from "@/context/WebSocketContext";
 import { marcarComoLida, listarNotificacao } from "@/api/notificacao";
-import { id } from "date-fns/locale";
 
-// Tipo de Notificação esperado
+export enum TipoNotificacao {
+  PRE_CONSELHO_LIBERADO = "PRE_CONSELHO_LIBERADO",
+  PRE_CONSELHO_PREENCHIDO = "PRE_CONSELHO_PREENCHIDO",
+  RESULTADO_LIBERADO = "RESULTADO_LIBERADO",
+}
+
 export interface Notificacao {
   id: number;
   titulo: string;
   mensagem: string;
   lido: boolean;
   horario: string;
+  idReferencia: number
+  tipo: TipoNotificacao
 }
 
 const formatarDataHora = (data: string) => {
   const date = new Date(data);
   return date.toLocaleDateString("pt-BR", {
     timeZone: "America/Sao_Paulo",
-    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
     year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
   });
 };
 
 const NotificationButton = () => {
+  const [mounted, setMounted] = useState(false);
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
-  const { subscribeToNotifications, isConnected } = useWebSocket();
   const [open, setOpen] = useState(false);
-  const idUsuario = 1;
+  const [routerReady, setRouterReady] = useState(false);
+  const usuarioId = 3;
+  const router = useRouter();
 
   // para carregar as notificações quando clilcar no botao
   useEffect(() => {
     if (open) {
       const carregar = async () => {
         try {
-          const data = await listarNotificacao(idUsuario);
+          const data = await listarNotificacao(usuarioId);
           setNotificacoes(data);
         } catch (error) {
           toast.error("Erro ao carregar notificações")
@@ -54,29 +58,35 @@ const NotificationButton = () => {
 
       carregar();
     }
-  }, [open, idUsuario]);
-
-  // Inscreve-se nas notificações ao conectar
-  useEffect(() => {
-    if (isConnected) {
-      subscribeToNotifications((novaNotificacao: Notificacao) => {
-        setNotificacoes((prev) => [novaNotificacao, ...prev]);
-      });
-    }
-  }, [isConnected, subscribeToNotifications]);
+  }, [open, usuarioId]);
 
   // Função para marcar a notificação como lida
-  const handleMarkAsRead = async (id: number) => {
-    try {      
-      await marcarComoLida(id);
+  const handleMarkAsRead = async (notificacaoId: number, idReferencia: number, tipo: TipoNotificacao) => {
+    try {
+      await marcarComoLida(notificacaoId);
 
       setNotificacoes((prevNotifications) =>
         prevNotifications.map((notif) =>
-          notif.id === id ? { ...notif, lido: true } : notif
+          notif.id === notificacaoId ? { ...notif, lido: true } : notif
         )
       );
 
       toast.success("Notificação marcada como lida!");
+
+      switch (tipo) {
+        case TipoNotificacao.PRE_CONSELHO_LIBERADO:
+          router.push(`/preConselhoForm?preConselhoId=${idReferencia}`);
+          break;
+        case TipoNotificacao.PRE_CONSELHO_PREENCHIDO:
+          router.push(`/`);
+          break;
+        case TipoNotificacao.RESULTADO_LIBERADO:
+          router.push(`/`);
+          break;
+        default:
+          router.push(`/=${idReferencia}`);
+          break;
+      }
     } catch (error: any) {
       toast.error(error.message || "Erro ao marcar notificação como lida");
     }
@@ -156,7 +166,7 @@ const NotificationButton = () => {
                     content={notificacao.mensagem}
                     id={notificacao.id}
                     notif={() => console.log("Notificação visualizada")}
-                    onClick={() => handleMarkAsRead(notificacao.id)}
+                    onClick={() => handleMarkAsRead(notificacao.id, notificacao.idReferencia, notificacao.tipo)}
                     onDelete={() => handleDelete(notificacao.id)}
                     setNotificacoes={setNotificacoes}
                     lido={notificacao.lido}
