@@ -8,7 +8,8 @@ import { toast } from "sonner";
 
 type Role = "aluno" | "pedagogico" | "admin" | "weg" | "supervisor";
 
-interface User {
+interface Usuario {
+  nome: string;
   email: string;
   role: Role;
   token: string;
@@ -16,8 +17,8 @@ interface User {
 }
 
 interface AuthContextProps {
-  user: User | null;
-  login: (email: string, password: string) => Promise<User | null>;
+  user: Usuario | null;
+  login: (email: string, password: string) => Promise<Usuario | null>;
   logout: () => void;
   hasPermission: (roles: Role[]) => boolean;
   loading: boolean;
@@ -26,7 +27,7 @@ interface AuthContextProps {
 const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUsuario] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -36,7 +37,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const session = cookie ? JSON.parse(cookie) : null;
 
       if (session) {
-        setUser({
+        setUsuario({
+          nome: session.nome,
           email: session.email,
           role: session.role.toLowerCase(),
           token: session.token,
@@ -49,9 +51,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     verify();
   }, []);
 
-  const login = async (email: string, password: string): Promise<User | null> => {
+  const login = async (email: string, password: string): Promise<Usuario | null> => {
     try {
       const session = await apiLogin(email, password);
+      console.log("SESSION RECEBIDA:", session);
+
 
       if (session && session.token) {
         Cookies.set('session', JSON.stringify(session), {
@@ -59,7 +63,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           path: '/',
         });
 
-        setUser({
+        setUsuario({
+          nome: session.nome, 
           email: session.email,
           role: session.role.toLowerCase(),
           token: session.token,
@@ -79,7 +84,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = () => {
     Cookies.remove('session');
-    setUser(null);
+    setUsuario(null);
     router.push("/login");
   };
 
