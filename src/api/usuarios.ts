@@ -37,16 +37,23 @@ export const criarUsuario = async (data: Usuario) => {
 }
 
 export const editarUsuario = async (usuario: Usuario) => {
+    const userId = usuario.id; 
+    
+    const bodyEnvio = {
+        nome: usuario.nome,
+        email: usuario.email,
+        ativo: usuario.ativo 
+    };
+    
+
     const controller = new AbortController();
 
     try {
-    const response = await api.put(`/${usuario.role}/atualizar/${usuario.id}`, usuario, { signal: controller.signal });
+        const response = await api.put(`/usuario/atualizar/${userId}`, bodyEnvio, { signal: controller.signal });
+        
         return response.data;
 
     } catch (err) {
-        if (err instanceof AxiosError) {
-            console.log(err.response?.status);
-            console.log(err.response?.data);
-        }
+        throw err; 
     }
 }
