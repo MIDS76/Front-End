@@ -119,7 +119,7 @@ export default function ListaConselhos({
   }, [fetchConselhos]);
 
   const handleConfirm = () => {
-    window.location.href = "/criar/conselho";
+    window.location.href = "/criar/conselho/representante";
     setModalAberto(false);
   };
 
