@@ -1,215 +1,369 @@
 "use client";
 
-import React, { useState } from "react";
-import MedModal from "@/components/modal/medModal";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect, useMemo } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import ButtonTT from "@/components/button/ButtonTT";
 import { cn } from "@/lib/utils";
 import BackgroundDevolutiva from "@/components/ui/background-devolutiva";
-import { useAuth } from "@/context/AuthContext";
 import AccessDeniedPage from "../access-denied";
+import InfoCard from "@/components/card/cardTituloTelas";
+import { RotateCw } from "lucide-react";
+import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
-// ------------------ TIPOS ------------------
-interface Feedback {
+import {
+  buscarFeedbackConsolidado,
+  FeedbackConsolidadoAPI, 
+} from "@/api/feedback";
+
+import {
+  listarConselhosDoAlunoComResultado,
+  ConselhoAlunoList,
+} from "@/api/conselho";
+
+
+const formatarMesAno = (dateString: string): string => {
+  const date = new Date(dateString);
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${year}/${month}`;
+};
+
+const traduzirStatus = (statusApi: string | undefined): string => {
+  if (!statusApi) return "Em Andamento";
+
+  const statusMap: { [key: string]: string } = {
+    "RESULTADO": "Concluído",
+    "NAO_INICIADO": "Em Andamento",
+    "PRE_CONSELHO": "Em Andamento",
+  };
+
+  const chave = statusApi.toUpperCase().trim();
+  return statusMap[chave] || "Status Desconhecido";
+};
+
+interface FeedbackVisualizacao {
   pontosFortes: string;
   oportunidades: string;
   sugestoes: string;
 }
 
-interface Conselho {
-  id: number;
-  periodo: string;
-  status: string;
-  feedback: Feedback | null;
+interface ConselhoExibicao extends ConselhoAlunoList {
+  periodoFormatado: string; 
+  statusExibicao: string; 
 }
 
-// ------------------ DADOS MOCK ------------------
-const conselhos: Conselho[] = [
-  {
-    id: 1,
-    periodo: "03/2024 até 04/2024",
-    status: "Publicado",
-    feedback: {
-      pontosFortes: `Demonstra liderança em projetos de grupo, sempre assumindo a frente na organização de tarefas e incentivando os colegas.`,
-      oportunidades: `Pode desenvolver mais segurança ao expor ideias em público.`,
-      sugestoes: `Participar de workshops e eventos voltados à comunicação e liderança.`,
-    },
-  },
-  {
-    id: 2,
-    periodo: "09/2024 até 10/2024",
-    status: "Publicado",
-    feedback: {
-      pontosFortes: `Excelente capacidade analítica e atenção aos detalhes.`,
-      oportunidades: `Desenvolver habilidades de trabalho em equipe.`,
-      sugestoes: `Participar de grupos de estudo colaborativos.`,
-    },
-  },
-  {
-    id: 3,
-    periodo: "01/2025 até 03/2025",
-    status: "Publicado",
-    feedback: {
-      pontosFortes: `Muita criatividade e inovação nas abordagens.`,
-      oportunidades: `Aprimorar habilidades técnicas específicas.`,
-      sugestoes: `Fazer cursos online para reforçar as competências técnicas.`,
-    },
-  },
-  {
-    id: 4,
-    periodo: "05/2025 até 07/2025",
-    status: "Publicado",
-    feedback: {
-      pontosFortes: `Boa comunicação e proatividade.`,
-      oportunidades: `Melhorar a gestão do tempo.`,
-      sugestoes: `Participar mais nas discussões e buscar feedback constante.`,
-    },
-  },
-];
 
-// ------------------ COMPONENTE: DevolutivaAluno ------------------
-interface DevolutivaAlunoProps {
-  isOpen: boolean;
-  onClose: () => void;
-  feedback: Feedback | null;
-  periodo?: string;
-}
+const mapFeedbackConsolidadoToVisualizacao = (
+  apiData: FeedbackConsolidadoAPI | null | undefined, 
+  tipo: "individual" | "turma"
+): FeedbackVisualizacao => {
 
-function DevolutivaAluno({ isOpen, onClose, feedback, periodo }: DevolutivaAlunoProps) {
-  const { user } = useAuth();
-  
-  if (user?.role !== "aluno") {
-    return AccessDeniedPage();
+
+  if (!apiData) {
+    return {
+      pontosFortes: "Sem dados para exibir.",
+      oportunidades: "Sem dados para exibir.",
+      sugestoes: "Sem dados para exibir."
+    };
   }
+
+  if (tipo === "individual") {
+    return {
+      pontosFortes: apiData.pontosPositivosAluno,
+      oportunidades: apiData.pontosMelhoriaAluno,
+      sugestoes: apiData.sugestaoAluno,
+    };
+  } else { 
+    return {
+      pontosFortes: apiData.pontosPositivosTurma,
+      oportunidades: apiData.pontosMelhoriaTurma,
+      sugestoes: apiData.sugestaoTurma,
+    };
+  }
+};
+
+
+
+function DevolutivaAluno({ isOpen, onClose, conselhoId, periodoFormatado }: { isOpen: boolean, onClose: () => void, conselhoId: number | null, periodoFormatado: string }) {
+  const { user } = useAuth();
+  const idAluno = user?.id;
+
+  const [tipoVisualizacao, setTipoVisualizacao] = useState<"individual" | "turma">("individual");
+  const [feedbackConsolidado, setFeedbackConsolidado] = useState<FeedbackConsolidadoAPI | null | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const feedbackAtivo = useMemo(() => {
+    return mapFeedbackConsolidadoToVisualizacao(feedbackConsolidado, tipoVisualizacao);
+  }, [feedbackConsolidado, tipoVisualizacao]);
+
+
+  useEffect(() => {
+    if (!isOpen || !conselhoId || !idAluno) {
+      setFeedbackConsolidado(undefined);
+      return;
+    }
+
+    const loadFeedbacks = async () => {
+      setIsLoading(true);
+      setFeedbackConsolidado(undefined);
+
+      try {
+        const data = await buscarFeedbackConsolidado(conselhoId, idAluno);
+        setFeedbackConsolidado(data);
+
+      } catch (error) {
+        toast.error("Erro ao carregar detalhes do feedback. Tente novamente.");
+        console.error("Falha na busca de Feedback Consolidado (API):", error);
+        setFeedbackConsolidado(null); 
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadFeedbacks();
+  }, [isOpen, conselhoId, idAluno]);
+
+  if (user?.role !== "aluno" && user?.role !== "admin") return <AccessDeniedPage />;
+
 
   return (
     <aside
       className={cn(
-        "fixed top-[5rem] right-0 z-50 w-full sm:w-[80%] md:w-[60%] lg:w-[480px] h-[calc(100vh-5rem)] p-4 sm:p-6",
-        "transform transition-transform duration-300 ease-in-out",
+        "fixed top-[3.75rem] right-0 z-50",
+        "w-[26rem] sm:w-[32rem] md:w-[45rem] lg:w-[55rem] xl:w-[60rem]",
+        "h-[calc(100vh-3.75rem)] bg-[#d2dbdc] shadow-2xl border-l border-slate-300 p-[1.25rem]",
+        "transform transition-transform duration-300 ease-in-out flex flex-col",
         isOpen ? "translate-x-0" : "translate-x-full"
       )}
     >
-      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 md:top-8 md:right-10 z-50">
-        <ButtonTT
-          variant="ghost"
-          mode="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-          icon="IoClose"
-          tooltip="none"
-          className="inline-flex items-center justify-center rounded-md h-10 w-10 text-accent-foreground hover:bg-accent hover:text-accent-foreground"
-        />
-      </div>
+      {/* CARD BRANCO */}
+      <div className="bg-white w-full h-full rounded-[1.25rem] shadow-sm flex flex-col overflow-hidden mt-[1rem]">
 
-      <Card className="h-full border-t-0 shadow-md">
-        <CardHeader>
-          <CardTitle className="font-title text-accent-foreground text-lg mb-1">
-            Conselho Publicado
-          </CardTitle>
-          <span className="text-sm text-muted-foreground mb-4">
-            {periodo || "Período não informado"}
-          </span>
-        </CardHeader>
+        {/* HEADER */}
+        <div className="flex items-center justify-between px-[1.5rem] pt-[1.5rem] pb-[0.125rem]">
+          <div>
+            <h2 className="text-[1.25rem] font-bold text-slate-800">Conselho Publicado</h2>
+            <p className="text-[0.875rem] text-slate-600 mt-[0.0625rem]">{periodoFormatado}</p>
+          </div>
+          <ButtonTT
+            icon="IoClose"
+            tooltip="Fechar"
+            variant="ghost"
+            mode="text-icon"
+            onClick={(e: any) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            className="text-slate-500 hover:text-slate-800"
+          />
+        </div>
 
-        <CardContent className="flex flex-col h-[calc(100%-7rem)] overflow-y-auto px-2 md:px-4 pb-4">
-          {!feedback ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground text-center px-2">
-              Nenhum conselho selecionado!
+        {/* LINHA SEPARADORA SUTIL */}
+        <div className="w-full h-[0.0625rem] bg-slate-100 mt-[0.125rem] mb-[1rem] mx-auto max-w-[90%]"></div>
+
+        {/* BOTÕES INTERRUPTOR */}
+        <div className="px-[1.5rem] pb-[0.5rem]">
+          <div className="flex bg-[#447f88] p-[0.3rem] rounded-[0.80rem] shadow-inner">
+            <button
+              onClick={() => setTipoVisualizacao("turma")}
+              className={cn(
+                "flex-1 py-[0.5rem] text-[0.875rem] font-bold rounded-[0.25rem] transition-all duration-200",
+                tipoVisualizacao === "turma"
+                  ? "bg-white text-[#2A5C61] shadow-sm"
+                  : "text-white hover:bg-white/10"
+              )}
+            >
+              Turma
+            </button>
+            <button
+              onClick={() => setTipoVisualizacao("individual")}
+              className={cn(
+                "flex-1 py-[0.5rem] text-[0.875rem] font-bold rounded-[0.25rem] transition-all duration-200",
+                tipoVisualizacao === "individual"
+                  ? "bg-white text-[#2A5C61] shadow-sm"
+                  : "text-white hover:bg-white/10"
+              )}
+            >
+              Individual
+            </button>
+          </div>
+        </div>
+
+        {/* CONTEÚDO SCROLLÁVEL (TEXTAREAS) */}
+        <div className="flex-1 overflow-y-auto px-[1.5rem] pb-[1.5rem] pt-[0.125rem] space-y-[1.25rem]">
+
+          {isLoading ? (
+            <div className="flex justify-center items-center h-full min-h-[30rem] text-slate-500">
+              <RotateCw className="w-6 h-6 animate-spin mr-2" />
+              Carregando feedback...
             </div>
           ) : (
-            <div className="flex flex-col gap-6 sm:gap-8 flex-1">
-              <div className="flex flex-col flex-1">
-                <Label className="mb-2 text-base font-semibold">Pontos Fortes</Label>
+            <>
+              {/* PONTOS FORTES */}
+              <div className="space-y-2">
+                <Label className="text-[1rem] font-bold text-[#2A5C61]">
+                  Pontos fortes ({tipoVisualizacao === "individual" ? "Aluno" : "Turma"})
+                </Label>
                 <Textarea
-                  value={feedback.pontosFortes}
                   readOnly
-                  className="resize-none min-h-[150px] sm:min-h-[160px] md:min-h-[180px] text-sm leading-relaxed"
+                  value={feedbackAtivo.pontosFortes} 
+                  className="min-h-[7.5rem] bg-slate-50 border-slate-200 resize-none text-slate-700 focus-visible:ring-[#2A5C61]"
                 />
               </div>
 
-              <div className="flex flex-col flex-1">
-                <Label className="mb-2 text-base font-semibold">
+              {/* OPORTUNIDADES */}
+              <div className="space-y-2">
+                <Label className="text-[1rem] font-bold text-[#2A5C61]">
                   Oportunidades de Melhoria
                 </Label>
                 <Textarea
-                  value={feedback.oportunidades}
                   readOnly
-                  className="resize-none min-h-[150px] sm:min-h-[160px] md:min-h-[180px] text-sm leading-relaxed"
+                  value={feedbackAtivo.oportunidades} 
+                  className="min-h-[7.5rem] bg-slate-50 border-slate-200 resize-none text-slate-700 focus-visible:ring-[#2A5C61]"
                 />
               </div>
 
-              <div className="flex flex-col flex-1">
-                <Label className="mb-2 text-base font-semibold">Sugestões</Label>
+              {/* SUGESTÕES */}
+              <div className="space-y-2">
+                <Label className="text-[1rem] font-bold text-[#2A5C61]">
+                  Sugestões
+                </Label>
                 <Textarea
-                  value={feedback.sugestoes}
                   readOnly
-                  className="resize-none min-h-[150px] sm:min-h-[160px] md:min-h-[180px] text-sm leading-relaxed"
+                  value={feedbackAtivo.sugestoes} 
+                  className="min-h-[7.5rem] bg-slate-50 border-slate-200 resize-none text-slate-700 focus-visible:ring-[#2A5C61]"
                 />
               </div>
-            </div>
+            </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+
+      </div>
     </aside>
   );
 }
 
-// ------------------ COMPONENTE PRINCIPAL ------------------
-export default function AlunoHome() {
-  const [selectedConselho, setSelectedConselho] = useState<number | null>(null);
-  const conselhoSelecionado = conselhos.find((c) => c.id === selectedConselho);
+export default function Page() {
+  const { user } = useAuth();
+  const idAluno = user?.id;
+
+  const [conselhos, setConselhos] = useState<ConselhoExibicao[]>([]);
+  const [selectedConselhoId, setSelectedConselhoId] = useState<number | null>(null);
+  const [isLoadingConselhos, setIsLoadingConselhos] = useState(true);
+
+  const conselhoSelecionado = useMemo(() => {
+    return conselhos.find((c) => c.id === selectedConselhoId);
+  }, [conselhos, selectedConselhoId]);
+
+
+  useEffect(() => {
+
+    if (!idAluno) {
+      setIsLoadingConselhos(false);
+      return;
+    }
+
+    const fetchConselhos = async () => {
+      setIsLoadingConselhos(true);
+      try {
+        const data = await listarConselhosDoAlunoComResultado(idAluno);
+
+        const conselhosMapeados: ConselhoExibicao[] = data.map(c => ({
+          ...c,
+          periodoFormatado: `${formatarMesAno(c.dataInicio)} - ${formatarMesAno(c.dataFim)}`,
+          statusExibicao: traduzirStatus(c.etapas)
+        }));
+
+        setConselhos(conselhosMapeados);
+      } catch (error) {
+        toast.error("Falha ao buscar sua lista de conselhos. Tente recarregar a página.");
+        setConselhos([]);
+      } finally {
+        setIsLoadingConselhos(false);
+      }
+    };
+
+    fetchConselhos();
+  }, [idAluno]);
+
+  if (user?.role !== "aluno" && user?.role !== "admin"  && user?.role !== "pedagogico") {
+    return <AccessDeniedPage />;
+  }
+
+  if (isLoadingConselhos) {
+    return (
+      <div className="min-h-screen pt-[6rem] px-[2rem] pb-[2.5rem] bg-[#F2F4F5] flex justify-center items-center">
+        <p className="text-xl text-slate-600 flex items-center">
+          <RotateCw className="w-5 h-5 animate-spin mr-3" />
+          Carregando histórico de conselhos...
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen">
-      {/* LISTA DE CONSELHOS */}
-      <div className="flex-1 p-8">
-        <div className="flex items-center gap-2 mb-6 mt-20">
-          <h1 className="font-title text-2xl font-bold text-accent-foreground px-4">
-            Meus Conselhos
-          </h1>
-        </div>
+    <div className="min-h-screen pt-[6rem] px-[2rem] pb-[2.5rem] bg-[#F2F4F5]">
+      {/* BANNER PRINCIPAL */}
+      <div className="max-w-[32.5625rem] mt-[4rem] ml-[2.5rem]">
+        <InfoCard
+          titulo="Meus Conselhos"
+          subtitulo="Centro de Gerenciamento de conselhos"
+          descricao=""
+          className="shadow-sm   w-[32.5625rem] h-[6.4375rem] mb-[4rem]"
+        />
+      </div>
 
-        {/* GRID DE CONSELHOS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {conselhos.length > 0 ? (
-            conselhos.map((c) => (
-              <MedModal
-                key={c.id}
-                courseCode={c.periodo}
-                courseName="Conselho"
-                onClick={() => setSelectedConselho(c.id)}
-                className={cn(
-                  "transition-transform hover:scale-[1.02] cursor-pointer",
-                  selectedConselho === c.id && "ring-2 ring-primary scale-[1.02]"
-                )}
-              >
-                <div className="text-muted-foreground text-right">
-                  <span className="font-semibold">Status:</span> {c.status}
+      {/* LISTA DE CONSELHOS */}
+      <div className="flex flex-wrap gap-[1.5rem] ml-[2.5rem]">
+        {conselhos.length === 0 ? (
+          <div className="mt-8 text-lg text-slate-500">
+            Nenhum conselho com feedback disponível para visualização no momento.
+          </div>
+        ) : (
+          conselhos.map((c) => (
+            <div
+              key={c.id}
+              className="flex-shrink-0"
+              onClick={() => setSelectedConselhoId(c.id)}
+            >
+              <div className="group cursor-pointer flex flex-col w-[19rem] h-[7.50rem] rounded-[0.625rem] overflow-hidden shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg bg-white ">
+
+                <div className="bg-[#2A5C61] p-[1rem] h-[5.375rem] flex flex-col justify-start gap-[0.25rem] relative overflow-hidden">
+                  <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-300" />
+
+                  <Label className="text-[0.875rem] text-white pt-1">Período</Label>
+
+                  <h3 className="text-[1.25rem] font-bold text-white tracking-wide">{c.periodoFormatado}</h3>
+
+                  <span className="text-[0.875rem] text-white/70 font-medium uppercase tracking-wider">
+                    {c.titulo}
+                  </span>
                 </div>
-              </MedModal>
-            ))
-          ) : (
-            <div className="text-center text-muted-foreground mt-6">
-              Nenhum conselho encontrado!
+
+                <div className="p-[0.75rem] border-t border-slate-100 flex items-center h-[2.125rem]">
+                  <p className="text-[0.875rem] font-bold text-slate-700">
+                    Status:
+                    <span className="font-normal text-slate-900 ml-[0.25rem]">{c.statusExibicao}</span>
+                  </p>
+                </div>
+              </div>
             </div>
-          )}
-        </div>
+          ))
+        )}
       </div>
 
       {/* PAINEL LATERAL */}
-      <BackgroundDevolutiva>
+      <BackgroundDevolutiva isOpen={selectedConselhoId !== null}>
         <DevolutivaAluno
-          isOpen={selectedConselho !== null}
-          onClose={() => setSelectedConselho(null)}
-          feedback={conselhoSelecionado?.feedback ?? null}
-          periodo={conselhoSelecionado?.periodo}
+          isOpen={selectedConselhoId !== null}
+          onClose={() => setSelectedConselhoId(null)}
+          conselhoId={conselhoSelecionado?.id || null}
+          periodoFormatado={conselhoSelecionado?.periodoFormatado || ""}
         />
       </BackgroundDevolutiva>
+
     </div>
   );
 }

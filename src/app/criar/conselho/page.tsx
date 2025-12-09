@@ -10,7 +10,7 @@ import InfoCard from "@/components/card/cardTituloTelas";
 import ButtonTT from "@/components/button/ButtonTT";
 import { toast } from "sonner";
 import ActionModal from "@/components/modal/actionModal";
-import { listarUnidadeCurricular, listarProfessores, preConselhoProfessor, criarPreConselho, buscarPreConselhoPorConselho } from "@/api/preConselho";
+import { listarUnidadeCurricular, listarProfessores, preConselhoProfessorCriar, criarPreConselho, buscarPreConselhoPorConselho } from "@/api/preConselho";
 import { UnidadeCurricular, Usuario } from "@/utils/types";
 import { criarConselho } from "@/api/conselho";
 
@@ -38,7 +38,6 @@ export default function ConselhoPage() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [UnidadeCurriculares, setUnidadeCurriculares] = useState<UnidadeCurricular[]>([]);
   const [usuario, setUsuario] = useState<Usuario[]>([]);
-  const [conselhoId, setConselho] = useState<number | null>(null);
   const [turmaSelecionada, setTurmaSelecionada] = useState<{ id: number; nome: string } | null>(null);
   const [representante1, setIdRepresentante1] = useState<number | null>(null);
   const [representante2, setIdRepresentante2] = useState<number | null>(null);
@@ -64,15 +63,6 @@ export default function ConselhoPage() {
       setIdRepresentante2(JSON.parse(representante2));
     } else {
       toast.error("Nenhum representante encontrado.");
-    }
-  }, []);
-
-  useEffect(() => {
-    const c = localStorage.getItem("idConselho");
-    if (c) {
-      setConselho(Number(JSON.parse(c)));
-    } else {
-      toast.error("Nenhum conselho encontrado.");
     }
   }, []);
 
@@ -233,17 +223,16 @@ export default function ConselhoPage() {
         return;
       }
 
-      // const idPedagogico = user?.id;
+      const idPedagogico = user?.id;
 
-      // if (!idPedagogico) {
-      //   toast.error("ID do usuário pedagógico não encontrado.");
-      //   return;
-      // }
+      if (!idPedagogico) {
+         toast.error("ID do usuário pedagógico não encontrado.");
+         return;
+      }
 
       const idTurma = turmaSelecionada.id;
       const idRepresentante1 = representante1;
       const idRepresentante2 = representante2;
-      const idPedagogico = 12;
 
       console.log("id do representante: " + idRepresentante1);
       console.log("id do representante: " + idRepresentante2);
@@ -275,7 +264,7 @@ export default function ConselhoPage() {
       console.log("preConselho:" + preConselhoCriado);
 
       for (const item of salvos) {
-        await preConselhoProfessor({
+        await preConselhoProfessorCriar({
           idPreConselho: preConselhoCriado.id,
           idUnidadeCurricular: item.unidadeId,
           idProfessor: item.professorId,
@@ -453,7 +442,7 @@ export default function ConselhoPage() {
         isOpen={isConfirmOpen}
         setOpen={setIsConfirmOpen}
         title="Deseja liberar pré-conselho?"
-        conteudo="Ao confirmar, todos os dados relacionados ao pré-conselho serão enviados."
+        description="Ao confirmar, todos os dados relacionados ao pré-conselho serão enviados."
         actionButtonLabel="Confirmar"
         onConfirm={handleConfirmarUcProfessores}
       />

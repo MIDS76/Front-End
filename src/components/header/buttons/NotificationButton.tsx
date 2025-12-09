@@ -129,16 +129,16 @@ const NotificationButton = () => {
           className="p-2 flex flex-col bg-popover rounded-md shadow-md border border-border mt-2"
         >
           <div className="flex flex-row justify-between px-4 pt-2 pb-0">
-            <DropdownMenu.Label className="text-xl select-none">
+            <DropdownMenu.Label className="text-xl select-none font-bold">
               Notificações
             </DropdownMenu.Label>
 
             {/* Modal de limpar todas as notificações */}
             <ActionModal
-              description="Excluir todas as suas notificações"
               title="Limpar todas notificações"
               onConfirm={handleDeleteAll} // Chama a função de apagar todas
               destructive
+             
             >
               <ButtonTT
                 mode="small"
@@ -152,10 +152,10 @@ const NotificationButton = () => {
 
           {/* Scroll para as notificações */}
           <ScrollArea.Root className="h-96 w-96 flex flex-col items-center">
-            <ScrollArea.Viewport>
+            <ScrollArea.Viewport className="w-full h-full">
               {notificacoes.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-96">
-                  <p className="text-muted-foreground">Nenhuma notificação</p>
+                <div className="flex flex-col items-center justify-center h-full pt-10">
+                  <p className="text-muted-foreground text-sm">Nenhuma notificação</p>
                 </div>
               ) : (
                 notificacoes.map((notificacao) => (
@@ -174,6 +174,9 @@ const NotificationButton = () => {
                 ))
               )}
             </ScrollArea.Viewport>
+            <ScrollArea.Scrollbar orientation="vertical">
+              <ScrollArea.Thumb />
+            </ScrollArea.Scrollbar>
           </ScrollArea.Root>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>

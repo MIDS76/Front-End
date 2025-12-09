@@ -2,11 +2,12 @@ import api from "@/utils/axios";
 import { AxiosError } from "axios";
 
 
-export const ordenarOrdemAlfabeticaTurma = async () => {
+export const ordenarOrdemAlfabeticaTurma = async (ordem: string) => {
     const controller = new AbortController();
 
     try {
-        const response = await api.get(`/turmas/ordemAlfabetica`, { signal: controller.signal });
+        const response = await api.get(`/turmas/ordemAlfabetica?ordem=${ordem}`, { signal: controller.signal });
+        console.log(response.data);
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
@@ -18,9 +19,41 @@ export const ordenarOrdemAlfabeticaTurma = async () => {
 
 export const listarCursos = async () => {
     const controller = new AbortController();
+  
+    try {
+      const response = await api.get("/turmas/listarCursos", {
+        signal: controller.signal,
+      });
+      return response.data;
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        console.error(err.response?.status);
+        console.error(err.response?.data);
+      }
+      return [];
+    }
+  };
+
+export const listarAnosEntrada = async () => {
+    const controller = new AbortController();
+  
+    try {
+      const response = await api.get(`/turmas/listarAnosDeEntrada`, { signal: controller.signal });
+      return response.data;
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        console.error(err.response?.status);
+        console.error(err.response?.data);
+      }
+      return [];
+    }
+  }
+
+export const filtrarPorCurso = async (curso: string) => {
+    const controller = new AbortController();
 
     try {
-        const response = await api.get(`/turmas/listarCursos`, { signal: controller.signal });
+        const response = await api.get(`/turmas/filtrarPorCurso?curso=${curso}`, { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
@@ -30,11 +63,11 @@ export const listarCursos = async () => {
     }
 }
 
-export const filtrarPorCurso = async () => {
+export const filtrarPorAnoEntrada = async (anoEntrada: string) => {
     const controller = new AbortController();
 
     try {
-        const response = await api.get(`/turmas/filtrarPorCurso`, { signal: controller.signal });
+        const response = await api.get(`/turmas/filtrarPorAnoEntrada?anoEntrada=${anoEntrada}`, { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
@@ -44,11 +77,11 @@ export const filtrarPorCurso = async () => {
     }
 }
 
-export const filtrarPorAnoEntrada = async () => {
+export const filtrarConselhoEtapa = async (etapa: string) => {
     const controller = new AbortController();
 
     try {
-        const response = await api.get(`/turmas/filtrarPorAnoEntrada`, { signal: controller.signal });
+        const response = await api.get(`/conselhos/filtrarPorEtapas?etapa=${etapa}`, { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
@@ -58,11 +91,12 @@ export const filtrarPorAnoEntrada = async () => {
     }
 }
 
-export const filtrarConselhoEtapa = async () => {
+export const filtrarAlunoOrdemAlfabetica = async (ordem: string) => {
     const controller = new AbortController();
 
     try {
-        const response = await api.get(`/conselhos/filtrarPorEtapas`, { signal: controller.signal });
+        const response = await api.get(`/usuario/ordemAlfabetica?ordem=${ordem}`, { signal: controller.signal });
+        console.log(response.data);
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
@@ -72,26 +106,21 @@ export const filtrarConselhoEtapa = async () => {
     }
 }
 
-export const filtrarAlunoOrdemAlfabetica = async () => {
+export const filtrarPorAtividade = async (atividade : string) => {
     const controller = new AbortController();
-
-    try {
-        const response = await api.get(`/aluno/ordemAlfabetica`, { signal: controller.signal });
-        return response.data;
-    } catch (err) {
-        if (err instanceof AxiosError) {
-            console.log(err.response?.status);
-            console.log(err.response?.data);
-        }
+    let ativo;
+    
+    if(atividade === "Ativo"){
+        ativo = true;
+    }else if(atividade === "Inativo"){
+        ativo = false;
     }
-}
-
-export const filtrarPorAtividade = async () => {
-    const controller = new AbortController();
 
     try {
-        const response = await api.get(`/aluno/buscarAtividade`, { signal: controller.signal });
+        const response = await api.get(`/usuario/buscarAtividade?ativo=${ativo}`, { signal: controller.signal });
         return response.data;
+        
+        
     } catch (err) {
         if (err instanceof AxiosError) {
             console.log(err.response?.status);

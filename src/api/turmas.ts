@@ -5,6 +5,7 @@ import { AxiosError } from "axios";
 const controller = new AbortController();
 
 export interface Aluno {
+    id?: number;
     matricula: string;
     nome: string;
     email: string;
@@ -12,7 +13,6 @@ export interface Aluno {
 
 // buscar turmas
 export const buscarTurmas = async () => {
-
     try {
         const response = await api.get<Turma[]>("/turmas/listar", { signal: controller.signal });
 
@@ -26,15 +26,29 @@ export const buscarTurmas = async () => {
 
 // criar turmas
 export const criarTurma = async (data: Turma) => {
-
     try {
         const response = await api.post(`/turmas/criar`, data, { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
-            console.log(err.response?.status);
-            console.log(err.response?.data);
+            console.error("Erro ao criar turma:", err.response?.status, err.response?.data);
         }
+        // RELANÇAR o erro é VITAL para o catch no componente funcionar
+        throw err;
+    }
+}
+
+export const excluirTurma = async (idTurma: number) => {
+    try {
+        const response = await api.delete(`/turmas/deletar/${idTurma}`, { signal: controller.signal });
+        if (response.status === 200) {
+            console.log("Turma excluída com sucesso.");
+        }
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.error("Erro ao excluir turma:", err.response?.status, err.response?.data);
+        }
+        throw err;
     }
 }
 
@@ -45,9 +59,9 @@ export const criarAlunos = async (listaAlunos: Aluno[]) => {
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
-            console.log(err.response?.status);
-            console.log(err.response?.data);
+            console.error("Erro ao criar alunos:", err.response?.status, err.response?.data);
         }
+        throw err;
     }
 }
 
@@ -59,12 +73,11 @@ export const associarAlunosTurma = async (alunoTurma: {
     try {
         const response = await api.post(`/aluno-turma/criar`, alunoTurma, { signal: controller.signal });
         return response.data;
-
     } catch (err) {
         if (err instanceof AxiosError) {
-            console.log(err.response?.status);
-            console.log(err.response?.data);
+            console.error("Erro ao associar alunos:", err.response?.status, err.response?.data);
         }
+        throw err;
     }
 }
 

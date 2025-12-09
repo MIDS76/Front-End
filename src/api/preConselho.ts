@@ -1,3 +1,4 @@
+import { UsuarioApi } from "@/app/preConselhoForm/page";
 import api from "@/utils/axios";
 import { AxiosError } from "axios";
 
@@ -6,7 +7,7 @@ export const criarPreConselho = async (idConselho: number) => {
     const controller = new AbortController();
 
     try {
-        const response = await api.post(`/preConselho/criar`, {idConselho}, { signal: controller.signal });
+        const response = await api.post(`/preConselho/criar`, { idConselho }, { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {
@@ -51,7 +52,28 @@ export const preConselhoSupervisao = async (supervisao: {
 }
 
 // utilizar para criar quando criar uc/professor na criação do conselho
-export const preConselhoProfessor = async (professor: {
+export const preConselhoProfessorAtualizar = async (idPreconselhoProfessor: number, professor: {
+    idPreConselho: number;
+    idUnidadeCurricular: number;
+    idProfessor: number;
+    pontosPositivos: string;
+    pontosMelhoria: string;
+    sugestoes: string;
+}) => {
+    const controller = new AbortController();
+
+    try {
+        const response = await api.put(`/preConselhoProfessor/atualizar/${idPreconselhoProfessor}`, professor, { signal: controller.signal });
+        return response.data;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.log(err.response?.status);
+            console.log(err.response?.data);
+        }
+    }
+}
+
+export const preConselhoProfessorCriar = async (professor: {
     idPreConselho: number;
     idUnidadeCurricular: number;
     idProfessor: number;
@@ -71,6 +93,7 @@ export const preConselhoProfessor = async (professor: {
         }
     }
 }
+
 
 export const preConselhoPedagogico = async (pedagogico: {
     idPreConselho: number;
@@ -101,6 +124,49 @@ export const preConselhoAmbienteEnsino = async (ambienteEnsino: {
 
     try {
         const response = await api.post(`/preConselhoAmbienteEnsino/criar`, ambienteEnsino, { signal: controller.signal });
+        return response.data;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.log(err.response?.status);
+            console.log(err.response?.data);
+        }
+    }
+}
+
+export const buscarPreConselho = async (id: number) => {
+    const controller = new AbortController();
+
+    try {
+        const response = await api.get(`/preConselho/buscar/${id}`, { signal: controller.signal });
+        return response.data;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.log(err.response?.status);
+            console.log(err.response?.data);
+        }
+    }
+}
+
+// listar na hora de criar um conselho
+export const unidadeCurricular = async () => {
+    const controller = new AbortController();
+
+    try {
+        const response = await api.get(`/unidadeCurricular/listar`, { signal: controller.signal });
+        return response.data;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            console.log(err.response?.status);
+            console.log(err.response?.data);
+        }
+    }
+}
+
+export const listarPreConselhoProfessorPorConselho = async (idPreConselho: number) => {
+    const controller = new AbortController();
+
+    try {
+        const response = await api.get<UsuarioApi[]>(`/preConselhoProfessor/listar-por-pre-conselho/${idPreConselho}`, { signal: controller.signal });
         return response.data;
     } catch (err) {
         if (err instanceof AxiosError) {

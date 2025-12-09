@@ -40,5 +40,26 @@
         "nomeCurso": "Desenvolvimento de Sistemas",
         "dataInicio": "2023-08-01",
         "dataFim": "2025-07-31"
+    },
+    {
+        "id": 7,
+        "codigoTurma": "MF77",
+        "nomeCurso": "Ferramentaria",
+        "dataInicio": "2023-08-01",
+        "dataFim": "2025-07-31"
+    },
+    {
+        "id": 8,
+        "codigoTurma": "ME77",
+        "nomeCurso": "Manutenção Eletroeletrônica",
+        "dataInicio": "2023-08-01",
+        "dataFim": "2025-07-31"
+    },
+    {
+        "id": 9,
+        "codigoTurma": "MT77",
+        "nomeCurso": "Eletrotécnica",
+        "dataInicio": "2023-08-01",
+        "dataFim": "2025-07-31"
     }
 ]

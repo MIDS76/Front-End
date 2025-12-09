@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Turma } from "@/utils/types";
 import MedModal from "@/components/modal/medModal";
 import SearchBar from "@/components/input/searchBar";
@@ -14,9 +14,12 @@ import {
     filtrarPorCurso,
     filtrarPorAnoEntrada
 } from "@/api/filtros";
+import { useAuth } from "@/context/AuthContext";
+import BaixarDocumentosModal from "@/components/modal/BaixarDocumentosModal";
 
+export default function SupervisorPage() {
+    const { user } = useAuth(); 
 
-export default function PedagogicoPage() {
     const [allTurmas, setAllTurmas] = useState<Turma[]>([]);
     const [filteredTurmas, setFilteredTurmas] = useState<Turma[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -31,6 +34,9 @@ export default function PedagogicoPage() {
     const [selectedTurma, setSelectedTurma] = useState<Turma | null>(null);
     const [screenWidth, setScreenWidth] = useState(0);
 
+    const [baixarModalOpen, setBaixarModalOpen] = useState(false);
+    const [conselhoSelecionado, setConselhoSelecionado] = useState<any | null>(null);
+
     const modalRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -43,60 +49,56 @@ export default function PedagogicoPage() {
         };
     }, []);
 
-    const fetchData = useCallback(async () => {
-        setIsLoading(true);
-        try {
-            const turmasArray = await buscarTurmas();
-            setAllTurmas(turmasArray || []);
-            setPaginaAtual(0);
-
-            if (turmasArray?.length) {
-                
-                const promises = turmasArray.map(turma => {
-                    if (typeof turma.id === 'number' && turma.id > 0) {
-                        return buscarUltimoConselhoPorTurma(turma.id);
-                    }
-                    return Promise.resolve(null);
-                });
-
-                const resultados = await Promise.all(promises);
-
-                const novoMapa: Record<number, string> = {};
-                resultados.forEach((conselho, index) => {
-                    const turma = turmasArray[index];
-                    if (typeof turma.id === 'number' && turma.id > 0) {
-                        if (conselho) {
-                            if (conselho.etapas === "RESULTADO" && conselho.dataFim) {
-                                const dataFormatada = new Date(conselho.dataFim).toLocaleDateString('pt-BR');
-                                novoMapa[turma.id] = dataFormatada;
-                            } else {
-                                novoMapa[turma.id] = "Em andamento";
-                            }
-                        } else {
-
-                            novoMapa[turma.id] = "Não realizado";
-                        }
-                    }
-                });
-                setUltimoConselhoMap(novoMapa);
-            }
-
-        } catch (error) {
-            console.error("Erro ao carregar dados da página pedagógica:", error);
-            setAllTurmas([]);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [buscarTurmas, buscarUltimoConselhoPorTurma]);
-
     useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                const turmasArray = await buscarTurmas();
+                setAllTurmas(turmasArray || []);
+                setPaginaAtual(0);
 
+                if (turmasArray?.length) {
+                    const promises = turmasArray.map(turma => {
+                        if (typeof turma.id === 'number' && turma.id > 0) {
+                            return buscarUltimoConselhoPorTurma(turma.id);
+                        }
+                        return Promise.resolve(null);
+                    });
+
+                    const resultados = await Promise.all(promises);
+
+                    const novoMapa: Record<number, string> = {};
+                    resultados.forEach((conselho, index) => {
+                        const turma = turmasArray[index];
+                        if (typeof turma.id === 'number' && turma.id > 0) {
+                            if (conselho) {
+                                if (conselho.etapas === "RESULTADO" && conselho.dataFim) {
+                                    const dataFormatada = new Date(conselho.dataFim).toLocaleDateString('pt-BR');
+                                    novoMapa[turma.id] = dataFormatada;
+                                } else {
+                                    novoMapa[turma.id] = "Em andamento";
+                                }
+                            } else {
+                                novoMapa[turma.id] = "Não realizado";
+                            }
+                        }
+                    });
+                    setUltimoConselhoMap(novoMapa);
+                }
+
+            } catch (error) {
+                console.error("Erro ao carregar dados da página supervisor:", error);
+                setAllTurmas([]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     const etapasEmAndamento = ["PRE_CONSELHO", "CONSELHO", "AGUARDANDO_RESULTADO", "NAO_INICIADO"];
     const etapaFinalizada = "RESULTADO";
-
 
     const handleAplicarFiltro = async (grupo: string, valor: string) => {
         setPaginaAtual(0);
@@ -111,13 +113,11 @@ export default function PedagogicoPage() {
             } else if (grupo === "Ano de Entrada") {
                 dadosNovos = await filtrarPorAnoEntrada(valor) || [];
             } else if (grupo === "Conselho") {
-
                 const todasAsTurmas = await buscarTurmas() || [];
 
                 if (valor === "Todos") {
                     dadosNovos = todasAsTurmas;
                 } else {
-
                     const promises = todasAsTurmas.map(turma => {
                         if (typeof turma.id === 'number' && turma.id > 0) {
                             return buscarUltimoConselhoPorTurma(turma.id);
@@ -135,7 +135,6 @@ export default function PedagogicoPage() {
                         const conselho = turma.ultimoConselho;
 
                         if (valor === "Resultado") {
-
                             return conselho
                                 && conselho.etapas === etapaFinalizada
                                 && conselho.dataFim
@@ -151,10 +150,7 @@ export default function PedagogicoPage() {
                         return false;
                     });
                 }
-
-
             } else {
-
                 dadosNovos = await buscarTurmas() || [];
             }
 
@@ -162,14 +158,12 @@ export default function PedagogicoPage() {
             setFiltroAtivoKey(prev => prev + 1);
 
         } catch (error) {
-            console.error("Erro ao aplicar filtro de API ou Local:", error);
+            console.error("Erro ao aplicar filtro:", error);
             setAllTurmas(await buscarTurmas() || []);
         } finally {
             setIsLoading(false);
         }
     };
-
-
 
     useEffect(() => {
         const getTurmasPorPagina = () => {
@@ -207,7 +201,6 @@ export default function PedagogicoPage() {
         setPaginaAtual(0);
     }, [searchQuery]);
 
-
     const handleOpenModal = (turma: Turma) => {
         if (selectedTurma?.id === turma.id) {
             setSideModalOpen(false);
@@ -217,6 +210,11 @@ export default function PedagogicoPage() {
 
         setSelectedTurma(turma);
         setSideModalOpen(true);
+    };
+
+    const handleBaixarDocumentos = (conselho: any) => {
+        setConselhoSelecionado(conselho);
+        setBaixarModalOpen(true);
     };
 
     function ListaTurmas() {
@@ -239,17 +237,15 @@ export default function PedagogicoPage() {
             return (
                 <MedModal
                     key={turma.id}
-                    courseCode={turma.nome}
+                    courseCode={turma.nome} 
                     courseName={turma.curso}
                     onClick={() => handleOpenModal(turma)}
                 >
-                    {/* Status do último conselho */}
                     <b>Último conselho:</b> {ultimoConselhoMap[turma.id] || "Não realizado"}
                 </MedModal>
             );
         });
     }
-
 
     return (
         <ProtectedRoute>
@@ -259,7 +255,7 @@ export default function PedagogicoPage() {
                         <div className="ml-6 w-[calc(100%-3rem)] desktop:w-[35.8%] laptop:w-[47.5%]">
                             <SearchBar
                                 texto="Todos os Conselhos"
-                                className="w-full xl:w-3/5 2xl:w-2/5"
+                                className="w-full"
                                 searchQuery={searchQuery}
                                 setSearchQuery={setSearchQuery}
                                 filter
@@ -277,7 +273,6 @@ export default function PedagogicoPage() {
                             <ListaTurmas />
                         </div>
 
-                        {/* Paginação */}
                         {!isLoading && allTurmas.length > 0 && (
                             <Paginacao
                                 paginaAtual={paginaAtual}
@@ -293,8 +288,15 @@ export default function PedagogicoPage() {
                             turma={selectedTurma}
                             estaAberto={sideModalOpen}
                             aoFechar={() => setSideModalOpen(false)}
-                            role="PEDAGOGICO"
-                            onConselhoUpdate={fetchData}
+                            role={user?.role ?? ""}
+                            onBaixarDocumentos={handleBaixarDocumentos}
+                        />
+
+                        <BaixarDocumentosModal
+                            open={baixarModalOpen}
+                            onClose={() => setBaixarModalOpen(false)}
+                            conselho={conselhoSelecionado}
+                            role={user?.role}
                         />
                     </div>
                 </div>
