@@ -309,9 +309,9 @@ export default function PreConselhoFormulario() {
     );
   }
 
-  if (user?.role !== "aluno" || conselho?.etapas !== "PRE_CONSELHO") {
-    return AccessDeniedPage();
-  }
+  //if (user?.role !== "aluno" || conselho?.etapas !== "PRE_CONSELHO") {
+    //return AccessDeniedPage();
+  //}
 
   if (formulario.length === 0) {
     return (
