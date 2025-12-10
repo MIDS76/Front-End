@@ -69,9 +69,9 @@ export default function GerenciarTurma() {
       } else if (valor === "Z-A") {
         dadosNovos = listaBase.sort((a, b) => b.nome.localeCompare(a.nome));
       } else if (valor === "Ativo") {
-        dadosNovos = listaBase.filter(aluno => !aluno.isActive);
+        dadosNovos = listaBase.filter(aluno => !aluno.ativo);
       } else if (valor === "Inativo") {
-        dadosNovos = listaBase.filter(aluno => !!aluno.isActive);
+        dadosNovos = listaBase.filter(aluno => !!aluno.ativo);
       } else {
         dadosNovos = alunosDaTurmaOriginal;
       }
