@@ -11,12 +11,10 @@ interface InfoCardProps {
 export default function InfoCard({ titulo, subtitulo, descricao, className, style }: InfoCardProps) {
   return (
     <div
-    className={`rounded-2xl shadow p-[1rem] ${className || ""}`}
+    className={`rounded-2xl shadow p-[1rem] w-full h-auto ${className || ""}`}    
     style={{
       backgroundColor: "hsl(var(--card))",
       color: "hsl(var(--card-foreground))",
-      width: "521px",  // Largura fixa
-      height: "103px", // Altura fixa
       ...style, 
     }}
   >

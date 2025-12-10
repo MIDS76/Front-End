@@ -309,8 +309,8 @@ export default function ConselhoPage() {
             <InfoCard
               titulo={`Conselho da Turma ${turmaSelecionada?.nome}`}
               descricao="Selecione os professores de cada unidade curricular"
-              className="w-[48.5rem]"
-            />
+              className="w-[49rem] h-[7rem]"
+              />
           </div>
 
           <div className="flex justify-center gap-[3.5rem] mt-[1rem]">

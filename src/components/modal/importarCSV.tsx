@@ -152,8 +152,7 @@ export default function ImportarCSV({ isOpen, setOpen, onImported, width, height
 
         <button
           onClick={handleImport}
-          className="rounded bg-teal-700 px-5 py-2 text-sm text-white hover:bg-teal-600"
-        >
+          className="bg-[hsl(var(--primary))] rounded px-5 py-2 text-sm text-white hover:opacity-90"        >
           Importar
         </button>
       </div>

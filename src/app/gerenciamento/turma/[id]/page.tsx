@@ -115,6 +115,7 @@ export default function GerenciarTurma() {
             titulo="Gerenciamento de turma"
             subtitulo="Status"
             descricao="Ativa"
+            className="w-[30rem] h-[9rem]"
           />
 
           <TurmaForm

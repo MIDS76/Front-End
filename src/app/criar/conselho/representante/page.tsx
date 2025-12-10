@@ -12,7 +12,6 @@ import Lista from "@/components/lista/lista";
 import { Aluno, Usuario } from "@/utils/types";
 import InfoCard from "@/components/card/cardTituloTelas";
 import { buscarAlunosTurma } from "@/api/turmas";
-import { criarConselho } from "@/api/conselho";
 
 export default function RepresentantePage() {
   const router = useRouter();
@@ -121,25 +120,37 @@ export default function RepresentantePage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
+    <div className="flex h-screen w-full overflow-hidden bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
 
       {/* CONTEÚDO PRINCIPAL */}
-      <main className="flex-1 px-[3rem] pt-[2rem] pb-[3rem] mt-[5rem]">
-        <div className="max-w-[80rem] mx-auto flex flex-col items-center">
+      <main className="flex-1 px-[3rem] pt-[2rem] pb-[3rem] pt-[6rem]">
+        <div className="
+        desktop:max-w-[80rem] desktop:mx-auto desktop:flex desktop:flex-col desktop:items-center
+        laptop:max-w-[80rem] laptop:mx-auto laptop:flex laptop:flex-col laptop:items-center
+        tablet:max-w-[34rem]">
 
           {/* CABEÇALHO */}
-          <div className="flex justify-center mt-[1.5rem]">
+          <div className="
+          desktop:flex desktop:justify-center desktop:mt-[1.5rem]
+          laptop:items-start
+          tablet:items-start">
             <InfoCard
               titulo={`Conselho da Turma ${turmaSelecionada?.nome}`}
               descricao="Selecione os representantes da turma"
-              className="w-[48.5rem] mb-6"
-            />
+              className="
+              desktop:w-[48rem] desktop:h-[7rem] desktop:mb-[2rem]
+              laptop:w-[42rem] laptop:h-[7rem] laptop:mb-[2rem]
+              tablet:w-[34rem] tablet:h-[7rem] tablet:mb-[2rem]"
+              />
           </div>
 
           {/* LISTA DE REPRESENTANTES */}
           <div
-            className="bg-[hsl(var(--background))] rounded-xl border-2 border-[hsl(var(--border))] shadow-sm 
-            w-[48.4rem] p-[1.25rem] flex flex-col gap-3"
+            className="
+            bg-[hsl(var(--background))] rounded-xl border-2 border-[hsl(var(--border))] shadow-sm 
+            desktop:w-[48.4rem] desktop:p-[1.25rem] desktop:flex desktop:flex-col desktop:gap-3
+            laptop:w-[42rem]
+            tablet:w-[34rem] tablet:gap-3 tablet:items-start tablet:p-[1.25rem] "
             style={{
               height: "30rem",
               overflowY: "auto",
@@ -187,8 +198,9 @@ export default function RepresentantePage() {
         </div>
       </main>
 
-      {/* LOG LATERAL */}
-      <LogLateral
+      <div className="h-full pt-[5rem]">
+        {/* LOG LATERAL */}
+        <LogLateral
         titulo="Representante"
         itens={selecionados.map((s) => ({
           id: s.id,
@@ -200,6 +212,7 @@ export default function RepresentantePage() {
         // aqui vou criar o conselho - e vai para selecionar professor e uc
         onProximo={handleProximoPasso}
       />
+      </div>
     </div>
   );
 }

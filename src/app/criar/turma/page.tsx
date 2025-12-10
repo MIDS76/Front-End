@@ -96,6 +96,7 @@ export default function CriarTurma() {
               titulo="Criar nova turma"
               subtitulo="Resumo"
               descricao={`Alunos ativos: ${alunos.length}`}
+              className="w-[45rem] h-[9rem]"
             />
 
             {/* Form */}

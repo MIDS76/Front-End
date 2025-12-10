@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FiSearch } from "react-icons/fi";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Header from "@/components/header/header";
 import LogLateral from "@/components/sidebar/logLateral";
@@ -35,9 +34,8 @@ export default function SelecionarTurmaPreConselho() {
     carregarTurmas();
   }, []);
 
-  const turmasFiltradas = turmas.filter(
-    (t) =>
-      t.nome.toLowerCase().includes(searchTerm.toLowerCase())
+  const turmasFiltradas = turmas.filter((t) =>
+    t.nome.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   function handleRemover() {
@@ -56,29 +54,25 @@ export default function SelecionarTurmaPreConselho() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[hsl(var(--background))] w-full flex flex-col">
-        <Header />
+      <div className="flex flex-col h-screen w-full overflow-hidden bg-[hsl(var(--background))]">
+        <div className="absolute top-0 w-full z-10">
+          <Header />
+        </div>
 
-        <div className="flex w-full mt-[5rem]">
-          {/* CENTRO */}
-          <main className="flex-1 flex justify-center px-10">
-            <div className="flex flex-col items-center w-full max-w-[60rem]">
-              {/* CABEÇALHO */}
-              <div className="bg-[hsl(var(--card))] rounded-xl shadow-md p-6 border border-[hsl(var(--border))] w-full mt-7">
+        <div className="flex flex-1 w-full pt-[5rem] overflow-hidden">
+          <main className="flex-1 h-full overflow-y-auto px-6 py-6 tablet:px-10">
+            <div className="flex flex-col items-center w-full max-w-[60rem] mx-auto">
+              <div className="bg-[hsl(var(--card))] rounded-xl shadow-md p-6 border border-[hsl(var(--border))] w-full">
                 <h1 className="text-2xl font-semibold text-[hsl(var(--foreground))]">
                   Turma para o Pré-Conselho
                 </h1>
-
                 <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">
                   Selecione a turma para o pré-conselho
                 </p>
-
                 <div className="border-t mt-4 border-[hsl(var(--border))]" />
               </div>
 
-              {/* GRID + BUSCA */}
               <div className="bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] shadow-sm w-full h-[34rem] p-5 mt-6 flex flex-col">
-                {/* BUSCA */}
                 <div className="w-full mb-4 flex items-center gap-4 flex-wrap">
                   <SearchBar
                     className="flex-1 min-w-[250px]"
@@ -93,9 +87,8 @@ export default function SelecionarTurmaPreConselho() {
                   />
                 </div>
 
-                {/* GRID — AGORA COM MedModal */}
-                <div className="flex-1 overflow-y-auto pr-2">
-                  <div className="grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-3 gap-4">
+                <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin">
+                  <div className="grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-3 desktop:grid-cols-4 gap-4">
                     {turmasFiltradas.map((t) => {
                       const isSelected = selected?.id === t.id;
 
@@ -109,7 +102,7 @@ export default function SelecionarTurmaPreConselho() {
                             setErroSelecao("");
                           }}
                           className={`
-                            transition-all duration-300 cursor-pointer
+                            transition-all duration-300 cursor-pointer h-full
                             ${isSelected
                               ? "border-2 border-[hsl(var(--primary))] scale-[1.02]"
                               : "hover:scale-[1.01]"
@@ -129,7 +122,6 @@ export default function SelecionarTurmaPreConselho() {
                 </div>
               </div>
 
-              {/* ERRO */}
               {erroSelecao && (
                 <p className="text-red-600 text-sm mt-3 font-medium">
                   {erroSelecao}
@@ -138,25 +130,27 @@ export default function SelecionarTurmaPreConselho() {
             </div>
           </main>
 
-          {/* LATERAL */}
-          <LogLateral
-            titulo="Turma"
-            itens={
-              selected
-                ? [
-                  {
-                    id: selected.id,
-                    unidade: selected.nome,
-                    professor: selected.curso,
-                  },
-                ]
-                : []
-            }
-            onRemover={handleRemover}
-            vazioTexto="Nenhuma turma selecionada"
-            onProximo={handleProximo}
-          />
-
+          <aside className="w-[22rem] shrink-0 h-full border-l border-[hsl(var(--border))] bg-gray-50/50 hidden tablet:block">
+            <div className="h-full">
+              <LogLateral
+                titulo="Turma"
+                itens={
+                  selected
+                    ? [
+                        {
+                          id: selected.id,
+                          unidade: selected.nome,
+                          professor: selected.curso,
+                        },
+                      ]
+                    : []
+                }
+                onRemover={handleRemover}
+                vazioTexto="Nenhuma turma selecionada"
+                onProximo={handleProximo}
+              />
+            </div>
+          </aside>
         </div>
       </div>
     </ProtectedRoute>
