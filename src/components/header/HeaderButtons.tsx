@@ -15,7 +15,7 @@ export default function HeaderButtons({ role, sidebar }: HeaderButtonsProps) {
     aluno: [<NotificationButton key="notifications" />, <ConfigurationButton key="config" />],
     admin: [<CreateButton key="create" />, <NotificationButton key="notifs" />, <ConfigurationButton key="config" />],
     pedagogico: [<CreateButton key="create" />, <NotificationButton key="notifs" />, <ConfigurationButton key="config" />],
-    supervisor: [<CreateButton key="create" />, <NotificationButton key="notifs" />, <ConfigurationButton key="config" />],
+    supervisor: [<NotificationButton key="notifs" />, <ConfigurationButton key="config" />],
     weg: [<NotificationButton key="notifications" />, <ConfigurationButton key="config" />],
   };
 

@@ -118,7 +118,37 @@ export function ConfigDialog() {
         "typography-alternative"
       );
     }
-  }
+
+    // envia pro backend
+    try {
+      const res = await fetch("/api/usuario/alterar-senha", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          senhaAtual: oldPassword,
+          novaSenha: password,
+          confirmarSenha: confirmPassword,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const msg = data?.message || "Erro ao alterar a senha.";
+        toast.error(msg);
+        return;
+      }
+
+      toast.success("Senha alterada com sucesso!");
+      // limpar campos sensíveis (não salvar localmente)
+      setOldPassword("");
+      setPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      toast.error("Erro de conexão ao tentar alterar a senha.");
+    }
+  };
 
   function applyFontSize(size: number) {
     // aplica direto no root
@@ -269,6 +299,7 @@ export function ConfigDialog() {
   //     setErrors({});
   //   }
   // }, [isOpen]);
+
 
 
   return (

@@ -13,6 +13,7 @@ interface BlocoUsuariosProps {
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onAplicarFiltro: (grupo: string, valor: string) => Promise<void>;
   scrollHeight?: string;
 }
 
@@ -22,7 +23,8 @@ export default function BlocoUsuarios({
   setSearchQuery,
   isDialogOpen,
   setIsDialogOpen,
-  scrollHeight = "40rem",
+  onAplicarFiltro,
+  scrollHeight = "40rem"
 }: BlocoUsuariosProps) {
 
   // FILTRAGEM AQUI
@@ -43,10 +45,11 @@ export default function BlocoUsuarios({
               setSearchQuery={setSearchQuery}
               filter
               filtrosMostrar={{
-                aluno: true,
+                usuario: true,
                 turma: false,
                 conselho: false,
               }}
+              onSelect={onAplicarFiltro}
             />
           </div>
         }
