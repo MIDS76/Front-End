@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/context/AuthContext";
-
+import { Usuario } from "@/utils/types";
 import { toast } from "sonner";
 import TextField from "../input/textField";
 import {
@@ -118,37 +118,7 @@ export function ConfigDialog() {
         "typography-alternative"
       );
     }
-
-    // envia pro backend
-    try {
-      const res = await fetch("/api/usuario/alterar-senha", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          senhaAtual: oldPassword,
-          novaSenha: password,
-          confirmarSenha: confirmPassword,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        const msg = data?.message || "Erro ao alterar a senha.";
-        toast.error(msg);
-        return;
-      }
-
-      toast.success("Senha alterada com sucesso!");
-      // limpar campos sensíveis (não salvar localmente)
-      setOldPassword("");
-      setPassword("");
-      setConfirmPassword("");
-    } catch (err) {
-      toast.error("Erro de conexão ao tentar alterar a senha.");
-    }
-  };
+  }
 
   function applyFontSize(size: number) {
     // aplica direto no root
@@ -232,74 +202,73 @@ export function ConfigDialog() {
    
   
  
-  // // --------------------------------------------------
-  // // Alterar senha -> chama o backend
-  // // --------------------------------------------------
-  // const handleSubmit = async () => {
-  //   setErrors({});
-  //   const newErrors: { [key: string]: string } = {};
+  // --------------------------------------------------
+  // Alterar senha -> chama o backend
+  // --------------------------------------------------
+  const handleSubmit = async () => {
+    setErrors({});
+    const newErrors: { [key: string]: string } = {};
 
-  //   newErrors.oldPassword = validateRequired(oldPassword, "Senha atual");
-  //   newErrors.newPassword = validatePassword(password);
-  //   newErrors.confirmPassword = validateRequired(
-  //     confirmPassword,
-  //     "Confirme a nova senha"
-  //   );
-  //   newErrors.igualPassword = validatePasswordMatch(password, confirmPassword);
+    newErrors.oldPassword = validateRequired(oldPassword, "Senha atual");
+    newErrors.newPassword = validatePassword(password);
+    newErrors.confirmPassword = validateRequired(
+      confirmPassword,
+      "Confirme a nova senha"
+    );
+    newErrors.igualPassword = validatePasswordMatch(password, confirmPassword);
 
-  //   Object.keys(newErrors).forEach((k) => {
-  //     if (!newErrors[k]) delete newErrors[k];
-  //   });
+    Object.keys(newErrors).forEach((k) => {
+      if (!newErrors[k]) delete newErrors[k];
+    });
 
-  //   if (Object.keys(newErrors).length > 0) {
-  //     setErrors(newErrors);
-  //     // se tiver uma utilidade showError, chama; caso contrário, toast
-  //     try {
-  //       // @ts-ignore
-  //       if (typeof showError === "function") showError(newErrors);
-  //     } catch {
-  //       toast.error("Verifique os campos do formulário.");
-  //     }
-  //     return;
-  //   }
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      // se tiver uma utilidade showError, chama; caso contrário, toast
+      try {
+        // @ts-ignore
+        if (typeof showError === "function") showError(newErrors);
+      } catch {
+        toast.error("Verifique os campos do formulário.");
+      }
+      return;
+    }
 
-  //   // envia pro backend
-  //   try {
-  //     const res = await fetch("/api/usuario/alterar-senha", {
-  //       method: "PUT",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         senhaAtual: oldPassword,
-  //         novaSenha: password,
-  //         confirmarSenha: confirmPassword,
-  //       }),
-  //     });
+    // envia pro backend
+    try {
+      const res = await fetch("/api/usuario/alterar-senha", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          senhaAtual: oldPassword,
+          novaSenha: password,
+          confirmarSenha: confirmPassword,
+        }),
+      });
 
-  //     if (!res.ok) {
-  //       const data = await res.json().catch(() => ({}));
-  //       const msg = data?.message || "Erro ao alterar a senha.";
-  //       toast.error(msg);
-  //       return;
-  //     }
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const msg = data?.message || "Erro ao alterar a senha.";
+        toast.error(msg);
+        return;
+      }
 
-  //     toast.success("Senha alterada com sucesso!");
-  //     // limpar campos sensíveis (não salvar localmente)
-  //     setOldPassword("");
-  //     setPassword("");
-  //     setConfirmPassword("");
-  //   } catch (err) {
-  //     toast.error("Erro de conexão ao tentar alterar a senha.");
-  //   }
-  // };
+      toast.success("Senha alterada com sucesso!");
+      // limpar campos sensíveis (não salvar localmente)
+      setOldPassword("");
+      setPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      toast.error("Erro de conexão ao tentar alterar a senha.");
+    }
+  };
 
-  // React.useEffect(() => {
-  //   if (!isOpen) {
-  //     setErrors({});
-  //   }
-  // }, [isOpen]);
-
+  React.useEffect(() => {
+    if (!isOpen) {
+      setErrors({});
+    }
+  }, [isOpen]);
 
 
   return (
@@ -333,17 +302,15 @@ export function ConfigDialog() {
                     <div className="flex flex-wrap md:flex-nowrap items-end justify-center gap-6">
                       <div className="w-32 md:w-auto order-first md:order-last overflow-hidden rounded-full shadow-md mx-auto xs:mx-0">
                         <Avatar className="h-32 w-32">
-                          <AvatarImage src={""} alt={user?.nome|| "Usuário"} />
-
-                          <AvatarFallback>
-                            {(user?.nome || "US").substring(0, 2).toUpperCase()}</AvatarFallback>
+                          <AvatarImage src={""} alt={user?.nome} />
+                          <AvatarFallback>{user?.nome?.substring(0, 2).toUpperCase()}</AvatarFallback>
                         </Avatar>
                       </div>
 
                       <div className="w-full md:flex-1 space-y-2 order-last md:order-first">
                         <div className="space-y-2">
                           <Label htmlFor="name">Nome</Label>
-                          <Input value={user?.nome || ""} readOnly  />
+                          <Input value={user?.nome || ""} readOnly className="bg-card" />
                         </div>
 
                         <div className="space-y-2">
@@ -353,7 +320,7 @@ export function ConfigDialog() {
                       </div>
                     </div>
 
-                    {/* <div className="mt-6 space-y-2">
+                    <div className="mt-6 space-y-2">
                       <Label>Alterar senha</Label>
                       <TextField id="oldPassword" name="oldPassword" label="" placeholder="Insira a senha atual" type="password" onChange={(e) => setOldPassword(e.target.value)} value={oldPassword} error={errors.oldPassword} />
                       <TextField id="newPassword" name="newPassword" label="" placeholder="Insira a nova senha" type="password" onChange={(e) => setPassword(e.target.value)} value={password} error={errors.newPassword} />
@@ -363,7 +330,7 @@ export function ConfigDialog() {
                           Alterar senha
                         </ButtonTT>
                       </div>
-                    </div> */}
+                    </div>
                   </div>
                 </div>
 
