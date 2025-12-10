@@ -287,7 +287,7 @@ export default function ListaConselhos({
 
           <div className="p-6 bg-card mb-16">
 
-            <div className="flex justify-center">
+            { role !== "weg" && role != "supervisor" && (<div className="flex justify-center">
 
               <ButtonTT
                 disabled={existeConselhoAberto}
@@ -303,7 +303,7 @@ export default function ListaConselhos({
               >
                 Criar novo conselho para esta turma
               </ButtonTT>
-            </div>
+            </div>)}
           </div>
         </div>
       </aside>

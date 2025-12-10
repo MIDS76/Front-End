@@ -29,9 +29,6 @@ export default function BaixarDocumentosModal({
   const podePre = STATUS_PRE.includes(statusConselhoUpper);
   const podeConselho = STATUS_CONSELHO.includes(statusConselhoUpper);
 
-  // ------------------------------------------------------------
-  // FUNÇÃO PARA BUSCAR TURMA (CORRETO!)
-  // ------------------------------------------------------------
   async function fetchTurmaInfo(idTurma: number) {
     try {
       const resp = await api.get(`/turmas/buscar/${idTurma}`);
@@ -350,7 +347,7 @@ export default function BaixarDocumentosModal({
         </DialogHeader>
 
         <div className="flex flex-col gap-5 mt-4">
-          {podePre && (
+          {podePre && role !== "weg" && (
             <div className="border rounded-xl p-4 bg-muted/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <FileSpreadsheet className="text-black" size={26} />
