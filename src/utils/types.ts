@@ -19,6 +19,11 @@ export interface UnidadeCurricular {
   nome: string;
 }
 
+export interface UnidadeCurricular {
+  id: number;
+  nome: string;
+}
+
 export interface Conselho {
   id: number;
   idTurma: number;

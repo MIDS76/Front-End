@@ -1,65 +1,104 @@
 "use client";
 
-import ButtonTT from "@/components/button/ButtonTT";
-import ActionModal from "@/components/modal/actionModal";
-import SmallModal from "@/components/modal/smallModal";
-import api from "@/utils/axios";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import * as ScrollArea from "@radix-ui/react-scroll-area";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import useSWR, { SWRConfiguration } from "swr"; 
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";  // Para exibir mensagens de toast
+import ButtonTT from "@/components/button/ButtonTT";  // Componente de botão customizado
+import ActionModal from "@/components/modal/actionModal";  // Modal de ação
+import SmallModal from "@/components/modal/smallModal";  // Modal para exibir as notificações
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";  // Menu suspenso para exibir as notificações
+import * as ScrollArea from "@radix-ui/react-scroll-area";  // Scroll para as notificações
+import { marcarComoLida, listarNotificacao, listarNotificacaoNaoLidas } from "@/api/notificacao";
+import { useAuth } from "@/context/AuthContext";
 
-const fetchNotifications = async () => {
-  const response = await api.get("/notificacoes/todas");
-  return response.data;
-};
+export enum TipoNotificacao {
+  PRE_CONSELHO_LIBERADO = "PRE_CONSELHO_LIBERADO",
+  PRE_CONSELHO_PREENCHIDO = "PRE_CONSELHO_PREENCHIDO",
+  RESULTADO_LIBERADO = "RESULTADO_LIBERADO",
+}
 
 export interface Notificacao {
   id: number;
-  tipo: string;
-  horario: string;
+  titulo: string;
   mensagem: string;
+  lido: boolean;
+  criadoEm: string;
+  idReferencia: number | null;
+  tipo: TipoNotificacao;
 }
 
-export default function NotificationButton() {
-  
-  const swrConfig: SWRConfiguration = {
-    onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
-      if (error.response?.status === 403 || error.response?.status === 404) return;
-      
-      if (retryCount >= 3) return;
-      
-      setTimeout(() => revalidate({ retryCount }), 5000);
+const formatarDataHora = (data: string) => {
+  const date = new Date(data);
+  return date.toLocaleDateString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
+
+const NotificationButton = () => {
+  const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
+  const [open, setOpen] = useState(false);
+
+  const { user } = useAuth();
+  const usuarioId = user?.id;
+
+  const router = useRouter();
+
+  // Carregar quando abrir o dropdown
+  useEffect(() => {
+    if (open && usuarioId) {
+      const carregar = async () => {
+        try {
+          const data = await listarNotificacaoNaoLidas(usuarioId);
+          setNotificacoes(Array.isArray(data) ? data : []);
+        } catch (error) {
+          toast.error("Erro ao carregar notificações");
+        }
+      };
+
+      carregar();
+    }
+  }, [open, usuarioId]);
+
+  const handleMarkAsRead = async (
+    notificacaoId: number,
+    idReferencia: number | null,
+    tipo: TipoNotificacao
+  ) => {
+    try {
+      await marcarComoLida(notificacaoId);
+
+      setNotificacoes((prev) => prev.filter((n) => n.id !== notificacaoId));
+
+      toast.success("Notificação marcada como lida!");
+
+      switch (tipo) {
+        case TipoNotificacao.PRE_CONSELHO_LIBERADO:
+          router.push(`/preConselhoForm?preConselhoId=${idReferencia}`);
+          break;
+        default:
+          router.push(`/preConselhoForm?preConselhoId=${idReferencia}`);
+          break;
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao marcar notificação como lida");
     }
   };
 
-  const { data } = useSWR<Notificacao[]>("/notificacoes/todas", fetchNotifications, swrConfig);
-  
-  const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
-  const tiposNotificacoes = ["CRIADO", "ATUALIZADO", "REMOVIDO", "PARTE_ATUALIZADA"];
+  const handleDelete = (id: number) => {
+    setNotificacoes((prev) => prev.filter((n) => n.id !== id));
+    toast.success("Notificação apagada!");
+  };
 
-  useEffect(() => {
-    if (data) setNotificacoes(data);
-  }, [data]);
-
-  const handleDelete = async () => {
-    try {
-      const response = await api.get(`/usuarios/buscar-por-email?email=admin`);
-      const user = response.data;
-      
-      await api.delete(`/notificacoes/deletar-todas/${user.id}`);
-      
-      setNotificacoes([]); 
-      toast.success("Notificações apagadas com sucesso!");
-    } catch (error: any) {
-      console.error(error);
-      toast.error(error.response?.data?.mensagem || "Erro ao apagar notificações");
-    }
+  const handleDeleteAll = () => {
+    setNotificacoes([]);
+    toast.success("Todas as notificações apagadas!");
   };
 
   return (
-    <DropdownMenu.Root>
+    <DropdownMenu.Root open={open} onOpenChange={setOpen}>
       <DropdownMenu.Trigger asChild>
         <div>
           <ButtonTT
@@ -76,7 +115,7 @@ export default function NotificationButton() {
           align="end"
           side="bottom"
           sideOffset={20}
-          className="p-2 flex flex-col bg-popover rounded-md shadow-md border border-border mt-2 z-50" 
+          className="p-2 flex flex-col bg-popover rounded-md shadow-md border border-border mt-2"
         >
           <div className="flex flex-row justify-between px-4 pt-2 pb-0">
             <DropdownMenu.Label className="text-xl select-none font-bold">
@@ -85,9 +124,8 @@ export default function NotificationButton() {
 
             <ActionModal
               title="Limpar todas notificações"
-              onConfirm={handleDelete}
+              onConfirm={handleDeleteAll}
               destructive
-             
             >
               <ButtonTT
                 mode="small"
@@ -103,25 +141,30 @@ export default function NotificationButton() {
             <ScrollArea.Viewport className="w-full h-full">
               {notificacoes.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full pt-10">
-                  <p className="text-muted-foreground text-sm">Nenhuma notificação</p>
+                  <p className="text-muted-foreground text-sm">
+                    Nenhuma notificação
+                  </p>
                 </div>
               ) : (
-                <div className="flex flex-col gap-2 p-2">
-                    {notificacoes.map((notificacao) => (
-                    <SmallModal
-                        key={notificacao.id}
-                        title={tiposNotificacoes.includes(notificacao.tipo) ? "Sistema" : "Alerta"}
-                        description={notificacao.horario}
-                        content={notificacao.mensagem}
-                        id={notificacao.id}
-                        notif={() => console.log("Notificação")}
-                        onClick={() => console.log("Outro")}
-                        setNotificacoes={setNotificacoes}
-                    />
-                    ))}
-                </div>
+                notificacoes.map((n) => (
+                  <SmallModal
+                    key={n.id}
+                    title={n.titulo}
+                    description={formatarDataHora(n.criadoEm)}
+                    content={n.mensagem}
+                    id={n.id}
+                    notif={() => { }}
+                    onClick={() =>
+                      handleMarkAsRead(n.id, n.idReferencia, n.tipo)
+                    }
+                    onDelete={() => handleDelete(n.id)}
+                    setNotificacoes={setNotificacoes}
+                    lido={n.lido}
+                  />
+                ))
               )}
             </ScrollArea.Viewport>
+
             <ScrollArea.Scrollbar orientation="vertical">
               <ScrollArea.Thumb />
             </ScrollArea.Scrollbar>
@@ -130,4 +173,6 @@ export default function NotificationButton() {
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
   );
-}
+};
+
+export default NotificationButton;
