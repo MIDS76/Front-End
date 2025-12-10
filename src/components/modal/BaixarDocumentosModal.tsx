@@ -24,7 +24,7 @@ export default function BaixarDocumentosModal({
   const STATUS_PRE = ["NAO_INICIADO", "PRE_CONSELHO", "CONSELHO", "AGUARDANDO_RESULTADO", "RESULTADO"];
   const STATUS_CONSELHO = ["CONSELHO", "AGUARDANDO_RESULTADO", "RESULTADO"];
 
-  const statusConselhoUpper = conselho.etapas ? conselho.etapas.toUpperCase() : "";
+  const statusConselhoUpper = conselho.etapas;
 
   const podePre = STATUS_PRE.includes(statusConselhoUpper);
   const podeConselho = STATUS_CONSELHO.includes(statusConselhoUpper);
@@ -243,7 +243,7 @@ export default function BaixarDocumentosModal({
         turmaInfo?.curso ||
         "Curso não informado";
 
-      const respProfs = await api.get(`/preConselho/listar-por-pre-conselho/${conselho.id}`);
+      const respProfs = await api.get(`/preConselhoProfessor/listar-por-pre-conselho/${conselho.id}`);
       const professoresDoConselho = Array.isArray(respProfs.data) ? respProfs.data : [];
 
       const pdf = new jsPDF();
