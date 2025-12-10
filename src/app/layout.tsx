@@ -4,7 +4,6 @@ import "./globals.css";
 
 import Header from "@/components/header/header";
 import { Toaster } from "sonner";
-import { WebSocketProvider } from "@/context/WebSocketContext";
 import { Tema } from "@/components/tema/tema";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -45,20 +44,10 @@ export default function RootLayout({
       <body className="antialiased h-screen">
         <Tema attribute="class">
           <AuthProvider>
-           
-            {isPublicPage ? (
-              <>
-                {children}
-                <Toaster richColors />
-              </>
-            ) : (
-              <WebSocketProvider>
-                <Header />
-                {children}
-                <Toaster richColors />
-              </WebSocketProvider>
-            )}
-            
+            {pathname !== "/login" && pathname !== "/alterarSenha" && <Header />}
+
+              {children}
+              <Toaster richColors />
           </AuthProvider>
         </Tema>
       </body>

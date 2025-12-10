@@ -5,15 +5,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Notificacao } from "../header/header";
+import { Notificacao } from "../header/buttons/NotificationButton";
+
 interface SmallModalProps {
   title: string;
   description: string;
   content: string;
   notif?: () => void;
   onClick?: () => void;
+  onDelete?: () => void;
   id?: number;
-
+  lido: boolean,
   setNotificacoes: React.Dispatch<React.SetStateAction<Notificacao[]>>;
 }
 
@@ -23,30 +25,15 @@ export default function SmallModal({
   content,
   notif,
   onClick,
-  // id,
-  // setNotificacoes,
+  onDelete,
+  lido,
+  id,
+  setNotificacoes,
 }: SmallModalProps) {
+
   const handleClick = () => {
     if (onClick) onClick();
   };
-
-  // const handleRemove = (e: React.MouseEvent) => {
-  //   e.stopPropagation();
-
-  //   api.delete(`notificacoes/deletar/${id}`).catch((error) => {
-  //     toast.error(error.response.data.mensagem);
-  //   });
-  //   api
-  //     .delete(`notificacoes/deletar/${id}`)
-  //     .catch((error) => {
-  //       toast.error(error.response.data.mensagem);
-  //     })
-  //     .then(() => {
-  //       setNotificacoes((prevNotificacoes) =>
-  //         prevNotificacoes.filter((n) => n.id !== id)
-  //       );
-  //     });
-  // };
 
   return (
     <Card
@@ -54,9 +41,8 @@ export default function SmallModal({
       onClick={handleClick}
     >
       <CardHeader
-        className={`rounded-t-lg ${
-          notif ? "bg-accent" : "bg-secondary"
-        } flex flex-row items-center gap-2 px-4 ${notif ? "py-2" : "py-4"}`}
+        className={`rounded-t-lg ${notif ? "bg-accent" : "bg-secondary"
+          } flex flex-row items-center gap-2 px-4 ${notif ? "py-2" : "py-4"}`}
       >
         {notif && (
           <div className="mt-1.5 rounded-full bg-black w-10 h-10"></div>

@@ -442,7 +442,7 @@ export default function ConselhoPage() {
         isOpen={isConfirmOpen}
         setOpen={setIsConfirmOpen}
         title="Deseja liberar pré-conselho?"
-        conteudo="Ao confirmar, todos os dados relacionados ao pré-conselho serão enviados."
+        description="Ao confirmar, todos os dados relacionados ao pré-conselho serão enviados."
         actionButtonLabel="Confirmar"
         onConfirm={handleConfirmarUcProfessores}
       />
