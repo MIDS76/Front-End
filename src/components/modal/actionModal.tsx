@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 interface ActionModalProps {
   children?: React.ReactNode;
   description?: React.ReactNode;
+  conteudo?: React.ReactNode;
   title: string;
   closeButtonLabel?: string;
   actionButtonLabel?: string;
@@ -35,6 +36,7 @@ export default function ActionModal({
   onConfirm,
   onClose,
   description,
+  conteudo,
   isOpen,
   setOpen,
   customPosition,
@@ -56,6 +58,7 @@ export default function ActionModal({
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
 
+        <section>{conteudo}</section>
         <section>{description}</section>
        
         <DialogFooter className="flex flex-row justify-center gap-4 pt-4">
