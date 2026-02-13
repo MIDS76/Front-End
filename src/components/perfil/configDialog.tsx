@@ -302,7 +302,7 @@ export function ConfigDialog() {
                     <div className="flex flex-wrap md:flex-nowrap items-end justify-center gap-6">
                       <div className="w-32 md:w-auto order-first md:order-last overflow-hidden rounded-full shadow-md mx-auto xs:mx-0">
                         <Avatar className="h-32 w-32">
-                          <AvatarImage src={""} alt={user?.nome} />
+                          <AvatarImage src={""} alt={user?.nome || ""} />
                           <AvatarFallback>{user?.nome?.substring(0, 2).toUpperCase()}</AvatarFallback>
                         </Avatar>
                       </div>
