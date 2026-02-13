@@ -16,7 +16,8 @@ export default function InfoCard({ titulo, subtitulo, descricao, className, styl
       backgroundColor: "hsl(var(--card))",
       color: "hsl(var(--card-foreground))",
       width: "521px",  // Largura fixa
-      height: "103px", // Altura fixa
+      minHeight: "103px", // Altura mínima
+      //height: "103px", // Altura fixa
       ...style, 
     }}
   >
@@ -31,7 +32,7 @@ export default function InfoCard({ titulo, subtitulo, descricao, className, styl
         <h6 className="text-[1rem] font-medium mb-[0.5rem] opacity-80">{subtitulo}</h6>
       )}
 
-      <p className="text-[1rem] leading-relaxed">{descricao}</p>
+      <p className="text-[1rem] leading-relaxed pt-4">{descricao}</p>
     </div>
   );
 }
